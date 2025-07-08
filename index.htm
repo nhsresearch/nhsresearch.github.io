@@ -24,6 +24,10 @@
             "google-queries": ["waiting list", "\"chief executive\""]
         };
 
+        function duplicate(o) {
+            return JSON.parse(JSON.stringify(o));
+        }
+
         const savedSettings = localStorage.getItem("nhs-research-settings") ?? undefined;
         if (savedSettings !== undefined) {
             try {
@@ -51,23 +55,86 @@
             }
         }
 
-        // Terms are additive, are used for Google and for WDTK, can't have titles, can't contain commas
+        // Terms are additive, are used for Google and for WDTK, can't contain commas
         // and disappear as a separate part of the URL when customisations are shared or kept
         const termsText = params.get("terms") ?? undefined;
         if (termsText !== undefined) {
             document.body.dataset.settingsUpdated = true;
             const terms = termsText.split(",").map(t => t.trim());
             for (const term of terms) {
-                settings["wdtk-queries"].push(term);
-                settings["google-queries"].push(term);
+                const pieces = term.split("=").map(p => p.trim());
+                const [name, value] = [pieces.length === 1 ? undefined : pieces[0], pieces.length === 1 ? pieces[0] : pieces[1]];
+                const v = name !== undefined ? { name, value } : value;
+                settings["wdtk-queries"].push(v);
+                settings["google-queries"].push(v);
             }
         }
+
+        /** Splits common terms off the end of the wdtk and google queries and eliminates empty arrays */
+        function rationalizeTerms(allSettings) {
+            function isEqualTerm(a, b) {
+                if (typeof a === typeof b) {
+                    if (typeof a === "string") {
+                        return a === b && !a.includes(",");
+                    }
+
+                    return (
+                        a.name === b.name &&
+                        !a.name.includes(",") && !a.name.includes("=")
+                        &&
+                        a.value === b.value &&
+                        !a.value.includes(",")
+                    );
+                }
+                return false;
+            }
+
+            const settings = duplicate(allSettings);
+            const w = settings["wdtk-queries"];
+            const g = settings["google-queries"]
+
+            const terms = [];
+            while (w.length && g.length) {
+                const lw = w.at(-1);
+                const lg = g.at(-1);
+
+                if (lw === undefined || lg === undefined) {
+                    break;
+                }
+
+                if (!isEqualTerm(lw, lg)) {
+                    break;
+                }
+
+                w.pop();
+                g.pop();
+                terms.push(lw);
+            }
+            terms.reverse();
+
+            for (const prop of ["wdtk-user-queries", "wdtk-queries", "google-queries"]) {
+                if (settings[prop] && settings[prop].length === 0) {
+                    delete settings[prop];
+                }
+            }
+
+            return terms.length === 0 ? { settings } : { settings, terms };
+        }
+
+        function termsStringify(terms) {
+            return terms.map(term => term.name !== undefined ? `${term.name}=${term.value}` : term).join(",");
+        }
+
+        const rt = rationalizeTerms(settings);
 
         const shareURL = new URL("?", document.location);
         if (id !== undefined) {
             shareURL.searchParams.set("id", id);
         }
-        shareURL.searchParams.set("settings", JSON.stringify(settings));
+        if (rt.terms !== undefined) {
+            shareURL.searchParams.set("terms", termsStringify(rt.terms));
+        }
+        shareURL.searchParams.set("settings", JSON.stringify(rt.settings));
 
         // Update environment save link
         const saveLink = document.querySelector("#environment-save a") ?? undefined;
@@ -136,8 +203,6 @@
                 document.body.append(e);
             }
         }
-
-
 
         let trust = getTrust(id);
         if (trust === undefined) {
