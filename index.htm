@@ -23,31 +23,62 @@
             "google-queries": ["waiting list", "\"chief executive\""]
         };
 
-        const settingsText = params.get("settings") ?? undefined;
-        if (settingsText !== undefined) {
-            try {
-                const updatedSettings = JSON.parse(settingsText) ?? undefined;
-                const action = updatedSettings === undefined ? "Remove" : "Replace"
-                if (confirm(`${action} existing customizations?`)) {
-                    if (updatedSettings === undefined) {
-                        localStorage.removeItem("nhs-research-settings");
-                    } else {
-                        localStorage.setItem("nhs-research-settings", settingsText);
-                    }
-                }
-            } catch (e) {
-                console.log("Invalid settings update", e);
-            }
-            document.location = "?";
-        }
-
         const savedSettings = localStorage.getItem("nhs-research-settings") ?? undefined;
         if (savedSettings !== undefined) {
             try {
                 settings = JSON.parse(savedSettings);
+                document.body.dataset.settingsLoaded = true;
             } catch (e) {
                 console.log("Invalid saved settings", e);
             }
+        }
+
+        const settingsText = params.get("settings") ?? undefined;
+        if (settingsText !== undefined) {
+            try {
+                const updatedSettings = JSON.parse(settingsText) ?? undefined;
+                if (updatedSettings !== undefined) {
+                    // It's OK to update settings without asking because it only applies to this page
+                    settings = updatedSettings;
+                    document.body.dataset.settingsUpdated = true;
+
+                    const saveLink = document.querySelector("#environment-save a") ?? undefined;
+                    if (saveLink !== undefined) {
+                        saveLink.onclick = (e) => {
+                            if (confirm("Replace your stored customizations with the ones on this page?")) {
+                                localStorage.setItem("nhs-research-settings", JSON.stringify(settings));
+                            }
+                            e.preventDefault();
+                        };
+                    }
+                }
+                // const action = updatedSettings === undefined ? "Remove" : "Replace"
+                // if (confirm(`${action} existing customizations?`)) {
+                //     if (updatedSettings === undefined) {
+                //         localStorage.removeItem("nhs-research-settings");
+                //     } else {
+                //         localStorage.setItem("nhs-research-settings", settingsText);
+                //     }
+                // }
+            } catch (e) {
+                console.log("Invalid settings update", e);
+            }
+            // document.location = "?";
+        }
+
+        // Update environment share link
+        const shareLink = document.querySelector(`#environment-share a`) ?? undefined;
+        if (shareLink !== undefined) {
+            const shareURL = new URL(document.location);
+            shareURL.searchParams.set("settings", JSON.stringify(settings));
+            shareLink.href = shareURL.toString();
+            shareLink.onclick = (e) => {
+                if (confirm("Copy URL to clipboard?")) {
+                    navigator.clipboard.writeText(shareLink.href);
+                }
+                e.preventDefault();
+                //alert("Copied URL to clipboard");
+            };
         }
 
         function getTrust(key) {
@@ -189,7 +220,7 @@
                 const setting = "google-queries";
                 const createURL = (value) => {
                     const url = new URL(`https://google.co.uk/search`);
-                    url.searchParams.set("q", `site:${this.current.website} ${value}`);
+                    url.searchParams.set("q", `${value} site:${this.current.website}`);
                     return url;
                 };
                 this.populateQueries(setting, createURL);
@@ -282,6 +313,26 @@
         .merged a {
             color: lightgray;
         }
+
+        #environment-save {
+            display: none;
+        }
+
+        #environment-share {
+            display: none;
+        }
+
+        body[data-settings-updated] #environment-save {
+            display: block;
+        }
+
+        body[data-settings-updated] #environment-share {
+            display: block;
+        }
+
+        body[data-settings-loaded] #environment-share {
+            display: block;
+        }
     </style>
 </head>
 
@@ -300,6 +351,9 @@
     <div> </div>
     <div id="all-trusts"><a href="?">← ALL TRUSTS</a></div>
     <div id="merged"><a></a></div>
+    <div> </div>
+    <div id="environment-share"><a>Share Customisations ⇧</a></div>
+    <div id="environment-save"><a>Keep Customisations ⇩</a></div>
 
     <template id="query-template">
         <div><a></a></div>
