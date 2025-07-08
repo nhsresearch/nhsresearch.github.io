@@ -7,6 +7,7 @@
     <title>NHS Trust Research</title>
     <script type="module">
         const params = new URLSearchParams(document.location.search);
+        const id = params.get("id") ?? undefined;
 
         const trusts = JSON.parse(document.querySelector("#trust-data").content.textContent).sort((a, b) => a.shortName.localeCompare(b.shortName));;
 
@@ -16,7 +17,7 @@
 
             // WDTK user queries use the specified user as context and the name of the trust as the query
             // Note that user queries are really slow on WDTK, so prefer ordinary queries
-            "wdtk-user-queries": [ ],
+            "wdtk-user-queries": [],
             // WDTK queries use the trust as the context and the specified terms as the query
             "wdtk-queries": ["waiting times"],
             // Google queries use the trust website as the context and the specified terms as the query
@@ -41,39 +42,45 @@
                     // It's OK to update settings without asking because it only applies to this page
                     settings = updatedSettings;
                     document.body.dataset.settingsUpdated = true;
-
-                    const saveLink = document.querySelector("#environment-save a") ?? undefined;
-                    if (saveLink !== undefined) {
-                        const shareURL = new URL(document.location);
-                        shareURL.searchParams.set("settings", JSON.stringify(settings));
-                        saveLink.href = shareURL.toString();
-                        saveLink.onclick = (e) => {
-                            if (confirm("Replace your stored customizations with the ones on this page?")) {
-                                localStorage.setItem("nhs-research-settings", JSON.stringify(settings));
-                            }
-                            e.preventDefault();
-                        };
-                    }
                 }
-                // const action = updatedSettings === undefined ? "Remove" : "Replace"
-                // if (confirm(`${action} existing customizations?`)) {
-                //     if (updatedSettings === undefined) {
-                //         localStorage.removeItem("nhs-research-settings");
-                //     } else {
-                //         localStorage.setItem("nhs-research-settings", settingsText);
-                //     }
-                // }
             } catch (e) {
                 console.log("Invalid settings update", e);
             }
-            // document.location = "?";
+        }
+
+        // Terms are additive, are used for Google and for WDTK, can't have titles, can't contain commas
+        // and disappear as a separate part of the URL when customisations are shared or kept
+        const termsText = params.get("terms") ?? undefined;
+        if (termsText !== undefined) {
+            document.body.dataset.settingsUpdated = true;
+            const terms = termsText.split(",").map(t => t.trim());
+            for (const term of terms) {
+                settings["wdtk-queries"].push(term);
+                settings["google-queries"].push(term);
+            }
+        }
+
+        const shareURL = new URL("?", document.location);
+        if (id !== undefined) {
+            shareURL.searchParams.set("id", id);
+        }
+        shareURL.searchParams.set("settings", JSON.stringify(settings));
+
+        // Update environment save link
+        const saveLink = document.querySelector("#environment-save a") ?? undefined;
+        if (saveLink !== undefined) {
+            saveLink.href = shareURL.toString();
+            saveLink.onclick = (e) => {
+                if (confirm("Replace your stored customizations with the ones on this page?")) {
+                    localStorage.setItem("nhs-research-settings", JSON.stringify(settings));
+                }
+                e.preventDefault();
+            };
         }
 
         // Update environment share link
         const shareLink = document.querySelector(`#environment-share a`) ?? undefined;
         if (shareLink !== undefined) {
-            const shareURL = new URL(document.location);
-            shareURL.searchParams.set("settings", JSON.stringify(settings));
             shareLink.href = shareURL.toString();
             shareLink.onclick = (e) => {
                 if (confirm("Copy URL to clipboard?")) {
@@ -128,7 +135,7 @@
         }
 
 
-        const id = params.get("id") ?? undefined;
+
         let trust = getTrust(id);
         if (trust === undefined) {
             // trust = getTrust("plymouthhospitals");
@@ -208,7 +215,7 @@
                 };
                 this.populateQueries(setting, createURL);
             }
-            
+
             wdtkQueries() {
                 const setting = "wdtk-queries";
                 const createURL = (value) => {
