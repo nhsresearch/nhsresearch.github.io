@@ -41,6 +41,9 @@
                 if (updatedSettings !== undefined) {
                     // It's OK to update settings without asking because it only applies to this page
                     settings = updatedSettings;
+                    settings["wdtk-user-queries"] = settings["wdtk-user-queries"] ?? [];
+                    settings["wdtk-queries"] = settings["wdtk-queries"] ?? [];
+                    settings["google-queries"] = settings["google-queries"] ?? [];
                     document.body.dataset.settingsUpdated = true;
                 }
             } catch (e) {
