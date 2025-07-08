@@ -55,8 +55,7 @@
             }
         }
 
-        // Terms are additive, are used for Google and for WDTK, can't contain commas
-        // and disappear as a separate part of the URL when customisations are shared or kept
+        // Terms are additive, are used for Google and for WDTK, and can't contain commas, equals
         const termsText = params.get("terms") ?? undefined;
         if (termsText !== undefined) {
             document.body.dataset.settingsUpdated = true;
@@ -72,18 +71,20 @@
 
         /** Splits common terms off the end of the wdtk and google queries and eliminates empty arrays */
         function rationalizeTerms(allSettings) {
+            function isValidTermText(text) {
+                return !text.includes(",") && !text.includes("=");
+            }
+
             function isEqualTerm(a, b) {
                 if (typeof a === typeof b) {
                     if (typeof a === "string") {
-                        return a === b && !a.includes(",");
+                        return a === b && isValidTermText(a);
                     }
 
                     return (
-                        a.name === b.name &&
-                        !a.name.includes(",") && !a.name.includes("=")
+                        a.name === b.name && isValidTermText(a.name)
                         &&
-                        a.value === b.value &&
-                        !a.value.includes(",")
+                        a.value === b.value && isValidTermText(a.value)
                     );
                 }
                 return false;
@@ -342,6 +343,17 @@
                     a.href = this.current.whatdotheyknow ?? url.toString();
                 })(this.current.shortName);
 
+                ((shortName) => {
+                    const url = new URL(`https://www.jobs.nhs.uk/candidate/search/results`);
+                    url.searchParams.set("employer", `${shortName}`);
+
+                    const a = document.querySelector("#jobs a");
+                    if (a !== undefined) {
+                        a.href = this.current.jobs ?? url.toString();
+                    }
+                    
+                })(this.current.shortName);
+
                 this.wdtkUserQueries();
                 this.wdtkQueries();
                 this.googleQueries();
@@ -419,6 +431,7 @@
     <div id="name"></div>
     <div id="website"><a href="">Website</a></div>
     <div id="provider"><a href="">NHS Report & Accounts</a></div>
+    <div id="jobs"><a href="">NHS Jobs</a></div>
     <div id="wikipedia"><a href="">Wikipedia</a></div>
     <div id="cqc"><a href="">CQC</a></div>
     <div id="whatdotheyknow"><a href="">What Do They Know</a></div>
