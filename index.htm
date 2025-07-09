@@ -194,6 +194,7 @@
             document.body.innerHTML = "<h1>ALL TRUSTS</h1>";
             for (const trust of trusts) {
                 const e = document.createElement("div");
+                e.id = trust.id;
                 const a = document.createElement("a");
                 a.innerText = trust.shortName;
                 a.href = `?id=${trust.id}`;
@@ -307,6 +308,12 @@
 
             oncurrentchanged() {
                 document.title = `[${this.current.shortName}] ${this.name}`;
+
+                const at = document.querySelector("#all-trusts a") ?? undefined;
+                if (at !== undefined) {
+                    at.href = `?#${this.current.id}`;
+                }
+
                 document.querySelector("#name").innerText = this.current.name;
                 document.querySelector("#shortName").innerText = this.current.shortName;
 
