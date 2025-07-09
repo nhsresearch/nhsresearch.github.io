@@ -9,7 +9,31 @@
         const params = new URLSearchParams(document.location.search);
         const id = params.get("id") ?? undefined;
 
+        /** query properties are the ones populated by the `terms` query parameter */
+        const queryProperties = ["wdtk-queries", "google-queries", "search-queries"];
+
         const trusts = JSON.parse(document.querySelector("#trust-data").content.textContent).sort((a, b) => a.shortName.localeCompare(b.shortName));;
+
+        function toID(u) {
+            try {
+                const url = new URL(u);
+                const pieces = url.hostname.split(".");
+                return pieces[0] !== "www" ? pieces[0] : pieces[1];
+            } catch (e) {
+            }
+            return undefined;
+        }
+
+        const searchLinks = document.querySelector("#search-data").content.textContent.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+        // console.log(searchLinks);
+
+        for (const searchLink of searchLinks) {
+            const searchLinkID = toID(searchLink);
+            const trust = trusts.find(t => t.id === searchLinkID);
+            if (trust !== undefined && trust.search === undefined) {
+                trust.search = searchLink;
+            }
+        }
 
         let settings = {
             // Queries can be a simple string or an object with "name" and "value" properties.
@@ -21,7 +45,8 @@
             // WDTK queries use the trust as the context and the specified terms as the query
             "wdtk-queries": ["waiting times"],
             // Google queries use the trust website as the context and the specified terms as the query
-            "google-queries": ["waiting list", "\"chief executive\""]
+            "google-queries": ["waiting list", "\"chief executive\""],
+            "search-queries": ["vacancies"]
         };
 
         function duplicate(o) {
@@ -46,13 +71,15 @@
                     // It's OK to update settings without asking because it only applies to this page
                     settings = updatedSettings;
                     settings["wdtk-user-queries"] = settings["wdtk-user-queries"] ?? [];
-                    settings["wdtk-queries"] = settings["wdtk-queries"] ?? [];
-                    settings["google-queries"] = settings["google-queries"] ?? [];
                     document.body.dataset.settingsUpdated = true;
                 }
             } catch (e) {
                 console.log("Invalid settings update", e);
             }
+        }
+
+        for (const queryProperty of queryProperties) {
+            settings[queryProperty] = settings[queryProperty] ?? [];
         }
 
         // Terms are additive, are used for Google and for WDTK, and can't contain commas, equals
@@ -64,8 +91,9 @@
                 const pieces = term.split("=").map(p => p.trim());
                 const [name, value] = [pieces.length === 1 ? undefined : pieces[0], pieces.length === 1 ? pieces[0] : pieces[1]];
                 const v = name !== undefined ? { name, value } : value;
-                settings["wdtk-queries"].push(v);
-                settings["google-queries"].push(v);
+                for (const queryProperty of queryProperties) {
+                    settings[queryProperty].push(v);
+                }
             }
         }
 
@@ -91,29 +119,29 @@
             }
 
             const settings = duplicate(allSettings);
-            const w = settings["wdtk-queries"];
-            const g = settings["google-queries"]
 
+            const collections = queryProperties.map(qp => settings[qp]);
             const terms = [];
-            while (w.length && g.length) {
-                const lw = w.at(-1);
-                const lg = g.at(-1);
+            while (true) {
+                const lasts = collections.map(c => c.at(-1));
 
-                if (lw === undefined || lg === undefined) {
+                if (lasts.includes(undefined)) {
                     break;
                 }
 
-                if (!isEqualTerm(lw, lg)) {
+                const term = lasts[0];
+
+                if (lasts.find(last => !isEqualTerm(last, term))) {
                     break;
                 }
 
-                w.pop();
-                g.pop();
-                terms.push(lw);
+                collections.map(c => c.pop());
+
+                terms.push(term);
             }
             terms.reverse();
 
-            for (const prop of ["wdtk-user-queries", "wdtk-queries", "google-queries"]) {
+            for (const prop of ["wdtk-user-queries", ...queryProperties]) {
                 if (settings[prop] && settings[prop].length === 0) {
                     delete settings[prop];
                 }
@@ -309,6 +337,25 @@
                 this.populateQueries(setting, createURL);
             }
 
+            searchQueries() {
+                const setting = "search-queries";
+
+                const searchURL = new URL(this.current.search ?? "search?query=${query}", this.current.website);
+                const [searchParamName] = [...searchURL.searchParams.entries()].find(e => e[1] === "${query}");
+
+                if (searchParamName === undefined) {
+                    console.log("invalid search URL");
+                }
+
+                const createURL = (value) => {
+                    const url = new URL(searchURL);
+                    url.searchParams.set(searchParamName, `${value}`);
+                    return url;
+                };
+
+                this.populateQueries(setting, createURL);
+            }
+
             oncurrentchanged() {
                 document.title = `[${this.current.shortName}] ${this.name}`;
 
@@ -363,12 +410,13 @@
                     if (a !== undefined) {
                         a.href = this.current.jobs ?? url.toString();
                     }
-                    
+
                 })(this.current.shortName);
 
                 this.wdtkUserQueries();
                 this.wdtkQueries();
                 this.googleQueries();
+                this.searchQueries();
             }
         }
 
@@ -442,6 +490,7 @@
     <h1 id="shortName"></h1>
     <div id="name"></div>
     <div id="website"><a href="">Website</a></div>
+    <div id="search-queries" class="queries"></div>
     <div id="provider"><a href="">NHS Report & Accounts</a></div>
     <div id="jobs"><a href="">NHS Jobs</a></div>
     <div id="wikipedia"><a href="">Wikipedia</a></div>
@@ -472,7 +521,8 @@
         "id": "airedale-trust",
         "wikipedia": "https://en.wikipedia.org/wiki/Airedale_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RCF",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/airedale_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/airedale_nhs_foundation_trust",
+        "search" : "?s=${query}"
         },
         {
         "name": "Alder Hey Children’s NHS Foundation Trust",
@@ -482,7 +532,8 @@
         "id": "alderhey",
         "wikipedia": "https://en.wikipedia.org/wiki/Alder_Hey_Children%27s_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RBS",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/alder_hey_childrens_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/alder_hey_childrens_nhs_foundation_trust",
+        "search" : "?s=${query}"
         },
         {
         "name": "Ashford and St Peter’s Hospitals NHS Foundation Trust",
@@ -492,7 +543,8 @@
         "id": "ashfordstpeters",
         "wikipedia": "https://en.wikipedia.org/wiki/Ashford_and_St_Peter%27s_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RTK",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/ashford_and_st_peters_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/ashford_and_st_peters_hospitals_nhs_foundation_trust",
+        "search" : "results?q=${query}"
         },
         {
         "name": "Avon and Wiltshire Mental Health Partnership NHS Trust",
@@ -514,7 +566,8 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Barking,_Havering_and_Redbridge_University_Hospitals_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RF4",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/barking_havering_and_redbridge_university_hospitals_nhs_trust"
+        "https://www.whatdotheyknow.com/body/barking_havering_and_redbridge_university_hospitals_nhs_trust",
+        "search" : "search?term=${query}"
         },
         {
         "name": "Barnet Enfield and Haringey Mental Health NHS Trust",
@@ -533,7 +586,8 @@
         "id": "barnsleyhospital",
         "wikipedia": "https://en.wikipedia.org/wiki/Barnsley_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RFF",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/barnsley_hospital_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/barnsley_hospital_nhs_foundation_trust",
+        "search" : "search?search=${query}"
         },
         {
         "name": "Barts Health NHS Trust",
@@ -543,7 +597,8 @@
         "id": "bartshealth",
         "wikipedia": "https://en.wikipedia.org/wiki/Barts_Health_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/R1H",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/barts_health_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/barts_health_nhs_trust",
+        "search" : "search?term=${query}"
         },
         {
         "name": "Bedfordshire Hospitals NHS Foundation Trust",
@@ -557,7 +612,8 @@
         "id": "bedfordshirehospitals",
         "website": "https://www.bedfordshirehospitals.nhs.uk/",
         "cqc": "https://www.cqc.org.uk/provider/RC9",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/bedfordshire_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/bedfordshire_hospitals_nhs_foundation_trust",
+        "search" : "?s=${query}"
         },
         {
         "name": "Berkshire Healthcare NHS Foundation Trust",
@@ -567,7 +623,8 @@
         "id": "berkshirehealthcare",
         "wikipedia": "https://en.wikipedia.org/wiki/Berkshire_Healthcare_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWX",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/berkshire_healthcare_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/berkshire_healthcare_nhs_foundation_trust",
+        "search" : "search-results/?search_field=${query}"
         },
         {
         "name": "Birmingham and Solihull Mental Health NHS Foundation Trust",
@@ -579,7 +636,8 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Birmingham_and_Solihull_Mental_Health_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXT",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/birmingham_and_solihull_mental_health_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/birmingham_and_solihull_mental_health_nhs_foundation_trust",
+        "search" : "?s=${query}"
         },
         {
         "name": "Birmingham Community Healthcare NHS Foundation Trust",
@@ -589,7 +647,8 @@
         "id": "bhamcommunity",
         "wikipedia": "https://en.wikipedia.org/wiki/Birmingham_Community_Healthcare_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RYW",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/birmingham_community_healthcare_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/birmingham_community_healthcare_nhs_foundation_trust",
+        "search" : "search?term=${query}"
         },
         {
         "name": "Birmingham Women’s and Children’s NHS Foundation Trust",
@@ -599,7 +658,8 @@
         "id": "bwc",
         "wikipedia": "https://en.wikipedia.org/wiki/Birmingham_Women%27s_and_Children%27s_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RQ3",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/birmingham_womens_and_childrens_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/birmingham_womens_and_childrens_nhs_foundation_trust",
+        "search" : "search?term=${query}"
         },
         {
         "name": "Black Country Healthcare NHS Foundation Trust",
@@ -612,7 +672,8 @@
         ],
         "wikipedia": "https://en.wikipedia.org/wiki/Black_Country_Healthcare_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/TAJ",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/black_country_healthcare_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/black_country_healthcare_nhs_foundation_trust",
+        "search" : "search-results?query=${query}"
         },
         {
         "name": "Blackpool Teaching Hospitals NHS Foundation Trust",
@@ -646,7 +707,8 @@
         "id": "bdct",
         "wikipedia": "https://en.wikipedia.org/wiki/Bradford_District_Care_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/TAD",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/bradford_district_care_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/bradford_district_care_nhs_foundation_trust",
+        "search" : "search?searchquery=${query}"
         },
         {
         "name": "Bradford Teaching Hospitals NHS Foundation Trust",
@@ -656,7 +718,8 @@
         "id": "bradfordhospitals",
         "wikipedia": "https://en.wikipedia.org/wiki/Bradford_Teaching_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RAE",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/bradford_teaching_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/bradford_teaching_hospitals_nhs_foundation_trust",
+        "search" : "search?q=${query}"
         },
         {
         "name": "Bridgewater Community Healthcare NHS Foundation Trust",
@@ -666,7 +729,8 @@
         "id": "bridgewater",
         "wikipedia": "https://en.wikipedia.org/wiki/Bridgewater_Community_Healthcare",
         "cqc": "https://www.cqc.org.uk/provider/RY2",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/bridgewater_community_healthcare_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/bridgewater_community_healthcare_nhs_foundation_trust",
+        "search" : "?s=${query}"
         },
         {
         "name": "Buckinghamshire Healthcare NHS Trust",
@@ -676,7 +740,8 @@
         "id": "buckshealthcare",
         "wikipedia": "https://en.wikipedia.org/wiki/Buckinghamshire_Healthcare_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXQ",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/buckinghamshire_healthcare_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/buckinghamshire_healthcare_nhs_trust",
+        "search" : "?s=${query}"
         },
         {
         "name": "Calderdale and Huddersfield NHS Foundation Trust",
@@ -686,7 +751,8 @@
         "id": "cht",
         "wikipedia": "https://en.wikipedia.org/wiki/Calderdale_and_Huddersfield_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWY",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/calderdale_and_huddersfield_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/calderdale_and_huddersfield_nhs_foundation_trust",
+        "search": "resources/search?tx_kesearch_pi1%5Bpage%5D=1&tx_kesearch_pi1%5Bsword%5D=${query}"
         },
         {
         "name": "Cambridge University Hospitals NHS Foundation Trust",
@@ -696,7 +762,8 @@
         "id": "cuh",
         "wikipedia": "https://en.wikipedia.org/wiki/Cambridge_University_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RGT",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/cambridge_university_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/cambridge_university_hospitals_nhs_foundation_trust",
+        "search" : "search/?query=${query}"
         },
         {
         "name": "Cambridgeshire and Peterborough NHS Foundation Trust",
@@ -706,7 +773,8 @@
         "id": "cpft",
         "wikipedia": "https://en.wikipedia.org/wiki/Cambridgeshire_and_Peterborough_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RT1",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/cambridgeshire_and_peterborough_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/cambridgeshire_and_peterborough_nhs_foundation_trust",
+        "search" : "search?term=${query}"
         },
         {
         "name": "Cambridgeshire Community Services NHS Trust",
@@ -716,7 +784,8 @@
         "id": "cambscommunityservices",
         "wikipedia": "https://en.wikipedia.org/wiki/Cambridgeshire_Community_Services_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RYV",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/cambridgeshire_community_services_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/cambridgeshire_community_services_nhs_trust",
+        "search" : "search/?q=${query}"
         },
         {
         "name": "Central and North West London NHS Foundation Trust",
@@ -726,7 +795,8 @@
         "id": "cnwl",
         "wikipedia": "https://en.wikipedia.org/wiki/Central_and_North_West_London_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RV3",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/central_and_north_west_london_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/central_and_north_west_london_nhs_foundation_trust",
+        "search" : "search?dynamic=false&search=1&keywords=${query}"
         },
         {
         "name": "Central London Community Healthcare NHS Trust",
@@ -736,7 +806,8 @@
         "id": "clch",
         "wikipedia": "https://en.wikipedia.org/wiki/Central_London_Community_Healthcare_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RYX",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/central_london_community_healthcare_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/central_london_community_healthcare_nhs_trust",
+        "search" : "search-results?query=${query}"
         },
         {
         "name": "Chelsea and Westminster Hospital NHS Foundation Trust",
@@ -746,7 +817,8 @@
         "id": "chelwest",
         "wikipedia": "https://en.wikipedia.org/wiki/Chelsea_and_Westminster_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RQM",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/chelsea_and_westminster_hospital_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/chelsea_and_westminster_hospital_nhs_foundation_trust",
+        "search" : "search?SearchableText=${query}"
         },
         {
         "name": "Cheshire and Wirral Partnership NHS Foundation Trust",
@@ -776,7 +848,8 @@
         "id": "christie",
         "wikipedia": "https://en.wikipedia.org/wiki/The_Christie_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RBV",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_christie_hospital"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_christie_hospital",
+        "search" : "about-us/search-the-christie-website?searchterm=${query}"
         },
         {
         "name": "The Clatterbridge Cancer Centre NHS Foundation Trust",
@@ -796,7 +869,8 @@
         "id": "cornwallft",
         "wikipedia": "https://en.wikipedia.org/wiki/Cornwall_Partnership_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RJ8",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/cornwall_partnership_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/cornwall_partnership_nhs_foundation_trust",
+        "search" : "search?term=${query}"
         },
         {
         "name": "Countess of Chester Hospital NHS Foundation Trust",
@@ -2220,7 +2294,8 @@
         "id": "slam",
         "wikipedia": "https://en.wikipedia.org/wiki/South_London_and_Maudsley_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RV5",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_london_and_maudsley_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_london_and_maudsley_nhs_foundation_trust",
+        "search" : "search?term=${query}"
         },
         {
         "name": "South Tees Hospitals NHS Foundation Trust",
@@ -2519,7 +2594,8 @@
         "id": "plymouthhospitals",
         "wikipedia": "https://en.wikipedia.org/wiki/University_Hospitals_Plymouth_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RK9",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_hospitals_plymouth_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_hospitals_plymouth_nhs_trust",
+        "search": "search?term=${query}"
         },
         {
         "name": "University Hospitals Sussex NHS Foundation Trust",
@@ -2596,7 +2672,8 @@
         "wikipedia": "https://en.wikipedia.org/wiki/West_Midlands_Ambulance_Service",
         "cqc": "https://www.cqc.org.uk/provider/RYA",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/west_midlands_ambulance_service_university_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/west_midlands_ambulance_service_university_nhs_foundation_trust",
+        "search": "?s=${query}"
         },
         {
         "name": "West Suffolk NHS Foundation Trust",
@@ -2696,6 +2773,176 @@
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/yorkshire_ambulance_service_nhs_trust"
         }
         ]
+    </template>
+    <template id="search-data">
+https://www.coch.nhs.uk/Search.aspx?search=${query}
+https://www.cddft.nhs.uk/search?query=${query}
+https://www.covwarkpt.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.croydonhealthservices.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.cntw.nhs.uk/?s=${query}
+https://www.dgt.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
+https://dchs.nhs.uk/search-results?search_paths%5B%5D=&query=${query}#search-results
+https://www.derbyshirehealthcareft.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
+https://www.dbth.nhs.uk/search/sex
+https://www.dchft.nhs.uk/?s=${query}
+https://www.dorsethealthcare.nhs.uk/search?query=${query}
+https://www.enherts-tr.nhs.uk/?s=${query}
+https://services.eastcheshire.nhs.uk/pulmonary-rehabilitation/search?search_paths%5B%5D=&query=${query}&site=
+https://www.ekhuft.nhs.uk/search/?i=default&q=${query}
+https://elht.nhs.uk/search-results?query=${query}#search-anchor
+https://www.elft.nhs.uk/search?keywords=${query}&content_type=All&microsite=All&field_term_location=All&field_category=All&field_service_category=All&field_audience=All
+https://www.emas.nhs.uk/search?query=${query}
+https://www.eastamb.nhs.uk/search?q=${query}
+https://www.esneft.nhs.uk/?s=${query}
+https://www.esht.nhs.uk/?s=${query}
+https://www.epsom-sthelier.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.eput.nhs.uk/?s=${query}
+https://www.fhft.nhs.uk/search?query=${query}
+https://www.gatesheadhealth.nhs.uk/?s=${query}
+https://www.geh.nhs.uk/search?query=${query}
+https://www.ghc.nhs.uk/search-results/?q=${query}
+https://www.gloshospitals.nhs.uk/search/?query=${query}
+https://www.gosh.nhs.uk/search/?query=${query}
+https://www.gwh.nhs.uk/search-results/?search_field=${query}
+https://www.gmmh.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.guysandstthomas.nhs.uk/search?query=${query}
+https://hiowhealthcare.nhs.uk/search?query=${query}
+https://www.hampshirehospitals.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
+https://www.hdft.nhs.uk/?s=${query}
+https://www.hacw.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.hct.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://thh.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.homerton.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.kingstonandrichmond.nhs.uk/search?query=${query}#search-status
+https://www.hey.nhs.uk/?s=${query}
+https://www.humber.nhs.uk/search?search=${query}
+https://www.imperial.nhs.uk/search?keywords=${query}
+https://www.iow.nhs.uk/search-results?query=${query}#search
+https://www.kmpt.nhs.uk/search-results?keyword=${query}
+https://www.kentcht.nhs.uk/?s=${query}
+https://www.kgh.nhs.uk/advanced-search?term=${query}&search=Search&searchType=all
+https://www.kch.nhs.uk/?s=${query}
+https://www.kingstonandrichmond.nhs.uk/search?query=${query}#search-status
+https://www.lscft.nhs.uk/search?query=${query}
+https://www.lancsteachinghospitals.nhs.uk/search?tags=${query}
+https://www.leedsandyorkpft.nhs.uk/search/?q=${query}
+https://leedscommunityhealthcare.nhs.uk/?s=${query}
+https://www.leedsth.nhs.uk/?s=${query}
+https://www.leicspart.nhs.uk/?s=${query}
+https://www.lewishamandgreenwich.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://lincolnshirecommunityhealthservices.nhs.uk/search-results?search_paths%5B%5D=&query=${query}&submit=#results-111
+https://www.lpft.nhs.uk/search-results?search_paths%5B%5D=&query=${query}&file_type=&file_sort=&file_category=#main
+https://www.lhch.nhs.uk/search?tags=${query}
+https://www.uhliverpool.nhs.uk/search?query=${query}
+https://www.liverpoolwomens.nhs.uk/site-search/?search=${query}
+https://www.londonambulance.nhs.uk/?s=${query}
+https://www.lnwh.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.mtw.nhs.uk/?s=${query}
+https://mft.nhs.uk/?s=${query}
+https://www.medway.nhs.uk/search/?search=${query}
+https://www.merseywestlancs.nhs.uk/search?tags=${query}
+https://www.merseycare.nhs.uk/search?query=${query}
+https://www.mse.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.mcht.nhs.uk/search?query=${query}#search-anchor
+https://www.midyorks.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.mpft.nhs.uk/search?query=${query}
+https://www.mkuh.nhs.uk/?s=${query}
+https://www.moorfields.nhs.uk/search?input-autocomplete=${query}
+https://www.newcastle-hospitals.nhs.uk/?s=${query}
+https://www.nnuh.nhs.uk/?s=${query}&searchSiteSubmit=Search+site
+https://www.nsft.nhs.uk/search?term=${query}&search=Search&searchType=all#main-content
+https://www.norfolkcommunityhealthandcare.nhs.uk/search/?term=${query}&searchtype=all&search=Search
+https://www.nbt.nhs.uk/search?keywords=${query}
+https://www.ncic.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
+https://www.neas.nhs.uk/search?query=${query}#search-status
+https://www.nelft.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.northlondonmentalhealth.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.combined.nhs.uk/?s=${query}
+https://www.nth.nhs.uk/?s=${query}
+https://www.nwas.nhs.uk/?s=${query}
+https://www.nwangliaft.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.northamptongeneral.nhs.uk/Search.aspx?search_keywords=${query}
+https://www.nhft.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.northerncarealliance.nhs.uk/search?query=${query}
+https://www.nlg.nhs.uk/?s=${query}
+https://www.northumbria.nhs.uk/search?query=${query}#search-anchor
+https://www.nuh.nhs.uk/site-search/?term=${query}&searchtype=all&search=Search
+https://www.nottinghamshirehealthcare.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.oxfordhealth.nhs.uk/?s=${query}
+https://www.ouh.nhs.uk/search?query=${query}
+https://oxleas.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.penninecare.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
+https://www.porthosp.nhs.uk/search-results?query=${query}#search
+https://www.pah.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.qvh.nhs.uk/?s=${query}
+https://www.rjah.nhs.uk/Search?query=${query}
+https://www.therotherhamft.nhs.uk/search?search=${query}
+https://www.rdash.nhs.uk/?s=${query}&submit=Search
+https://www.royalberkshire.nhs.uk/search?q=${query}
+https://www.rbht.nhs.uk/search?query=${query}
+https://royalcornwallhospitals.nhs.uk/?s=${query}
+https://www.royaldevon.nhs.uk/search?q=${query}
+https://www.royalfree.nhs.uk/search?query=${query}#search
+https://www.rnoh.nhs.uk/search
+https://roh.nhs.uk/search?q=${query}
+https://www.royalpapworth.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
+https://www.royalsurrey.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.ruh.nhs.uk/zoom_search/RUH_AZ.asp?zoom_sort=0&zoom_query=${query}
+https://royalwolverhampton.nhs.uk/?s=${query}
+https://www.salisbury.nhs.uk/search?q=${query}
+https://www.swbh.nhs.uk/?s=${query}
+https://www.sheffieldchildrens.nhs.uk/?s=${query}&is_file=
+https://www.shsc.nhs.uk/search?keywords=${query}
+https://www.sth.nhs.uk/search/?q=${query}
+https://www.sfh-tr.nhs.uk/about-us/search?q=${query}
+https://www.sath.nhs.uk/?s=${query}
+https://www.shropscommunityhealth.nhs.uk/search
+https://hiowhealthcare.nhs.uk/search?search_paths%5B%5D=&query=${query}
+https://www.somersetft.nhs.uk/?s=${query}
+https://www.scas.nhs.uk/?s=${query}
+https://www.southtees.nhs.uk/?s=${query}
+https://www.stsft.nhs.uk/search-results?search_paths%5B%5D=&query=${query}&Search=
+https://www.swft.nhs.uk/search?query=${query}#search-status
+https://swlstg.nhs.uk/search?term=${query}&search=Search&searchType=all#main-content
+https://www.southwestyorkshire.nhs.uk/?s=${query}
+https://www.swast.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://so.merseywestlancs.nhs.uk/search?filter=01e69d80405fac0a46afbfc823e2b199&tags=${query}
+https://www.stgeorges.nhs.uk/?s=${query}
+https://www.stockport.nhs.uk/search
+https://www.sabp.nhs.uk/search-results?query=${query}#search
+https://www.sussexcommunity.nhs.uk/search?q=${query}
+https://www.sussexpartnership.nhs.uk/search?query=${query}#search-anchor
+https://www.tamesideandglossopicft.nhs.uk/search?query=${query}
+https://tavistockandportman.nhs.uk/?s=${query}
+https://www.tewv.nhs.uk/?s=${query}
+https://www.torbayandsouthdevon.nhs.uk/?s=${query}
+https://www.ulh.nhs.uk/search/?search=${query}
+https://www.uclh.nhs.uk/search?query=${query}#search
+https://www.uhs.nhs.uk/search?term=${query}
+https://www.uhb.nhs.uk/search-results/?indexname=uhb-search&search=${query}
+https://www.uhbw.nhs.uk/search/?q=${query}
+https://www.uhcw.nhs.uk/search/?q=${query}
+https://www.uhd.nhs.uk/component/search/?searchword=${query}
+https://www.uhdb.nhs.uk/search?term=${query}&search=Search&searchType=all#main-content
+https://www.uhleicester.nhs.uk/?s=${query}
+https://www.uhmb.nhs.uk/search-results?search_paths%5B%5D=&query=${query}#result-info
+https://www.plymouthhospitals.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.uhsussex.nhs.uk/?s=${query}
+https://www.walsallhealthcare.nhs.uk/?s=${query}
+https://www.thewaltoncentre.nhs.uk/search?term=${query}&search=Search&searchType=all
+https://www.whh.nhs.uk/search?query=${query}
+https://www.westhertshospitals.nhs.uk/search?query=${query}#search
+https://www.westlondon.nhs.uk/search?query=${query}
+https://www.wmas.nhs.uk/?s=${query}
+https://www.wsh.nhs.uk/search?term=${query}
+https://www.whittington.nhs.uk/search/?q=${query}
+https://www.wchc.nhs.uk/?s=${query}
+https://www.wuth.nhs.uk/site-search/?data=${query}
+https://www.worcsacute.nhs.uk/search/?_sf_s=${query}
+https://www.wwl.nhs.uk/search?tags=${query}
+https://www.wyevalley.nhs.uk/search-results.aspx?q=${query}
+https://www.yorkhospitals.nhs.uk/search-results/?search=${query}
+https://www.yas.nhs.uk/search?q=${query}
     </template>
 </body>
 
