@@ -9,13 +9,24 @@
         const params = new URLSearchParams(document.location.search);
         const id = params.get("id") ?? undefined;
 
+        function removeStart(n, start) {
+            if (n.startsWith(start)) {
+                n = n.substring(start.length);
+            }
+            return n;
+        }
+
+        function getHost(u) {
+            return removeStart((new URL(u)).hostname, "www.");
+        }
+
         /**
          * query properties are the ones added to by the `terms` query parameter
          * and can be set individually by query parameters of the same name as the property
         */
         const queryProperties = ["wdtk-queries", "google-queries", "search-queries"];
 
-        const trusts = JSON.parse(document.querySelector("#trust-data").content.textContent).sort((a, b) => a.shortName.localeCompare(b.shortName));;
+        const trusts = JSON.parse(document.querySelector("#trust-data").content.textContent).sort((a, b) => a.shortName.localeCompare(b.shortName));
 
         function toID(u) {
             try {
@@ -114,23 +125,28 @@
             }
         }
 
-        /** Splits common terms off the end of the wdtk and google queries and eliminates empty arrays */
-        function rationalizeTerms(allSettings) {
+        function isValidTerm(a) {
             function isValidTermText(text) {
-                return !text.includes(",") && !text.includes("=");
+                return (typeof text === "string") && !text.includes(",") && !text.includes("=");
             }
 
+            if (typeof a === "string") {
+                return isValidTermText(a);
+            }
+
+            return isValidTermText(a.name) && isValidTermText(b.value);
+        }
+
+        /** Splits common terms off the end of the wdtk and google queries and eliminates empty arrays */
+        function rationalizeTerms(allSettings) {
+
             function isEqualTerm(a, b) {
-                if (typeof a === typeof b) {
+                if (typeof a === typeof b && isValidTerm(a)) {
                     if (typeof a === "string") {
-                        return a === b && isValidTermText(a);
+                        return a === b
                     }
 
-                    return (
-                        a.name === b.name && isValidTermText(a.name)
-                        &&
-                        a.value === b.value && isValidTermText(a.value)
-                    );
+                    return a.name === b.name && a.value === b.value;
                 }
                 return false;
             }
@@ -350,7 +366,7 @@
                 const setting = "google-queries";
                 const createURL = (value) => {
                     const url = new URL(`https://google.co.uk/search`);
-                    url.searchParams.set("q", `${value} site:${this.current.website}`);
+                    url.searchParams.set("q", `${value} site:${getHost(this.current.website)}`);
                     return url;
                 };
                 this.populateQueries(setting, createURL);
@@ -403,7 +419,7 @@
                 }
 
                 const a = document.querySelector("#google a");
-                a.href = `https://google.co.uk/search?q=site:${this.current.website}+FOI`;
+                a.href = `https://google.co.uk/search?q=FOI+site:${getHost(this.current.website)}`;
 
                 ((shortName) => {
                     const url = new URL(`https://www.cqc.org.uk/search/all?filters%5B%5D=services%3Aservice-provider`);
