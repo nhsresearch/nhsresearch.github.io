@@ -189,6 +189,8 @@
             saveLink.onclick = (e) => {
                 if (confirm("Replace your stored customizations with the ones on this page?")) {
                     localStorage.setItem("nhs-research-settings", JSON.stringify(settings));
+                    // Remove params so that we don't get duplicates because of the additive ones like `terms`
+                    document.location = `?id=${id}`;
                 }
                 e.preventDefault();
             };
