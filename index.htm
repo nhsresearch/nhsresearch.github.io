@@ -9,7 +9,10 @@
         const params = new URLSearchParams(document.location.search);
         const id = params.get("id") ?? undefined;
 
-        /** query properties are the ones populated by the `terms` query parameter */
+        /**
+         * query properties are the ones added to by the `terms` query parameter
+         * and can be set individually by query parameters of the same name as the property
+        */
         const queryProperties = ["wdtk-queries", "google-queries", "search-queries"];
 
         const trusts = JSON.parse(document.querySelector("#trust-data").content.textContent).sort((a, b) => a.shortName.localeCompare(b.shortName));;
@@ -43,10 +46,10 @@
             // Note that user queries are really slow on WDTK, so prefer ordinary queries
             "wdtk-user-queries": [],
             // WDTK queries use the trust as the context and the specified terms as the query
-            "wdtk-queries": ["waiting times"],
+            "wdtk-queries": [], //["waiting times"],
             // Google queries use the trust website as the context and the specified terms as the query
-            "google-queries": ["waiting list", "\"chief executive\""],
-            "search-queries": ["vacancies"]
+            "google-queries": [], //["waiting list", "\"chief executive\""],
+            "search-queries": [], //["vacancies"]
         };
 
         function duplicate(o) {
@@ -78,22 +81,36 @@
             }
         }
 
-        for (const queryProperty of queryProperties) {
-            settings[queryProperty] = settings[queryProperty] ?? [];
+        function* getTerms(param) {
+            const paramValue = params.get(param) ?? undefined;
+            if (paramValue !== undefined) {
+                document.body.dataset.settingsUpdated = true;
+                const termTexts = paramValue.split(",").map(t => t.trim());
+                for (const termText of termTexts) {
+                    const pieces = termText.split("=").map(p => p.trim());
+                    const [name, value] = [pieces.length === 1 ? undefined : pieces[0], pieces.length === 1 ? pieces[0] : pieces[1]];
+                    const term = name !== undefined ? { name, value } : value;
+                    yield term;
+                }
+            }
         }
 
-        // Terms are additive, are used for Google and for WDTK, and can't contain commas, equals
-        const termsText = params.get("terms") ?? undefined;
-        if (termsText !== undefined) {
-            document.body.dataset.settingsUpdated = true;
-            const terms = termsText.split(",").map(t => t.trim());
-            for (const term of terms) {
-                const pieces = term.split("=").map(p => p.trim());
-                const [name, value] = [pieces.length === 1 ? undefined : pieces[0], pieces.length === 1 ? pieces[0] : pieces[1]];
-                const v = name !== undefined ? { name, value } : value;
-                for (const queryProperty of queryProperties) {
-                    settings[queryProperty].push(v);
+        for (const queryProperty of queryProperties) {
+            settings[queryProperty] = settings[queryProperty] ?? [];
+
+            // query properties in the params are additive just like `terms`
+            if (params.has(queryProperty)) {
+                for (const term of getTerms(queryProperty)) {
+                    settings[queryProperty].push(term);
                 }
+            }
+        }
+
+        // `terms` param is additive, used for site search, Google, and WDTK
+        // Terms can't contain commas, equals
+        for (const term of getTerms("terms")) {
+            for (const queryProperty of queryProperties) {
+                settings[queryProperty].push(term);
             }
         }
 
