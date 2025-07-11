@@ -7,7 +7,25 @@
     <title>NHS Trust Research</title>
     <script type="module">
         const params = new URLSearchParams(document.location.search);
-        const id = params.get("id") ?? undefined;
+
+        // Users may edit URLs directly, so we want to be able to deal with extraneous spaces
+        // We don't have any parameters that can be usefully stated more than once, so make an object from trimmed data
+        // This means that parameters at the end of the URL are more important than earlier ones with the same name
+        const parameters = Object.fromEntries([...params.entries()].map(([k, v]) => [k.trim(), v.trim()]));
+
+        function searchParamsDelete(name) {
+            const name_ = name.trim();
+            const keys = [...params.keys()].filter(k => k.trim() === name_);
+            for (const key of keys) {
+                params.delete(key);
+            }
+        }
+
+        // Remove id-like parameters so that we can safely reuse params
+        searchParamsDelete("id");
+
+        /** The ID of the trust or undefined if we don't have a trust */
+        const id = parameters.id ?? undefined;
 
         function removeStart(n, start) {
             if (n.startsWith(start)) {
@@ -16,15 +34,16 @@
             return n;
         }
 
+        function removeEnd(n, end) {
+            if (n.endsWith(end)) {
+                n = n.substring(0, n.length - end.length);
+            }
+            return n;
+        }
+
         function getHost(u) {
             return removeStart((new URL(u)).hostname, "www.");
         }
-
-        /**
-         * query properties are the ones added to by the `terms` query parameter
-         * and can be set individually by query parameters of the same name as the property
-        */
-        const queryProperties = ["wdtk-queries", "google-queries", "search-queries"];
 
         const trusts = JSON.parse(document.querySelector("#trust-data").content.textContent).sort((a, b) => a.shortName.localeCompare(b.shortName));
 
@@ -77,14 +96,13 @@
             }
         }
 
-        const settingsText = params.get("settings") ?? undefined;
+        const settingsText = parameters.settings ?? undefined;
         if (settingsText !== undefined) {
             try {
                 const updatedSettings = JSON.parse(settingsText) ?? undefined;
                 if (updatedSettings !== undefined) {
                     // It's OK to update settings without asking because it only applies to this page
                     settings = updatedSettings;
-                    settings["wdtk-user-queries"] = settings["wdtk-user-queries"] ?? [];
                     document.body.dataset.settingsUpdated = true;
                 }
             } catch (e) {
@@ -92,8 +110,37 @@
             }
         }
 
+        ////////////////////////////////////////////////////////////////
+        // settings has been loaded, now we adjust settings using parameters
+        ////////////////////////////////////////////////////////////////
+
+
+        ////////////////////////////////////////////////////////////////
+        // Load custom search engines
+        ////////////////////////////////////////////////////////////////
+
+        function loadSearchEngines() {
+            function loadEngine(key) {
+                const url = parameters[`${key}-engine`];
+                const id = key.toLowerCase().replaceAll(" ", "-");
+                const name = parameters[`${key}-engine-name`] ?? parameters[`${id}-engine-name`] ?? key;
+                return { id, name, url };
+            }
+
+            const engineKeys = Object.keys(parameters).filter(k => k.endsWith("-engine")).map(k => removeEnd(k, "-engine"));
+            const engines = engineKeys.map(key => loadEngine(key));
+            
+            settings.engines = settings.engines ?? {};
+            for (const engine of engines) {
+                settings.engines[engine.id] = engine;
+            }
+        }
+
+        loadSearchEngines();
+        console.log(settings);
+
         function* getTerms(param) {
-            const paramValue = params.get(param) ?? undefined;
+            const paramValue = parameters[param] ?? undefined;
             if (paramValue !== undefined) {
                 document.body.dataset.settingsUpdated = true;
                 const termTexts = paramValue.split(",").map(t => t.trim());
@@ -106,11 +153,17 @@
             }
         }
 
+        /**
+         * query properties are the ones added to by the `terms` query parameter
+         * and can be set individually by query parameters of the same name as the property
+        */
+        const queryProperties = ["wdtk-queries", "google-queries", "search-queries", Object.keys(settings.engines).map(k => `${k}-queries`)];
+
         for (const queryProperty of queryProperties) {
             settings[queryProperty] = settings[queryProperty] ?? [];
 
-            // query properties in the params are additive just like `terms`
-            if (params.has(queryProperty)) {
+            // query properties are additive just like `terms`
+            if (parameters[queryProperty] !== undefined) {
                 for (const term of getTerms(queryProperty)) {
                     settings[queryProperty].push(term);
                 }
@@ -124,6 +177,12 @@
                 settings[queryProperty].push(term);
             }
         }
+
+        console.log(settings);
+
+        //////////////////////////////////////////////////////////////////////
+        // settings is fully populated
+        //////////////////////////////////////////////////////////////////////
 
         function isValidTerm(a) {
             function isValidTermText(text) {
@@ -205,7 +264,7 @@
             saveLink.onclick = (e) => {
                 if (confirm("Replace your stored customizations with the ones on this page?")) {
                     localStorage.setItem("nhs-research-settings", JSON.stringify(settings));
-                    // Remove params so that we don't get duplicates because of the additive ones like `terms`
+                    // Remove parameters so that we don't get duplicates because of the additive ones like `terms`
                     document.location = `?id=${id}`;
                 }
                 e.preventDefault();
@@ -391,14 +450,64 @@
                 this.populateQueries(setting, createURL);
             }
 
+            engineQueries() {
+                const realize = (text) => {
+                    for (const property of ["id", "name", "shortName", "website"]) {
+                        text = text.replaceAll("${" + property + "}", encodeURIComponent(this.current[property]));
+                    }
+                    return text;
+                };
+
+                const enginesElement = document.querySelector("#engines");
+
+                for (const engine of Object.values(settings.engines)) {
+                    const setting = `${engine.id}-queries`;
+
+                    const engineElement = document.createElement("div");
+                    engineElement.dataset.engine = engine.id;
+
+                    const engineQueriesElement = document.createElement("div");
+                    engineQueriesElement.id = setting;
+                    engineQueriesElement.classList.add("queries");
+
+                    engineElement.append(`${engine.name}`, engineQueriesElement);
+                    
+                    const searchURL = realize(engine.url);
+                    console.log(searchURL);
+
+                    // If the URL includes ${query}, its only for queries and we won't show section if no queries
+                    // If it doesn't include ${query}, its a trust-relevant link and we always show it
+
+                    if (searchURL.includes("${query}")) {
+                        if (settings[setting] === undefined || settings[setting].length === 0) {
+                            console.log("No queries", engine);
+                            continue;
+                        }
+
+                        const createURL = (value) => {
+                            const url = new URL(searchURL.replaceAll("${query}", encodeURIComponent(value)));
+                            return url;
+                        };
+
+                        enginesElement.append(engineElement);
+                        this.populateQueries(setting, createURL);
+                    } else {
+                        engineElement.innerHTML = `<a></a>`; // TODO
+                        const a = engineElement.querySelector("a");
+                        a.href = searchURL;
+                        a.innerText = engine.name;
+                        enginesElement.append(engineElement);
+                        console.log(searchURL);
+                    }
+                }
+            }
+
             oncurrentchanged() {
                 document.title = `[${this.current.shortName}] ${this.name}`;
 
                 const at = document.querySelector("#all-trusts a") ?? undefined;
                 if (at !== undefined) {
-                    const newParams = new URLSearchParams(params);
-                    newParams.delete("id");
-                    at.href = `?${newParams}#${this.current.id}`;
+                    at.href = `?${params}#${this.current.id}`;
                 }
 
                 document.querySelector("#name").innerText = this.current.name;
@@ -452,6 +561,7 @@
                 this.wdtkQueries();
                 this.googleQueries();
                 this.searchQueries();
+                this.engineQueries();
             }
         }
 
@@ -535,6 +645,7 @@
     <div id="wdtk-queries" class="queries"></div>
     <div id="google"><a href="">Google</a></div>
     <div id="google-queries" class="queries"></div>
+    <div id="engines"></div>
     <div> </div>
     <div id="all-trusts"><a href="?">← ALL TRUSTS</a></div>
     <div id="merged"><a></a></div>
@@ -549,15 +660,15 @@
     <template id="trust-data">
         [
         {
-            "name": "NHS England",
-            "provider": "https://www.england.nhs.uk/publication/",
-            "shortName": "NHS England",
-            "website": "https://www.england.nhs.uk/",
-            "id": "england",
-            "wikipedia": "https://en.wikipedia.org/wiki/NHS_England",
-            "cqc": "https://www.cqc.org.uk/search/all?filters[]=services:service-provider",
-            "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_england",
-            "search" : "?s=${query}"
+        "name": "NHS England",
+        "provider": "https://www.england.nhs.uk/publication/",
+        "shortName": "NHS England",
+        "website": "https://www.england.nhs.uk/",
+        "id": "england",
+        "wikipedia": "https://en.wikipedia.org/wiki/NHS_England",
+        "cqc": "https://www.cqc.org.uk/search/all?filters[]=services:service-provider",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_england",
+        "search" : "?s=${query}"
         },
         {
         "name": "Airedale NHS Foundation Trust",
@@ -2821,174 +2932,174 @@
         ]
     </template>
     <template id="search-data">
-https://www.coch.nhs.uk/Search.aspx?search=${query}
-https://www.cddft.nhs.uk/search?query=${query}
-https://www.covwarkpt.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.croydonhealthservices.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.cntw.nhs.uk/?s=${query}
-https://www.dgt.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
-https://dchs.nhs.uk/search-results?search_paths%5B%5D=&query=${query}#search-results
-https://www.derbyshirehealthcareft.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
-https://www.dbth.nhs.uk/search/sex
-https://www.dchft.nhs.uk/?s=${query}
-https://www.dorsethealthcare.nhs.uk/search?query=${query}
-https://www.enherts-tr.nhs.uk/?s=${query}
-https://services.eastcheshire.nhs.uk/pulmonary-rehabilitation/search?search_paths%5B%5D=&query=${query}&site=
-https://www.ekhuft.nhs.uk/search/?i=default&q=${query}
-https://elht.nhs.uk/search-results?query=${query}#search-anchor
-https://www.elft.nhs.uk/search?keywords=${query}&content_type=All&microsite=All&field_term_location=All&field_category=All&field_service_category=All&field_audience=All
-https://www.emas.nhs.uk/search?query=${query}
-https://www.eastamb.nhs.uk/search?q=${query}
-https://www.esneft.nhs.uk/?s=${query}
-https://www.esht.nhs.uk/?s=${query}
-https://www.epsom-sthelier.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.eput.nhs.uk/?s=${query}
-https://www.fhft.nhs.uk/search?query=${query}
-https://www.gatesheadhealth.nhs.uk/?s=${query}
-https://www.geh.nhs.uk/search?query=${query}
-https://www.ghc.nhs.uk/search-results/?q=${query}
-https://www.gloshospitals.nhs.uk/search/?query=${query}
-https://www.gosh.nhs.uk/search/?query=${query}
-https://www.gwh.nhs.uk/search-results/?search_field=${query}
-https://www.gmmh.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.guysandstthomas.nhs.uk/search?query=${query}
-https://hiowhealthcare.nhs.uk/search?query=${query}
-https://www.hampshirehospitals.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
-https://www.hdft.nhs.uk/?s=${query}
-https://www.hacw.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.hct.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://thh.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.homerton.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.kingstonandrichmond.nhs.uk/search?query=${query}#search-status
-https://www.hey.nhs.uk/?s=${query}
-https://www.humber.nhs.uk/search?search=${query}
-https://www.imperial.nhs.uk/search?keywords=${query}
-https://www.iow.nhs.uk/search-results?query=${query}#search
-https://www.kmpt.nhs.uk/search-results?keyword=${query}
-https://www.kentcht.nhs.uk/?s=${query}
-https://www.kgh.nhs.uk/advanced-search?term=${query}&search=Search&searchType=all
-https://www.kch.nhs.uk/?s=${query}
-https://www.kingstonandrichmond.nhs.uk/search?query=${query}#search-status
-https://www.lscft.nhs.uk/search?query=${query}
-https://www.lancsteachinghospitals.nhs.uk/search?tags=${query}
-https://www.leedsandyorkpft.nhs.uk/search/?q=${query}
-https://leedscommunityhealthcare.nhs.uk/?s=${query}
-https://www.leedsth.nhs.uk/?s=${query}
-https://www.leicspart.nhs.uk/?s=${query}
-https://www.lewishamandgreenwich.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://lincolnshirecommunityhealthservices.nhs.uk/search-results?search_paths%5B%5D=&query=${query}&submit=#results-111
-https://www.lpft.nhs.uk/search-results?search_paths%5B%5D=&query=${query}&file_type=&file_sort=&file_category=#main
-https://www.lhch.nhs.uk/search?tags=${query}
-https://www.uhliverpool.nhs.uk/search?query=${query}
-https://www.liverpoolwomens.nhs.uk/site-search/?search=${query}
-https://www.londonambulance.nhs.uk/?s=${query}
-https://www.lnwh.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.mtw.nhs.uk/?s=${query}
-https://mft.nhs.uk/?s=${query}
-https://www.medway.nhs.uk/search/?search=${query}
-https://www.merseywestlancs.nhs.uk/search?tags=${query}
-https://www.merseycare.nhs.uk/search?query=${query}
-https://www.mse.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.mcht.nhs.uk/search?query=${query}#search-anchor
-https://www.midyorks.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.mpft.nhs.uk/search?query=${query}
-https://www.mkuh.nhs.uk/?s=${query}
-https://www.moorfields.nhs.uk/search?input-autocomplete=${query}
-https://www.newcastle-hospitals.nhs.uk/?s=${query}
-https://www.nnuh.nhs.uk/?s=${query}&searchSiteSubmit=Search+site
-https://www.nsft.nhs.uk/search?term=${query}&search=Search&searchType=all#main-content
-https://www.norfolkcommunityhealthandcare.nhs.uk/search/?term=${query}&searchtype=all&search=Search
-https://www.nbt.nhs.uk/search?keywords=${query}
-https://www.ncic.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
-https://www.neas.nhs.uk/search?query=${query}#search-status
-https://www.nelft.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.northlondonmentalhealth.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.combined.nhs.uk/?s=${query}
-https://www.nth.nhs.uk/?s=${query}
-https://www.nwas.nhs.uk/?s=${query}
-https://www.nwangliaft.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.northamptongeneral.nhs.uk/Search.aspx?search_keywords=${query}
-https://www.nhft.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.northerncarealliance.nhs.uk/search?query=${query}
-https://www.nlg.nhs.uk/?s=${query}
-https://www.northumbria.nhs.uk/search?query=${query}#search-anchor
-https://www.nuh.nhs.uk/site-search/?term=${query}&searchtype=all&search=Search
-https://www.nottinghamshirehealthcare.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.oxfordhealth.nhs.uk/?s=${query}
-https://www.ouh.nhs.uk/search?query=${query}
-https://oxleas.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.penninecare.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
-https://www.porthosp.nhs.uk/search-results?query=${query}#search
-https://www.pah.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.qvh.nhs.uk/?s=${query}
-https://www.rjah.nhs.uk/Search?query=${query}
-https://www.therotherhamft.nhs.uk/search?search=${query}
-https://www.rdash.nhs.uk/?s=${query}&submit=Search
-https://www.royalberkshire.nhs.uk/search?q=${query}
-https://www.rbht.nhs.uk/search?query=${query}
-https://royalcornwallhospitals.nhs.uk/?s=${query}
-https://www.royaldevon.nhs.uk/search?q=${query}
-https://www.royalfree.nhs.uk/search?query=${query}#search
-https://www.rnoh.nhs.uk/search
-https://roh.nhs.uk/search?q=${query}
-https://www.royalpapworth.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
-https://www.royalsurrey.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.ruh.nhs.uk/zoom_search/RUH_AZ.asp?zoom_sort=0&zoom_query=${query}
-https://royalwolverhampton.nhs.uk/?s=${query}
-https://www.salisbury.nhs.uk/search?q=${query}
-https://www.swbh.nhs.uk/?s=${query}
-https://www.sheffieldchildrens.nhs.uk/?s=${query}&is_file=
-https://www.shsc.nhs.uk/search?keywords=${query}
-https://www.sth.nhs.uk/search/?q=${query}
-https://www.sfh-tr.nhs.uk/about-us/search?q=${query}
-https://www.sath.nhs.uk/?s=${query}
-https://www.shropscommunityhealth.nhs.uk/search
-https://hiowhealthcare.nhs.uk/search?search_paths%5B%5D=&query=${query}
-https://www.somersetft.nhs.uk/?s=${query}
-https://www.scas.nhs.uk/?s=${query}
-https://www.southtees.nhs.uk/?s=${query}
-https://www.stsft.nhs.uk/search-results?search_paths%5B%5D=&query=${query}&Search=
-https://www.swft.nhs.uk/search?query=${query}#search-status
-https://swlstg.nhs.uk/search?term=${query}&search=Search&searchType=all#main-content
-https://www.southwestyorkshire.nhs.uk/?s=${query}
-https://www.swast.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://so.merseywestlancs.nhs.uk/search?filter=01e69d80405fac0a46afbfc823e2b199&tags=${query}
-https://www.stgeorges.nhs.uk/?s=${query}
-https://www.stockport.nhs.uk/search
-https://www.sabp.nhs.uk/search-results?query=${query}#search
-https://www.sussexcommunity.nhs.uk/search?q=${query}
-https://www.sussexpartnership.nhs.uk/search?query=${query}#search-anchor
-https://www.tamesideandglossopicft.nhs.uk/search?query=${query}
-https://tavistockandportman.nhs.uk/?s=${query}
-https://www.tewv.nhs.uk/?s=${query}
-https://www.torbayandsouthdevon.nhs.uk/?s=${query}
-https://www.ulh.nhs.uk/search/?search=${query}
-https://www.uclh.nhs.uk/search?query=${query}#search
-https://www.uhs.nhs.uk/search?term=${query}
-https://www.uhb.nhs.uk/search-results/?indexname=uhb-search&search=${query}
-https://www.uhbw.nhs.uk/search/?q=${query}
-https://www.uhcw.nhs.uk/search/?q=${query}
-https://www.uhd.nhs.uk/component/search/?searchword=${query}
-https://www.uhdb.nhs.uk/search?term=${query}&search=Search&searchType=all#main-content
-https://www.uhleicester.nhs.uk/?s=${query}
-https://www.uhmb.nhs.uk/search-results?search_paths%5B%5D=&query=${query}#result-info
-https://www.plymouthhospitals.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.uhsussex.nhs.uk/?s=${query}
-https://www.walsallhealthcare.nhs.uk/?s=${query}
-https://www.thewaltoncentre.nhs.uk/search?term=${query}&search=Search&searchType=all
-https://www.whh.nhs.uk/search?query=${query}
-https://www.westhertshospitals.nhs.uk/search?query=${query}#search
-https://www.westlondon.nhs.uk/search?query=${query}
-https://www.wmas.nhs.uk/?s=${query}
-https://www.wsh.nhs.uk/search?term=${query}
-https://www.whittington.nhs.uk/search/?q=${query}
-https://www.wchc.nhs.uk/?s=${query}
-https://www.wuth.nhs.uk/site-search/?data=${query}
-https://www.worcsacute.nhs.uk/search/?_sf_s=${query}
-https://www.wwl.nhs.uk/search?tags=${query}
-https://www.wyevalley.nhs.uk/search-results.aspx?q=${query}
-https://www.yorkhospitals.nhs.uk/search-results/?search=${query}
-https://www.yas.nhs.uk/search?q=${query}
+        https://www.coch.nhs.uk/Search.aspx?search=${query}
+        https://www.cddft.nhs.uk/search?query=${query}
+        https://www.covwarkpt.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.croydonhealthservices.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.cntw.nhs.uk/?s=${query}
+        https://www.dgt.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
+        https://dchs.nhs.uk/search-results?search_paths%5B%5D=&query=${query}#search-results
+        https://www.derbyshirehealthcareft.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
+        https://www.dbth.nhs.uk/search/sex
+        https://www.dchft.nhs.uk/?s=${query}
+        https://www.dorsethealthcare.nhs.uk/search?query=${query}
+        https://www.enherts-tr.nhs.uk/?s=${query}
+        https://services.eastcheshire.nhs.uk/pulmonary-rehabilitation/search?search_paths%5B%5D=&query=${query}&site=
+        https://www.ekhuft.nhs.uk/search/?i=default&q=${query}
+        https://elht.nhs.uk/search-results?query=${query}#search-anchor
+        https://www.elft.nhs.uk/search?keywords=${query}&content_type=All&microsite=All&field_term_location=All&field_category=All&field_service_category=All&field_audience=All
+        https://www.emas.nhs.uk/search?query=${query}
+        https://www.eastamb.nhs.uk/search?q=${query}
+        https://www.esneft.nhs.uk/?s=${query}
+        https://www.esht.nhs.uk/?s=${query}
+        https://www.epsom-sthelier.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.eput.nhs.uk/?s=${query}
+        https://www.fhft.nhs.uk/search?query=${query}
+        https://www.gatesheadhealth.nhs.uk/?s=${query}
+        https://www.geh.nhs.uk/search?query=${query}
+        https://www.ghc.nhs.uk/search-results/?q=${query}
+        https://www.gloshospitals.nhs.uk/search/?query=${query}
+        https://www.gosh.nhs.uk/search/?query=${query}
+        https://www.gwh.nhs.uk/search-results/?search_field=${query}
+        https://www.gmmh.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.guysandstthomas.nhs.uk/search?query=${query}
+        https://hiowhealthcare.nhs.uk/search?query=${query}
+        https://www.hampshirehospitals.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
+        https://www.hdft.nhs.uk/?s=${query}
+        https://www.hacw.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.hct.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://thh.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.homerton.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.kingstonandrichmond.nhs.uk/search?query=${query}#search-status
+        https://www.hey.nhs.uk/?s=${query}
+        https://www.humber.nhs.uk/search?search=${query}
+        https://www.imperial.nhs.uk/search?keywords=${query}
+        https://www.iow.nhs.uk/search-results?query=${query}#search
+        https://www.kmpt.nhs.uk/search-results?keyword=${query}
+        https://www.kentcht.nhs.uk/?s=${query}
+        https://www.kgh.nhs.uk/advanced-search?term=${query}&search=Search&searchType=all
+        https://www.kch.nhs.uk/?s=${query}
+        https://www.kingstonandrichmond.nhs.uk/search?query=${query}#search-status
+        https://www.lscft.nhs.uk/search?query=${query}
+        https://www.lancsteachinghospitals.nhs.uk/search?tags=${query}
+        https://www.leedsandyorkpft.nhs.uk/search/?q=${query}
+        https://leedscommunityhealthcare.nhs.uk/?s=${query}
+        https://www.leedsth.nhs.uk/?s=${query}
+        https://www.leicspart.nhs.uk/?s=${query}
+        https://www.lewishamandgreenwich.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://lincolnshirecommunityhealthservices.nhs.uk/search-results?search_paths%5B%5D=&query=${query}&submit=#results-111
+        https://www.lpft.nhs.uk/search-results?search_paths%5B%5D=&query=${query}&file_type=&file_sort=&file_category=#main
+        https://www.lhch.nhs.uk/search?tags=${query}
+        https://www.uhliverpool.nhs.uk/search?query=${query}
+        https://www.liverpoolwomens.nhs.uk/site-search/?search=${query}
+        https://www.londonambulance.nhs.uk/?s=${query}
+        https://www.lnwh.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.mtw.nhs.uk/?s=${query}
+        https://mft.nhs.uk/?s=${query}
+        https://www.medway.nhs.uk/search/?search=${query}
+        https://www.merseywestlancs.nhs.uk/search?tags=${query}
+        https://www.merseycare.nhs.uk/search?query=${query}
+        https://www.mse.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.mcht.nhs.uk/search?query=${query}#search-anchor
+        https://www.midyorks.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.mpft.nhs.uk/search?query=${query}
+        https://www.mkuh.nhs.uk/?s=${query}
+        https://www.moorfields.nhs.uk/search?input-autocomplete=${query}
+        https://www.newcastle-hospitals.nhs.uk/?s=${query}
+        https://www.nnuh.nhs.uk/?s=${query}&searchSiteSubmit=Search+site
+        https://www.nsft.nhs.uk/search?term=${query}&search=Search&searchType=all#main-content
+        https://www.norfolkcommunityhealthandcare.nhs.uk/search/?term=${query}&searchtype=all&search=Search
+        https://www.nbt.nhs.uk/search?keywords=${query}
+        https://www.ncic.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
+        https://www.neas.nhs.uk/search?query=${query}#search-status
+        https://www.nelft.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.northlondonmentalhealth.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.combined.nhs.uk/?s=${query}
+        https://www.nth.nhs.uk/?s=${query}
+        https://www.nwas.nhs.uk/?s=${query}
+        https://www.nwangliaft.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.northamptongeneral.nhs.uk/Search.aspx?search_keywords=${query}
+        https://www.nhft.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.northerncarealliance.nhs.uk/search?query=${query}
+        https://www.nlg.nhs.uk/?s=${query}
+        https://www.northumbria.nhs.uk/search?query=${query}#search-anchor
+        https://www.nuh.nhs.uk/site-search/?term=${query}&searchtype=all&search=Search
+        https://www.nottinghamshirehealthcare.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.oxfordhealth.nhs.uk/?s=${query}
+        https://www.ouh.nhs.uk/search?query=${query}
+        https://oxleas.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.penninecare.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
+        https://www.porthosp.nhs.uk/search-results?query=${query}#search
+        https://www.pah.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.qvh.nhs.uk/?s=${query}
+        https://www.rjah.nhs.uk/Search?query=${query}
+        https://www.therotherhamft.nhs.uk/search?search=${query}
+        https://www.rdash.nhs.uk/?s=${query}&submit=Search
+        https://www.royalberkshire.nhs.uk/search?q=${query}
+        https://www.rbht.nhs.uk/search?query=${query}
+        https://royalcornwallhospitals.nhs.uk/?s=${query}
+        https://www.royaldevon.nhs.uk/search?q=${query}
+        https://www.royalfree.nhs.uk/search?query=${query}#search
+        https://www.rnoh.nhs.uk/search
+        https://roh.nhs.uk/search?q=${query}
+        https://www.royalpapworth.nhs.uk/search-results?search_paths%5B%5D=&query=${query}
+        https://www.royalsurrey.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.ruh.nhs.uk/zoom_search/RUH_AZ.asp?zoom_sort=0&zoom_query=${query}
+        https://royalwolverhampton.nhs.uk/?s=${query}
+        https://www.salisbury.nhs.uk/search?q=${query}
+        https://www.swbh.nhs.uk/?s=${query}
+        https://www.sheffieldchildrens.nhs.uk/?s=${query}&is_file=
+        https://www.shsc.nhs.uk/search?keywords=${query}
+        https://www.sth.nhs.uk/search/?q=${query}
+        https://www.sfh-tr.nhs.uk/about-us/search?q=${query}
+        https://www.sath.nhs.uk/?s=${query}
+        https://www.shropscommunityhealth.nhs.uk/search
+        https://hiowhealthcare.nhs.uk/search?search_paths%5B%5D=&query=${query}
+        https://www.somersetft.nhs.uk/?s=${query}
+        https://www.scas.nhs.uk/?s=${query}
+        https://www.southtees.nhs.uk/?s=${query}
+        https://www.stsft.nhs.uk/search-results?search_paths%5B%5D=&query=${query}&Search=
+        https://www.swft.nhs.uk/search?query=${query}#search-status
+        https://swlstg.nhs.uk/search?term=${query}&search=Search&searchType=all#main-content
+        https://www.southwestyorkshire.nhs.uk/?s=${query}
+        https://www.swast.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://so.merseywestlancs.nhs.uk/search?filter=01e69d80405fac0a46afbfc823e2b199&tags=${query}
+        https://www.stgeorges.nhs.uk/?s=${query}
+        https://www.stockport.nhs.uk/search
+        https://www.sabp.nhs.uk/search-results?query=${query}#search
+        https://www.sussexcommunity.nhs.uk/search?q=${query}
+        https://www.sussexpartnership.nhs.uk/search?query=${query}#search-anchor
+        https://www.tamesideandglossopicft.nhs.uk/search?query=${query}
+        https://tavistockandportman.nhs.uk/?s=${query}
+        https://www.tewv.nhs.uk/?s=${query}
+        https://www.torbayandsouthdevon.nhs.uk/?s=${query}
+        https://www.ulh.nhs.uk/search/?search=${query}
+        https://www.uclh.nhs.uk/search?query=${query}#search
+        https://www.uhs.nhs.uk/search?term=${query}
+        https://www.uhb.nhs.uk/search-results/?indexname=uhb-search&search=${query}
+        https://www.uhbw.nhs.uk/search/?q=${query}
+        https://www.uhcw.nhs.uk/search/?q=${query}
+        https://www.uhd.nhs.uk/component/search/?searchword=${query}
+        https://www.uhdb.nhs.uk/search?term=${query}&search=Search&searchType=all#main-content
+        https://www.uhleicester.nhs.uk/?s=${query}
+        https://www.uhmb.nhs.uk/search-results?search_paths%5B%5D=&query=${query}#result-info
+        https://www.plymouthhospitals.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.uhsussex.nhs.uk/?s=${query}
+        https://www.walsallhealthcare.nhs.uk/?s=${query}
+        https://www.thewaltoncentre.nhs.uk/search?term=${query}&search=Search&searchType=all
+        https://www.whh.nhs.uk/search?query=${query}
+        https://www.westhertshospitals.nhs.uk/search?query=${query}#search
+        https://www.westlondon.nhs.uk/search?query=${query}
+        https://www.wmas.nhs.uk/?s=${query}
+        https://www.wsh.nhs.uk/search?term=${query}
+        https://www.whittington.nhs.uk/search/?q=${query}
+        https://www.wchc.nhs.uk/?s=${query}
+        https://www.wuth.nhs.uk/site-search/?data=${query}
+        https://www.worcsacute.nhs.uk/search/?_sf_s=${query}
+        https://www.wwl.nhs.uk/search?tags=${query}
+        https://www.wyevalley.nhs.uk/search-results.aspx?q=${query}
+        https://www.yorkhospitals.nhs.uk/search-results/?search=${query}
+        https://www.yas.nhs.uk/search?q=${query}
     </template>
 </body>
 
