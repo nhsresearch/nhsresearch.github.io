@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Launcher - NHS Trust Research</title>
+    <script type="module">
+        const go = document.querySelector("#launch");
+
+        const terms = document.querySelector("#terms");
+        const searchName = document.querySelector("#search-name");
+        const searchURL = document.querySelector("#search-url");
+
+        const t = localStorage.getItem("t") ?? undefined;
+        if (t !== undefined) {
+            terms.value = t;
+        }
+        const sn = localStorage.getItem("sn") ?? undefined;
+        if (sn !== undefined) {
+            searchName.value = sn;
+        }
+        const su = localStorage.getItem("su") ?? undefined;
+        if (su !== undefined) {
+            searchURL.value = su;
+        }
+
+        const update = (e) => {
+            const t = terms.value;
+            const sn = searchName.value;
+            const su = searchURL.value;
+
+            localStorage.setItem("t", t);
+            localStorage.setItem("sn", sn);
+            localStorage.setItem("su", su);
+
+            const url = new URL("index.htm", document.location);
+            const params = url.searchParams;
+            params.set("terms", t)
+            const name = sn.trim();
+            if (name !== "") {
+                params.set(name + "-engine", su.trim());
+            }
+            params.set("settings", "{}");
+
+            go.href = url;
+        };
+
+        terms.addEventListener("input", update);
+        searchName.addEventListener("input", update);
+        searchURL.addEventListener("input", update);
+
+        update();
+    </script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+                Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            padding: 0 15px;
+            max-width: 650px;
+            font-size: 115%;
+            line-height: 1.4;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        div {
+            margin-bottom: 0.5rem;
+        }
+
+        input {
+            width: 100%;
+        }
+
+        #launch {
+            font-size: 1.6rem;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+    <h1>NHS Trust Research Launcher</h1>
+    <div>
+        <h2>TERMS</h2>
+        <input id="terms" type="text" value="">
+        <p>Comma-separated keywords for your searches</p>
+    </div>
+    <div>
+        <h2>CUSTOM SEARCH ENGINE</h2>
+        <h3>Name</h3>
+        <input id="search-name" type="text" value="">
+        <h3>URL</h3>
+        <input id="search-url" type="text" value="">
+        <p>${query} to add keywords</p>
+        <p>${shortName}, ${name}, ${id}, and ${website} to add trust-specific values</p>
+    </div>
+    <div><a id="launch" href="index.htm" target="_blank">LAUNCH</a></div>
+</body>
+
+</html>
