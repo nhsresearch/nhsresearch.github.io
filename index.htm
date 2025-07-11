@@ -313,7 +313,10 @@
         }
 
         function listTrusts() {
-            document.body.innerHTML = "<h1>ALL TRUSTS</h1>";
+            const template = document.querySelector("#all-trusts-template") ?? undefined;    
+            const clone = template.content.cloneNode(true);
+
+            const content = clone.querySelector("#content");
             for (const trust of trusts) {
                 const newParams = new URLSearchParams(params);
                 newParams.set("id", trust.id);
@@ -327,8 +330,10 @@
                     e.classList.add("merged");
                 }
                 e.append(a);
-                document.body.append(e);
+                content.append(e);
             }
+
+            document.body.replaceChildren(clone);
         }
 
         let trust = getTrust(id);
@@ -660,6 +665,13 @@
     <div> </div>
     <div id="environment-share"><a>Share Customisations ⇧</a></div>
     <div id="environment-save"><a>Keep Customisations ⇩</a></div>
+
+    <template id="all-trusts-template">
+        <h1>ALL TRUSTS</h1>
+        <div id="content"></div>
+        <div> </div>
+        <div><a href="launcher.htm">← LAUNCHER</a></div>
+    </template>
 
     <template id="query-template">
         <div><a></a></div>
