@@ -455,6 +455,9 @@
                     for (const property of ["id", "name", "shortName", "website"]) {
                         text = text.replaceAll("${" + property + "}", encodeURIComponent(this.current[property]));
                     }
+
+                    text = text.replaceAll("${host}", encodeURIComponent(getHost(this.current.website)));
+
                     return text;
                 };
 
