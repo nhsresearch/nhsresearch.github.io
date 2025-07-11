@@ -89,6 +89,15 @@
 
         #launch {
             font-size: 1.6rem;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border-color: blue;
+            border-style: solid;
+            border-width: 0.3rem;
+        }
+
+        .comments {
+            color: gray;
         }
 
         
@@ -100,7 +109,7 @@
     <div>
         <h2>TERMS</h2>
         <input id="terms" type="text" value="">
-        <p>Comma-separated keywords for your searches</p>
+        <p class="comments">Comma-separated keywords for your searches</p>
     </div>
     <div>
         <h2>CUSTOM SEARCH ENGINE</h2>
@@ -108,10 +117,15 @@
         <input id="search-name" type="text" value="">
         <h3>URL</h3>
         <input id="search-url" type="text" value="">
-        <p>${query} to add keywords</p>
-        <p>${shortName}, ${name}, ${id}, and ${website} to add trust-specific values</p>
+        <p class="comments">${query} to add keywords</p>
+        <p class="comments">${shortName}, ${name}, ${id}, and ${website} to add trust-specific values</p>
     </div>
+    <div> </div>
     <div><a id="launch" href="index.htm" target="_blank">LAUNCH</a></div>
+    <div> </div>
+    <div id="comments" class="comments">
+        <p>Save a bookmark or share the launched page. All your settings will persist.</p>
+    </div>
 </body>
 
 </html>
