@@ -339,7 +339,9 @@
         }
 
         if (trust.id !== id) {
-            document.location = `?id=${trust.id}`;
+            const newParams = new URLSearchParams(params);
+            newParams.set("id", trust.id);
+            document.location = `?${newParams}`;
         }
 
         class App {
