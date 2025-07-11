@@ -469,11 +469,14 @@
                     const engineElement = document.createElement("div");
                     engineElement.dataset.engine = engine.id;
 
+                    const engineTitleElement = document.createElement("div");
+                    engineTitleElement.innerText = engine.name;
+
                     const engineQueriesElement = document.createElement("div");
                     engineQueriesElement.id = setting;
                     engineQueriesElement.classList.add("queries");
 
-                    engineElement.append(`${engine.name}`, engineQueriesElement);
+                    engineElement.append(engineTitleElement, engineQueriesElement);
                     
                     const searchURL = realize(engine.url);
                     console.log(searchURL);
