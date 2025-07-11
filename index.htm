@@ -129,7 +129,7 @@
 
             const engineKeys = Object.keys(parameters).filter(k => k.endsWith("-engine")).map(k => removeEnd(k, "-engine"));
             const engines = engineKeys.map(key => loadEngine(key));
-            
+
             settings.engines = settings.engines ?? {};
             for (const engine of engines) {
                 settings.engines[engine.id] = engine;
@@ -313,7 +313,7 @@
         }
 
         function listTrusts() {
-            const template = document.querySelector("#all-trusts-template") ?? undefined;    
+            const template = document.querySelector("#all-trusts-template") ?? undefined;
             const clone = template.content.cloneNode(true);
 
             const content = clone.querySelector("#content");
@@ -484,7 +484,7 @@
                     engineQueriesElement.classList.add("queries");
 
                     engineElement.append(engineTitleElement, engineQueriesElement);
-                    
+
                     const searchURL = realize(engine.url);
                     console.log(searchURL);
 
@@ -688,7 +688,7 @@
         "wikipedia": "https://en.wikipedia.org/wiki/NHS_England",
         "cqc": "https://www.cqc.org.uk/search/all?filters[]=services:service-provider",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_england",
-        "search" : "?s=${query}"
+        "search": "?s=${query}"
         },
         {
         "name": "Airedale NHS Foundation Trust",
@@ -699,7 +699,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Airedale_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RCF",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/airedale_nhs_foundation_trust",
-        "search" : "?s=${query}"
+        "search": "?s=${query}",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Alder Hey Children’s NHS Foundation Trust",
@@ -710,7 +714,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Alder_Hey_Children%27s_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RBS",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/alder_hey_childrens_nhs_foundation_trust",
-        "search" : "?s=${query}"
+        "search": "?s=${query}",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Ashford and St Peter’s Hospitals NHS Foundation Trust",
@@ -721,7 +729,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Ashford_and_St_Peter%27s_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RTK",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/ashford_and_st_peters_hospitals_nhs_foundation_trust",
-        "search" : "results?q=${query}"
+        "search": "results?q=${query}",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Avon and Wiltshire Mental Health Partnership NHS Trust",
@@ -731,7 +743,10 @@
         "id": "awp",
         "wikipedia": "https://en.wikipedia.org/wiki/Avon_and_Wiltshire_Mental_Health_Partnership_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RVN",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/avon_and_wiltshire_mental_health_partnership_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/avon_and_wiltshire_mental_health_partnership_nhs_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Barking, Havering and Redbridge University Hospitals NHS Trust",
@@ -744,7 +759,11 @@
         "cqc": "https://www.cqc.org.uk/provider/RF4",
         "whatdotheyknow":
         "https://www.whatdotheyknow.com/body/barking_havering_and_redbridge_university_hospitals_nhs_trust",
-        "search" : "search?term=${query}"
+        "search": "search?term=${query}",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Barnet Enfield and Haringey Mental Health NHS Trust",
@@ -764,7 +783,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Barnsley_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RFF",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/barnsley_hospital_nhs_foundation_trust",
-        "search" : "search?search=${query}"
+        "search": "search?search=${query}",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Barts Health NHS Trust",
@@ -775,7 +798,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Barts_Health_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/R1H",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/barts_health_nhs_trust",
-        "search" : "search?term=${query}"
+        "search": "search?term=${query}",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Bedfordshire Hospitals NHS Foundation Trust",
@@ -790,7 +817,11 @@
         "website": "https://www.bedfordshirehospitals.nhs.uk/",
         "cqc": "https://www.cqc.org.uk/provider/RC9",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/bedfordshire_hospitals_nhs_foundation_trust",
-        "search" : "?s=${query}"
+        "search": "?s=${query}",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Berkshire Healthcare NHS Foundation Trust",
@@ -801,7 +832,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Berkshire_Healthcare_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWX",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/berkshire_healthcare_nhs_foundation_trust",
-        "search" : "search-results/?search_field=${query}"
+        "search": "search-results/?search_field=${query}",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Birmingham and Solihull Mental Health NHS Foundation Trust",
@@ -814,7 +849,10 @@
         "cqc": "https://www.cqc.org.uk/provider/RXT",
         "whatdotheyknow":
         "https://www.whatdotheyknow.com/body/birmingham_and_solihull_mental_health_nhs_foundation_trust",
-        "search" : "?s=${query}"
+        "search": "?s=${query}",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Birmingham Community Healthcare NHS Foundation Trust",
@@ -825,7 +863,10 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Birmingham_Community_Healthcare_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RYW",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/birmingham_community_healthcare_nhs_foundation_trust",
-        "search" : "search?term=${query}"
+        "search": "search?term=${query}",
+        "tags": [
+        "community_services_trust"
+        ]
         },
         {
         "name": "Birmingham Women’s and Children’s NHS Foundation Trust",
@@ -836,7 +877,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Birmingham_Women%27s_and_Children%27s_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RQ3",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/birmingham_womens_and_childrens_nhs_foundation_trust",
-        "search" : "search?term=${query}"
+        "search": "search?term=${query}",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Black Country Healthcare NHS Foundation Trust",
@@ -850,7 +895,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Black_Country_Healthcare_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/TAJ",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/black_country_healthcare_nhs_foundation_trust",
-        "search" : "search-results?query=${query}"
+        "search": "search-results?query=${query}",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Blackpool Teaching Hospitals NHS Foundation Trust",
@@ -864,7 +913,11 @@
         ],
         "wikipedia": "https://en.wikipedia.org/wiki/Blackpool_Teaching_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXL",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/blackpool_teaching_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/blackpool_teaching_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Bolton NHS Foundation Trust",
@@ -874,7 +927,11 @@
         "id": "boltonft",
         "wikipedia": "https://en.wikipedia.org/wiki/Bolton_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RMC",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/bolton_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/bolton_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Bradford District Care NHS Foundation Trust",
@@ -885,7 +942,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Bradford_District_Care_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/TAD",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/bradford_district_care_nhs_foundation_trust",
-        "search" : "search?searchquery=${query}"
+        "search": "search?searchquery=${query}",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Bradford Teaching Hospitals NHS Foundation Trust",
@@ -896,7 +957,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Bradford_Teaching_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RAE",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/bradford_teaching_hospitals_nhs_foundation_trust",
-        "search" : "search?q=${query}"
+        "search": "search?q=${query}",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Bridgewater Community Healthcare NHS Foundation Trust",
@@ -907,7 +972,10 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Bridgewater_Community_Healthcare",
         "cqc": "https://www.cqc.org.uk/provider/RY2",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/bridgewater_community_healthcare_nhs_foundation_trust",
-        "search" : "?s=${query}"
+        "search": "?s=${query}",
+        "tags": [
+        "community_services_trust"
+        ]
         },
         {
         "name": "Buckinghamshire Healthcare NHS Trust",
@@ -918,7 +986,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Buckinghamshire_Healthcare_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXQ",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/buckinghamshire_healthcare_nhs_trust",
-        "search" : "?s=${query}"
+        "search": "?s=${query}",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Calderdale and Huddersfield NHS Foundation Trust",
@@ -929,7 +1001,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Calderdale_and_Huddersfield_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWY",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/calderdale_and_huddersfield_nhs_foundation_trust",
-        "search": "resources/search?tx_kesearch_pi1%5Bpage%5D=1&tx_kesearch_pi1%5Bsword%5D=${query}"
+        "search": "resources/search?tx_kesearch_pi1%5Bpage%5D=1&tx_kesearch_pi1%5Bsword%5D=${query}",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Cambridge University Hospitals NHS Foundation Trust",
@@ -940,7 +1016,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Cambridge_University_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RGT",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/cambridge_university_hospitals_nhs_foundation_trust",
-        "search" : "search/?query=${query}"
+        "search": "search/?query=${query}",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Cambridgeshire and Peterborough NHS Foundation Trust",
@@ -951,7 +1031,10 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Cambridgeshire_and_Peterborough_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RT1",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/cambridgeshire_and_peterborough_nhs_foundation_trust",
-        "search" : "search?term=${query}"
+        "search": "search?term=${query}",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Cambridgeshire Community Services NHS Trust",
@@ -962,7 +1045,10 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Cambridgeshire_Community_Services_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RYV",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/cambridgeshire_community_services_nhs_trust",
-        "search" : "search/?q=${query}"
+        "search": "search/?q=${query}",
+        "tags": [
+        "community_services_trust"
+        ]
         },
         {
         "name": "Central and North West London NHS Foundation Trust",
@@ -973,7 +1059,10 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Central_and_North_West_London_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RV3",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/central_and_north_west_london_nhs_foundation_trust",
-        "search" : "search?dynamic=false&search=1&keywords=${query}"
+        "search": "search?dynamic=false&search=1&keywords=${query}",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Central London Community Healthcare NHS Trust",
@@ -984,7 +1073,10 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Central_London_Community_Healthcare_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RYX",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/central_london_community_healthcare_nhs_trust",
-        "search" : "search-results?query=${query}"
+        "search": "search-results?query=${query}",
+        "tags": [
+        "community_services_trust"
+        ]
         },
         {
         "name": "Chelsea and Westminster Hospital NHS Foundation Trust",
@@ -995,7 +1087,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Chelsea_and_Westminster_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RQM",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/chelsea_and_westminster_hospital_nhs_foundation_trust",
-        "search" : "search?SearchableText=${query}"
+        "search": "search?SearchableText=${query}",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Cheshire and Wirral Partnership NHS Foundation Trust",
@@ -1005,7 +1101,11 @@
         "id": "cwp",
         "wikipedia": "https://en.wikipedia.org/wiki/Cheshire_and_Wirral_Partnership_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXA",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/cheshire_and_wirral_partnership_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/cheshire_and_wirral_partnership_nhs_foundation_trust",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Chesterfield Royal Hospital NHS Foundation Trust",
@@ -1015,7 +1115,11 @@
         "id": "chesterfieldroyal",
         "wikipedia": "https://en.wikipedia.org/wiki/Chesterfield_Royal_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RFS",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/chesterfield_royal_hospital_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/chesterfield_royal_hospital_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "The Christie NHS Foundation Trust",
@@ -1026,7 +1130,10 @@
         "wikipedia": "https://en.wikipedia.org/wiki/The_Christie_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RBV",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_christie_hospital",
-        "search" : "about-us/search-the-christie-website?searchterm=${query}"
+        "search": "about-us/search-the-christie-website?searchterm=${query}",
+        "tags": [
+        "hospital_trust"
+        ]
         },
         {
         "name": "The Clatterbridge Cancer Centre NHS Foundation Trust",
@@ -1036,7 +1143,10 @@
         "id": "clatterbridgecc",
         "wikipedia": "https://en.wikipedia.org/wiki/Clatterbridge_Cancer_Centre_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/REN",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_clatterbridge_cancer_centre_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_clatterbridge_cancer_centre_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust"
+        ]
         },
         {
         "name": "Cornwall Partnership NHS Foundation Trust",
@@ -1047,7 +1157,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Cornwall_Partnership_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RJ8",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/cornwall_partnership_nhs_foundation_trust",
-        "search" : "search?term=${query}"
+        "search": "search?term=${query}",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Countess of Chester Hospital NHS Foundation Trust",
@@ -1057,7 +1171,11 @@
         "id": "coch",
         "wikipedia": "https://en.wikipedia.org/wiki/Countess_of_Chester_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RJR",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/countess_of_chester_hospital_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/countess_of_chester_hospital_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "County Durham and Darlington NHS Foundation Trust",
@@ -1067,7 +1185,11 @@
         "id": "cddft",
         "wikipedia": "https://en.wikipedia.org/wiki/County_Durham_and_Darlington_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXP",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/county_durham_and_darlington_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/county_durham_and_darlington_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Coventry and Warwickshire Partnership NHS Trust",
@@ -1077,7 +1199,10 @@
         "id": "covwarkpt",
         "wikipedia": "https://en.wikipedia.org/wiki/Coventry_and_Warwickshire_Partnership_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RYG",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/coventry_and_warwickshire_partnership_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/coventry_and_warwickshire_partnership_nhs_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Croydon Health Services NHS Trust",
@@ -1090,7 +1215,11 @@
         "maydayhospital"
         ],
         "cqc": "https://www.cqc.org.uk/provider/RJ6",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/croydon_health_services_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/croydon_health_services_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Cumbria, Northumberland, Tyne and Wear NHS Foundation Trust",
@@ -1104,7 +1233,10 @@
         ],
         "cqc": "https://www.cqc.org.uk/provider/RX4",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/cumbria_northumberland_tyne_and_wear_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/cumbria_northumberland_tyne_and_wear_nhs_foundation_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Dartford and Gravesham NHS Trust",
@@ -1117,7 +1249,11 @@
         "dvh"
         ],
         "cqc": "https://www.cqc.org.uk/provider/RN7",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/dartford_and_gravesham_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/dartford_and_gravesham_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Derbyshire Community Health Services NHS Foundation Trust",
@@ -1128,7 +1264,10 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Derbyshire_Community_Health_Services_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RY8",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/derbyshire_community_health_services_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/derbyshire_community_health_services_nhs_foundation_trust",
+        "tags": [
+        "community_services_trust"
+        ]
         },
         {
         "name": "Derbyshire Healthcare NHS Foundation Trust",
@@ -1138,7 +1277,10 @@
         "id": "derbyshirehealthcareft",
         "wikipedia": "https://en.wikipedia.org/wiki/Derbyshire_Healthcare_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXM",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/derbyshire_healthcare_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/derbyshire_healthcare_nhs_foundation_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Devon Partnership NHS Trust",
@@ -1148,7 +1290,10 @@
         "id": "dpt",
         "wikipedia": "https://en.wikipedia.org/wiki/Devon_Partnership_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWV",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/devon_partnership_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/devon_partnership_nhs_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Doncaster and Bassetlaw Teaching Hospitals NHS Foundation Trust",
@@ -1160,7 +1305,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Doncaster_and_Bassetlaw_Teaching_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RP5",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/doncaster_and_bassetlaw_teaching_hospitals_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/doncaster_and_bassetlaw_teaching_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Dorset County Hospital NHS Foundation Trust",
@@ -1170,7 +1319,11 @@
         "id": "dchft",
         "wikipedia": "https://en.wikipedia.org/wiki/Dorset_County_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RBD",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/dorset_county_hospital_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/dorset_county_hospital_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Dorset Healthcare University NHS Foundation Trust",
@@ -1180,7 +1333,10 @@
         "id": "dorsethealthcare",
         "wikipedia": "https://en.wikipedia.org/wiki/Dorset_HealthCare_University_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RDY",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/dorset_healthcare_university_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/dorset_healthcare_university_nhs_foundation_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "The Dudley Group NHS Foundation Trust",
@@ -1189,7 +1345,11 @@
         "website": "https://www.dgoh.nhs.uk/",
         "id": "dgoh",
         "cqc": "https://www.cqc.org.uk/provider/RNA",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_dudley_group_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_dudley_group_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Dudley Integrated Health and Care NHS Trust",
@@ -1198,7 +1358,10 @@
         "website": "https://www.dwmh.nhs.uk/",
         "id": "dwmh",
         "cqc": "https://www.cqc.org.uk/provider/RYK",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/dihc"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/dihc",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "East and North Hertfordshire NHS Trust",
@@ -1209,7 +1372,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/East_and_North_Hertfordshire_Teaching_NHS_Trust",
         "wikipediaName": "East and North Hertfordshire Teaching NHS Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWH",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_and_north_hertfordshire_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_and_north_hertfordshire_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "East Cheshire NHS Trust",
@@ -1219,7 +1386,11 @@
         "id": "eastcheshire",
         "wikipedia": "https://en.wikipedia.org/wiki/East_Cheshire_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RJN",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_cheshire_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_cheshire_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "East Kent Hospitals University NHS Foundation Trust",
@@ -1229,7 +1400,11 @@
         "id": "ekhuft",
         "wikipedia": "https://en.wikipedia.org/wiki/East_Kent_Hospitals_University_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RVV",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_kent_hospitals_university_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_kent_hospitals_university_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "East Lancashire Hospitals NHS Trust",
@@ -1239,7 +1414,11 @@
         "id": "elht",
         "wikipedia": "https://en.wikipedia.org/wiki/East_Lancashire_Hospitals_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXR",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_lancashire_hospitals_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_lancashire_hospitals_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "East London NHS Foundation Trust",
@@ -1249,7 +1428,11 @@
         "id": "elft",
         "wikipedia": "https://en.wikipedia.org/wiki/East_London_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWK",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_london_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_london_nhs_foundation_trust",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "East Midlands Ambulance Service NHS Trust",
@@ -1259,7 +1442,10 @@
         "id": "emas",
         "wikipedia": "https://en.wikipedia.org/wiki/East_Midlands_Ambulance_Service",
         "cqc": "https://www.cqc.org.uk/provider/RX9",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_midlands_ambulance_service_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_midlands_ambulance_service_nhs_trust",
+        "tags": [
+        "ambulance_trust"
+        ]
         },
         {
         "name": "East of England Ambulance Service NHS Trust",
@@ -1269,7 +1455,10 @@
         "id": "eastamb",
         "wikipedia": "https://en.wikipedia.org/wiki/East_of_England_Ambulance_Service",
         "cqc": "https://www.cqc.org.uk/provider/RYC",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_of_england_ambulance_service_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_of_england_ambulance_service_nhs_trust",
+        "tags": [
+        "ambulance_trust"
+        ]
         },
         {
         "name": "East Suffolk and North Essex NHS Foundation Trust",
@@ -1279,7 +1468,11 @@
         "id": "esneft",
         "wikipedia": "https://en.wikipedia.org/wiki/East_Suffolk_and_North_Essex_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RDE",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_suffolk_and_north_essex_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_suffolk_and_north_essex_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "East Sussex Healthcare NHS Trust",
@@ -1289,7 +1482,11 @@
         "id": "esht",
         "wikipedia": "https://en.wikipedia.org/wiki/East_Sussex_Healthcare_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXC",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_sussex_healthcare_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_sussex_healthcare_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Epsom and St Helier University Hospitals NHS Trust",
@@ -1299,7 +1496,11 @@
         "id": "epsom-sthelier",
         "wikipedia": "https://en.wikipedia.org/wiki/Epsom_and_St_Helier_University_Hospitals_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RVR",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/epsom_and_st_helier_university_hospitals_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/epsom_and_st_helier_university_hospitals_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Essex Partnership University NHS Foundation Trust",
@@ -1309,7 +1510,11 @@
         "id": "eput",
         "wikipedia": "https://en.wikipedia.org/wiki/Essex_Partnership_University_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/R1L",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/eput"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/eput",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Frimley Health NHS Foundation Trust",
@@ -1319,7 +1524,11 @@
         "id": "fhft",
         "wikipedia": "https://en.wikipedia.org/wiki/Frimley_Health_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RDU",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/frimley_health_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/frimley_health_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Gateshead Health NHS Foundation Trust",
@@ -1329,7 +1538,11 @@
         "id": "qegateshead",
         "wikipedia": "https://en.wikipedia.org/wiki/Gateshead_Health_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RR7",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/gateshead_health_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/gateshead_health_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "George Eliot Hospital NHS Trust",
@@ -1339,7 +1552,11 @@
         "id": "geh",
         "wikipedia": "https://en.wikipedia.org/wiki/George_Eliot_Hospital_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RLT",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/george_eliot_hospital_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/george_eliot_hospital_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Gloucestershire Health and Care NHS Foundation Trust",
@@ -1352,7 +1569,10 @@
         "id": "ghc",
         "website": "https://ghc.nhs.uk/",
         "cqc": "https://www.cqc.org.uk/provider/RTQ",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/ghc"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/ghc",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Gloucestershire Hospitals NHS Foundation Trust",
@@ -1362,7 +1582,11 @@
         "id": "gloshospitals",
         "wikipedia": "https://en.wikipedia.org/wiki/Gloucestershire_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RTE",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/gloucestershire_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/gloucestershire_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Great Ormond Street Hospital For Children NHS Foundation Trust",
@@ -1374,7 +1598,10 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Great_Ormond_Street_Hospital_for_Children_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RP4",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/great_ormond_street_hospital_for_children_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/great_ormond_street_hospital_for_children_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust"
+        ]
         },
         {
         "name": "Great Western Hospitals NHS Foundation Trust",
@@ -1384,7 +1611,11 @@
         "id": "gwh",
         "wikipedia": "https://en.wikipedia.org/wiki/Great_Western_Hospital",
         "cqc": "https://www.cqc.org.uk/provider/RN3",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/great_western_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/great_western_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Greater Manchester Mental Health NHS Foundation Trust",
@@ -1397,7 +1628,10 @@
         ],
         "wikipedia": "https://en.wikipedia.org/wiki/Greater_Manchester_Mental_Health_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXV",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/gmmh"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/gmmh",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Guy’s and St Thomas’ NHS Foundation Trust",
@@ -1407,7 +1641,11 @@
         "id": "guysandstthomas",
         "wikipedia": "https://en.wikipedia.org/wiki/Guy%27s_and_St_Thomas%27_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RJ1",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/guys_and_st_thomas_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/guys_and_st_thomas_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Hampshire and Isle of Wight Healthcare NHS Foundation Trust",
@@ -1421,7 +1659,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Hampshire_and_Isle_of_Wight_Healthcare_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RW1",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/hampshire_and_isle_of_wight_healthcare_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/hampshire_and_isle_of_wight_healthcare_nhs_foundation_trust",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Hampshire Hospitals NHS Foundation Trust",
@@ -1431,7 +1673,11 @@
         "id": "hampshirehospitals",
         "wikipedia": "https://en.wikipedia.org/wiki/Hampshire_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RN5",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/hampshire_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/hampshire_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Harrogate and District NHS Foundation Trust",
@@ -1441,7 +1687,11 @@
         "id": "hdft",
         "wikipedia": "https://en.wikipedia.org/wiki/Harrogate_and_District_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RCD",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/harrogate_and_district_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/harrogate_and_district_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Herefordshire and Worcestershire Health and Care NHS Trust",
@@ -1452,7 +1702,10 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Herefordshire_and_Worcestershire_Health_and_Care_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/R1A",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/herefordshire_and_worcestershire_health_and_care_nhs_trust"
+        "https://www.whatdotheyknow.com/body/herefordshire_and_worcestershire_health_and_care_nhs_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Hertfordshire Community NHS Trust",
@@ -1462,7 +1715,10 @@
         "id": "hct",
         "wikipedia": "https://en.wikipedia.org/wiki/Hertfordshire_Community_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RY4",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/hertfordshire_community_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/hertfordshire_community_nhs_trust",
+        "tags": [
+        "community_services_trust"
+        ]
         },
         {
         "name": "Hertfordshire Partnership University NHS Foundation Trust",
@@ -1473,7 +1729,10 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Hertfordshire_Partnership_University_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWR",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/hertfordshire_partnership_university_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/hertfordshire_partnership_university_nhs_foundation_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "The Hillingdon Hospitals NHS Foundation Trust",
@@ -1483,7 +1742,11 @@
         "id": "thh",
         "wikipedia": "https://en.wikipedia.org/wiki/The_Hillingdon_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RAS",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_hillingdon_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_hillingdon_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Homerton Healthcare NHS Foundation Trust",
@@ -1493,7 +1756,11 @@
         "id": "homerton",
         "wikipedia": "https://en.wikipedia.org/wiki/Homerton_Healthcare_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RQX",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/homerton_healthcare_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/homerton_healthcare_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Hounslow and Richmond Community Healthcare NHS Trust",
@@ -1502,7 +1769,10 @@
         "website": "https://www.hrch.nhs.uk/",
         "id": "hrch",
         "wikipedia": "https://en.wikipedia.org/wiki/Hounslow_and_Richmond_Community_Healthcare_NHS_Trust",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/hounslow_and_richmond_community_healthcare_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/hounslow_and_richmond_community_healthcare_nhs_trust",
+        "tags": [
+        "community_services_trust"
+        ]
         },
         {
         "name": "Hull University Teaching Hospitals NHS Trust",
@@ -1512,7 +1782,11 @@
         "id": "hey",
         "wikipedia": "https://en.wikipedia.org/wiki/Hull_University_Teaching_Hospitals_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWA",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/hull_university_teaching_hospitals_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/hull_university_teaching_hospitals_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Humber Teaching NHS Foundation Trust",
@@ -1522,7 +1796,11 @@
         "id": "humber",
         "wikipedia": "https://en.wikipedia.org/wiki/Humber_Teaching_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RV9",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/humber_teaching_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/humber_teaching_nhs_foundation_trust",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Imperial College Healthcare NHS Trust",
@@ -1532,7 +1810,11 @@
         "id": "imperial",
         "wikipedia": "https://en.wikipedia.org/wiki/Imperial_College_Healthcare_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RYJ",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/imperial_college_healthcare_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/imperial_college_healthcare_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Isle of Wight NHS Trust",
@@ -1542,7 +1824,11 @@
         "id": "iow",
         "wikipedia": "https://en.wikipedia.org/wiki/Isle_of_Wight_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/R1F",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/isle_of_wight_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/isle_of_wight_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "James Paget University Hospitals NHS Foundation Trust",
@@ -1552,7 +1838,11 @@
         "id": "jpaget",
         "wikipedia": "https://en.wikipedia.org/wiki/James_Paget_University_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RGP",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/james_paget_university_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/james_paget_university_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Kent and Medway NHS and Social Care Partnership Trust",
@@ -1562,7 +1852,10 @@
         "id": "kmpt",
         "wikipedia": "https://en.wikipedia.org/wiki/Kent_and_Medway_NHS_and_Social_Care_Partnership_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXY",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/kent_and_medway_nhs_and_social_care_partnership_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/kent_and_medway_nhs_and_social_care_partnership_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Kent Community Health NHS Foundation Trust",
@@ -1572,7 +1865,10 @@
         "id": "kentcht",
         "wikipedia": "https://en.wikipedia.org/wiki/Kent_Community_Health_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RYY",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/kent_community_health_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/kent_community_health_nhs_foundation_trust",
+        "tags": [
+        "community_services_trust"
+        ]
         },
         {
         "name": "Kettering General Hospital NHS Foundation Trust",
@@ -1582,7 +1878,11 @@
         "id": "kgh",
         "wikipedia": "https://en.wikipedia.org/wiki/Kettering_General_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RNQ",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/kettering_general_hospital_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/kettering_general_hospital_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "King’s College Hospital NHS Foundation Trust",
@@ -1592,7 +1892,11 @@
         "id": "kch",
         "wikipedia": "https://en.wikipedia.org/wiki/King%27s_College_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RJZ",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/kings_college_hospital_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/kings_college_hospital_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Kingston and Richmond NHS Foundation Trust",
@@ -1602,7 +1906,11 @@
         "id": "kingstonhospital",
         "wikipedia": "https://en.wikipedia.org/wiki/Kingston_and_Richmond_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RAX",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/kingston_and_richmond_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/kingston_and_richmond_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Lancashire and South Cumbria NHS Foundation Trust",
@@ -1624,7 +1932,11 @@
         "id": "lancsteachinghospitals",
         "wikipedia": "https://en.wikipedia.org/wiki/Lancashire_Teaching_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXN",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/lancashire_teaching_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/lancashire_teaching_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Leeds and York Partnership NHS Foundation Trust",
@@ -1644,7 +1956,10 @@
         "id": "leedscommunityhealthcare",
         "wikipedia": "https://en.wikipedia.org/wiki/Leeds_Community_Healthcare_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RY6",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/leeds_community_healthcare_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/leeds_community_healthcare_nhs_trust",
+        "tags": [
+        "community_services_trust"
+        ]
         },
         {
         "name": "Leeds Teaching Hospitals NHS Trust",
@@ -1654,7 +1969,11 @@
         "id": "leedsth",
         "wikipedia": "https://en.wikipedia.org/wiki/Leeds_Teaching_Hospitals_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RR8",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/leeds_teaching_hospitals_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/leeds_teaching_hospitals_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Leicestershire Partnership NHS Trust",
@@ -1664,7 +1983,11 @@
         "id": "leicspart",
         "wikipedia": "https://en.wikipedia.org/wiki/Leicestershire_Partnership_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RT5",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/leicestershire_partnership_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/leicestershire_partnership_nhs_trust",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Lewisham and Greenwich NHS Trust",
@@ -1674,7 +1997,11 @@
         "id": "lewishamandgreenwich",
         "wikipedia": "https://en.wikipedia.org/wiki/Lewisham_and_Greenwich_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RJ2",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/lewisham_and_greenwich_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/lewisham_and_greenwich_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Lincolnshire Community Health Services NHS Trust",
@@ -1684,7 +2011,10 @@
         "id": "lincolnshirecommunityhealthservices",
         "wikipedia": "https://en.wikipedia.org/wiki/Lincolnshire_Community_Health_Services_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RY5",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/lincolnshire_community_health_services_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/lincolnshire_community_health_services_nhs_trust",
+        "tags": [
+        "community_services_trust"
+        ]
         },
         {
         "name": "Lincolnshire Partnership NHS Foundation Trust",
@@ -1694,7 +2024,11 @@
         "id": "lpft",
         "wikipedia": "https://en.wikipedia.org/wiki/Lincolnshire_Partnership_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RP7",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/lincolnshire_partnership_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/lincolnshire_partnership_nhs_foundation_trust",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Liverpool Heart and Chest Hospital NHS Foundation Trust",
@@ -1704,7 +2038,10 @@
         "id": "lhch",
         "wikipedia": "https://en.wikipedia.org/wiki/Liverpool_Heart_and_Chest_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RBQ",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/liverpool_heart_and_chest_hospital_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/liverpool_heart_and_chest_hospital_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust"
+        ]
         },
         {
         "name": "Liverpool University Hospitals NHS Foundation Trust",
@@ -1717,7 +2054,11 @@
         "id": "uhliverpool",
         "website": "https://www.uhliverpool.nhs.uk/",
         "cqc": "https://www.cqc.org.uk/provider/REM",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/luhft"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/luhft",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Liverpool Women’s NHS Foundation Trust",
@@ -1727,7 +2068,10 @@
         "id": "liverpoolwomens",
         "wikipedia": "https://en.wikipedia.org/wiki/Liverpool_Women%27s_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/REP",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/liverpool_womens_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/liverpool_womens_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust"
+        ]
         },
         {
         "name": "London Ambulance Service NHS Trust",
@@ -1737,7 +2081,10 @@
         "id": "londonambulance",
         "wikipedia": "https://en.wikipedia.org/wiki/London_Ambulance_Service",
         "cqc": "https://www.cqc.org.uk/provider/RRU",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/london_ambulance_service_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/london_ambulance_service_nhs_trust",
+        "tags": [
+        "ambulance_trust"
+        ]
         },
         {
         "name": "London North West University Healthcare NHS Trust",
@@ -1747,7 +2094,11 @@
         "id": "lnwh",
         "wikipedia": "https://en.wikipedia.org/wiki/London_North_West_University_Healthcare_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/R1K",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/london_north_west_university_healthcare_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/london_north_west_university_healthcare_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Maidstone and Tunbridge Wells NHS Trust",
@@ -1757,7 +2108,11 @@
         "id": "mtw",
         "wikipedia": "https://en.wikipedia.org/wiki/Maidstone_and_Tunbridge_Wells_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWF",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/maidstone_and_tunbridge_wells_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/maidstone_and_tunbridge_wells_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Manchester University NHS Foundation Trust",
@@ -1767,7 +2122,11 @@
         "id": "mft",
         "wikipedia": "https://en.wikipedia.org/wiki/Manchester_University_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/R0A",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/mft"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/mft",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Medway NHS Foundation Trust",
@@ -1777,7 +2136,11 @@
         "id": "medway",
         "wikipedia": "https://en.wikipedia.org/wiki/Medway_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RPA",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/medway_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/medway_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Mersey and West Lancashire Teaching Hospitals NHS Trust",
@@ -1790,7 +2153,11 @@
         ],
         "wikipedia": "https://en.wikipedia.org/wiki/Mersey_and_West_Lancashire_Teaching_Hospitals_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RBN",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/mersey_and_west_lancashire_teaching_hospitals_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/mersey_and_west_lancashire_teaching_hospitals_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Mersey Care NHS Foundation Trust",
@@ -1800,7 +2167,11 @@
         "id": "merseycare",
         "wikipedia": "https://en.wikipedia.org/wiki/Mersey_Care_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RW4",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/mersey_care_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/mersey_care_nhs_foundation_trust",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Mid and South Essex NHS Foundation Trust",
@@ -1813,7 +2184,11 @@
         "id": "mse",
         "website": "https://www.mse.nhs.uk/",
         "cqc": "https://www.cqc.org.uk/provider/RAJ",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/mseft"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/mseft",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Mid Cheshire Hospitals NHS Foundation Trust",
@@ -1823,7 +2198,11 @@
         "id": "mcht",
         "wikipedia": "https://en.wikipedia.org/wiki/Mid_Cheshire_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RBT",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/mid_cheshire_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/mid_cheshire_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Mid Yorkshire Teaching NHS Trust",
@@ -1833,7 +2212,11 @@
         "id": "midyorks",
         "wikipedia": "https://en.wikipedia.org/wiki/Mid_Yorkshire_Teaching_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXF",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/mid_yorkshire_hospitals_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/mid_yorkshire_hospitals_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Midlands Partnership University NHS Foundation Trust",
@@ -1843,7 +2226,11 @@
         "id": "mpft",
         "wikipedia": "https://en.wikipedia.org/wiki/Midlands_Partnership_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RRE",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/mpft"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/mpft",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Milton Keynes University Hospital NHS Foundation Trust",
@@ -1856,7 +2243,11 @@
         "id": "mkuh",
         "website": "https://www.mkuh.nhs.uk/",
         "cqc": "https://www.cqc.org.uk/provider/RD8",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/milton_keynes_university_hospital_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/milton_keynes_university_hospital_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Moorfields Eye Hospital NHS Foundation Trust",
@@ -1866,7 +2257,10 @@
         "id": "moorfields",
         "wikipedia": "https://en.wikipedia.org/wiki/Moorfields_Eye_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RP6",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/moorfields_eye_hospital_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/moorfields_eye_hospital_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust"
+        ]
         },
         {
         "name": "The Newcastle Upon Tyne Hospitals NHS Foundation Trust",
@@ -1876,7 +2270,11 @@
         "id": "newcastle-hospitals",
         "wikipedia": "https://en.wikipedia.org/wiki/Newcastle_upon_Tyne_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RTD",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_newcastle_upon_tyne_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_newcastle_upon_tyne_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Norfolk and Norwich University Hospitals NHS Foundation Trust",
@@ -1888,7 +2286,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Norfolk_and_Norwich_University_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RM1",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/norfolk_and_norwich_university_hospitals_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/norfolk_and_norwich_university_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Norfolk and Suffolk NHS Foundation Trust",
@@ -1898,7 +2300,10 @@
         "id": "nsft",
         "wikipedia": "https://en.wikipedia.org/wiki/Norfolk_and_Suffolk_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RMY",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/norfolk_and_suffolk_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/norfolk_and_suffolk_nhs_foundation_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Norfolk Community Health and Care NHS Trust",
@@ -1908,7 +2313,10 @@
         "id": "norfolkcommunityhealthandcare",
         "wikipedia": "https://en.wikipedia.org/wiki/Norfolk_Community_Health_and_Care_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RY3",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/norfolk_community_health_and_care_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/norfolk_community_health_and_care_nhs_trust",
+        "tags": [
+        "community_services_trust"
+        ]
         },
         {
         "name": "North Bristol NHS Trust",
@@ -1918,7 +2326,11 @@
         "id": "nbt",
         "wikipedia": "https://en.wikipedia.org/wiki/North_Bristol_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RVJ",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_bristol_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_bristol_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "North Cumbria Integrated Care NHS Foundation Trust",
@@ -1931,7 +2343,11 @@
         "id": "ncic",
         "website": "https://www.ncic.nhs.uk/",
         "cqc": "https://www.cqc.org.uk/provider/RNN",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/ncic"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/ncic",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "North East Ambulance Service NHS Foundation Trust",
@@ -1941,7 +2357,10 @@
         "id": "neas",
         "wikipedia": "https://en.wikipedia.org/wiki/North_East_Ambulance_Service",
         "cqc": "https://www.cqc.org.uk/provider/RX6",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_east_ambulance_service_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_east_ambulance_service_nhs_foundation_trust",
+        "tags": [
+        "ambulance_trust"
+        ]
         },
         {
         "name": "North East London NHS Foundation Trust",
@@ -1951,7 +2370,11 @@
         "id": "nelft",
         "wikipedia": "https://en.wikipedia.org/wiki/North_East_London_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RAT",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nelft"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nelft",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "North London NHS Foundation Trust",
@@ -1964,7 +2387,10 @@
         ],
         "wikipedia": "https://en.wikipedia.org/wiki/North_London_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/G6V2S",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_london_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_london_nhs_foundation_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "North Middlesex University Hospital NHS Trust",
@@ -1974,7 +2400,11 @@
         "id": "northmid",
         "wikipedia": "https://en.wikipedia.org/wiki/North_Middlesex_University_Hospital_NHS_Trust",
         "merged": "royalfree",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_middlesex_university_hospital_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_middlesex_university_hospital_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "North Staffordshire Combined Healthcare NHS Trust",
@@ -1984,7 +2414,10 @@
         "id": "combined",
         "wikipedia": "https://en.wikipedia.org/wiki/North_Staffordshire_Combined_Healthcare_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RLY",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_staffordshire_combined_healthcare_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_staffordshire_combined_healthcare_nhs_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "North Tees and Hartlepool NHS Foundation Trust",
@@ -1994,7 +2427,11 @@
         "id": "nth",
         "wikipedia": "https://en.wikipedia.org/wiki/North_Tees_and_Hartlepool_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RVW",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_tees_and_hartlepool_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_tees_and_hartlepool_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "North West Ambulance Service NHS Trust",
@@ -2004,7 +2441,10 @@
         "id": "nwas",
         "wikipedia": "https://en.wikipedia.org/wiki/North_West_Ambulance_Service",
         "cqc": "https://www.cqc.org.uk/provider/RX7",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_west_ambulance_service_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_west_ambulance_service_nhs_trust",
+        "tags": [
+        "ambulance_trust"
+        ]
         },
         {
         "name": "North West Anglia NHS Foundation Trust",
@@ -2017,7 +2457,11 @@
         "id": "nwangliaft",
         "website": "https://www.nwangliaft.nhs.uk/",
         "cqc": "https://www.cqc.org.uk/provider/RGN",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_west_anglia_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_west_anglia_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "North West Boroughs Healthcare NHS Foundation Trust",
@@ -2036,7 +2480,11 @@
         "id": "northamptongeneral",
         "wikipedia": "https://en.wikipedia.org/wiki/Northampton_General_Hospital_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RNS",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/northampton_general_hospital_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/northampton_general_hospital_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Northamptonshire Healthcare NHS Foundation Trust",
@@ -2046,7 +2494,11 @@
         "id": "nhft",
         "wikipedia": "https://en.wikipedia.org/wiki/Northamptonshire_Healthcare_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RP1",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/northamptonshire_healthcare_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/northamptonshire_healthcare_nhs_foundation_trust",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Northern Care Alliance NHS Foundation Trust",
@@ -2059,7 +2511,11 @@
         ],
         "wikipedia": "https://en.wikipedia.org/wiki/Northern_Care_Alliance_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RM3",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/ncaft"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/ncaft",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Northern Lincolnshire and Goole NHS Foundation Trust",
@@ -2070,7 +2526,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Northern_Lincolnshire_and_Goole_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RJL",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/northern_lincolnshire_and_goole_hospitals_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/northern_lincolnshire_and_goole_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Northumbria Healthcare NHS Foundation Trust",
@@ -2080,7 +2540,11 @@
         "id": "northumbria",
         "wikipedia": "https://en.wikipedia.org/wiki/Northumbria_Healthcare_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RTF",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/northumbria_healthcare_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/northumbria_healthcare_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Nottingham University Hospitals NHS Trust",
@@ -2090,7 +2554,11 @@
         "id": "nuh",
         "wikipedia": "https://en.wikipedia.org/wiki/Nottingham_University_Hospitals_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RX1",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nottingham_university_hospitals_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nottingham_university_hospitals_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Nottinghamshire Healthcare NHS Foundation Trust",
@@ -2100,7 +2568,11 @@
         "id": "nottinghamshirehealthcare",
         "wikipedia": "https://en.wikipedia.org/wiki/Nottinghamshire_Healthcare_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RHA",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nottinghamshire_healthcare_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nottinghamshire_healthcare_nhs_trust",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Oxford Health NHS Foundation Trust",
@@ -2110,7 +2582,11 @@
         "id": "oxfordhealth",
         "wikipedia": "https://en.wikipedia.org/wiki/Oxford_Health_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RNU",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/oxford_health_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/oxford_health_nhs_foundation_trust",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Oxford University Hospitals NHS Foundation Trust",
@@ -2120,7 +2596,11 @@
         "id": "ouh",
         "wikipedia": "https://en.wikipedia.org/wiki/Oxford_University_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RTH",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/oxford_university_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/oxford_university_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Oxleas NHS Foundation Trust",
@@ -2130,7 +2610,11 @@
         "id": "oxleas",
         "wikipedia": "https://en.wikipedia.org/wiki/Oxleas_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RPG",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/oxleas_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/oxleas_nhs_foundation_trust",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Pennine Care NHS Foundation Trust",
@@ -2140,7 +2624,10 @@
         "id": "penninecare",
         "wikipedia": "https://en.wikipedia.org/wiki/Pennine_Care_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RT2",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/pennine_care_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/pennine_care_nhs_foundation_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Portsmouth Hospitals University NHS Trust",
@@ -2150,7 +2637,11 @@
         "id": "porthosp",
         "wikipedia": "https://en.wikipedia.org/wiki/Portsmouth_Hospitals_University_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RHU",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/portsmouth_hospitals_university_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/portsmouth_hospitals_university_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "The Princess Alexandra Hospital NHS Trust",
@@ -2160,7 +2651,11 @@
         "id": "pah",
         "wikipedia": "https://en.wikipedia.org/wiki/The_Princess_Alexandra_Hospital_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RQW",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_princess_alexandra_hospital_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_princess_alexandra_hospital_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "The Queen Elizabeth Hospital, King’s Lynn, NHS Foundation Trust",
@@ -2173,7 +2668,11 @@
         "https://en.wikipedia.org/wiki/Queen_Elizabeth_Hospital,_King%E2%80%99s_Lynn,_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RCX",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/the_queen_elizabeth_hospital_kings_lynn_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/the_queen_elizabeth_hospital_kings_lynn_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Queen Victoria Hospital NHS Foundation Trust",
@@ -2183,7 +2682,10 @@
         "id": "qvh",
         "wikipedia": "https://en.wikipedia.org/wiki/Queen_Victoria_Hospital",
         "cqc": "https://www.cqc.org.uk/provider/RPC",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/queen_victoria_hospital_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/queen_victoria_hospital_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust"
+        ]
         },
         {
         "name": "The Robert Jones and Agnes Hunt Orthopaedic Hospital NHS Foundation Trust",
@@ -2196,7 +2698,10 @@
         "https://en.wikipedia.org/wiki/Robert_Jones_and_Agnes_Hunt_Orthopaedic_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RL1",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/the_robert_jones_and_agnes_hunt_orthopaedic_hospital_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/the_robert_jones_and_agnes_hunt_orthopaedic_hospital_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust"
+        ]
         },
         {
         "name": "The Rotherham NHS Foundation Trust",
@@ -2206,7 +2711,11 @@
         "id": "therotherhamft",
         "wikipedia": "https://en.wikipedia.org/wiki/Rotherham_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RFR",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_rotherham_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_rotherham_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Rotherham Doncaster and South Humber NHS Foundation Trust",
@@ -2217,7 +2726,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Rotherham_Doncaster_and_South_Humber_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXE",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/rotherham_doncaster_and_south_humber_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/rotherham_doncaster_and_south_humber_nhs_foundation_trust",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Royal Berkshire NHS Foundation Trust",
@@ -2227,7 +2740,11 @@
         "id": "royalberkshire",
         "wikipedia": "https://en.wikipedia.org/wiki/Royal_Berkshire_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RHW",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_berkshire_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_berkshire_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Royal Brompton and Harefield NHS Foundation Trust",
@@ -2246,7 +2763,11 @@
         "id": "royalcornwall",
         "wikipedia": "https://en.wikipedia.org/wiki/Royal_Cornwall_Hospitals_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/REF",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_cornwall_hospitals_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_cornwall_hospitals_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Royal Devon University Healthcare NHS Foundation Trust",
@@ -2259,7 +2780,11 @@
         "id": "royaldevon",
         "website": "https://royaldevon.nhs.uk/",
         "cqc": "https://www.cqc.org.uk/provider/RH8",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_devon_university_healthcare_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_devon_university_healthcare_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Royal Free London NHS Foundation Trust",
@@ -2269,7 +2794,11 @@
         "id": "royalfree",
         "wikipedia": "https://en.wikipedia.org/wiki/Royal_Free_London_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RAL",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_free_london_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_free_london_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "The Royal Marsden NHS Foundation Trust",
@@ -2279,7 +2808,10 @@
         "id": "royalmarsden",
         "wikipedia": "https://en.wikipedia.org/wiki/Royal_Marsden_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RPY",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_royal_marsden_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_royal_marsden_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust"
+        ]
         },
         {
         "name": "Royal National Orthopaedic Hospital NHS Trust",
@@ -2289,7 +2821,10 @@
         "id": "rnoh",
         "wikipedia": "https://en.wikipedia.org/wiki/Royal_National_Orthopaedic_Hospital_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RAN",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_national_orthopaedic_hospital_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_national_orthopaedic_hospital_nhs_trust",
+        "tags": [
+        "hospital_trust"
+        ]
         },
         {
         "name": "The Royal Orthopaedic Hospital NHS Foundation Trust",
@@ -2299,7 +2834,10 @@
         "id": "roh",
         "wikipedia": "https://en.wikipedia.org/wiki/Royal_Orthopaedic_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RRJ",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_royal_orthopaedic_hospital_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_royal_orthopaedic_hospital_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust"
+        ]
         },
         {
         "name": "Royal Papworth Hospital NHS Foundation Trust",
@@ -2309,7 +2847,10 @@
         "id": "royalpapworth",
         "wikipedia": "https://en.wikipedia.org/wiki/Royal_Papworth_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RGM",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_papworth_hospital_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_papworth_hospital_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust"
+        ]
         },
         {
         "name": "Royal Surrey NHS Foundation Trust",
@@ -2319,7 +2860,11 @@
         "id": "royalsurrey",
         "wikipedia": "https://en.wikipedia.org/wiki/Royal_Surrey_County_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RA2",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_surrey_county_hospital_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_surrey_county_hospital_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Royal United Hospitals Bath NHS Foundation Trust",
@@ -2329,7 +2874,11 @@
         "id": "ruh",
         "wikipedia": "https://en.wikipedia.org/wiki/Royal_United_Hospitals_Bath_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RD1",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_united_hospitals_bath_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_united_hospitals_bath_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "The Royal Wolverhampton NHS Trust",
@@ -2339,7 +2888,11 @@
         "id": "royalwolverhampton",
         "wikipedia": "https://en.wikipedia.org/wiki/Royal_Wolverhampton_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RL4",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_royal_wolverhampton_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_royal_wolverhampton_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Salisbury NHS Foundation Trust",
@@ -2349,7 +2902,11 @@
         "id": "salisbury",
         "wikipedia": "https://en.wikipedia.org/wiki/Salisbury_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RNZ",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/salisbury_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/salisbury_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Sandwell and West Birmingham Hospitals NHS Trust",
@@ -2359,7 +2916,11 @@
         "id": "swbh",
         "wikipedia": "https://en.wikipedia.org/wiki/Sandwell_and_West_Birmingham_Hospitals_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXK",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/sandwell_and_west_birmingham_hospitals_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/sandwell_and_west_birmingham_hospitals_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Sheffield Children’s NHS Foundation Trust",
@@ -2369,7 +2930,11 @@
         "id": "sheffieldchildrens",
         "wikipedia": "https://en.wikipedia.org/wiki/Sheffield_Children%27s_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RCU",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/sheffield_childrens_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/sheffield_childrens_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Sheffield Health and Social Care NHS Foundation Trust",
@@ -2379,7 +2944,10 @@
         "id": "shsc",
         "wikipedia": "https://en.wikipedia.org/wiki/Sheffield_Health_and_Social_Care_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/TAH",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/sheffield_health_and_social_care_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/sheffield_health_and_social_care_nhs_foundation_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Sheffield Teaching Hospitals NHS Foundation Trust",
@@ -2389,7 +2957,11 @@
         "id": "sth",
         "wikipedia": "https://en.wikipedia.org/wiki/Sheffield_Teaching_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RHQ",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/sheffield_teaching_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/sheffield_teaching_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Sherwood Forest Hospitals NHS Foundation Trust",
@@ -2399,7 +2971,11 @@
         "id": "sfh-tr",
         "wikipedia": "https://en.wikipedia.org/wiki/Sherwood_Forest_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RK5",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/sherwood_forest_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/sherwood_forest_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Shrewsbury and Telford Hospital NHS Trust",
@@ -2409,7 +2985,11 @@
         "id": "sath",
         "wikipedia": "https://en.wikipedia.org/wiki/Shrewsbury_and_Telford_Hospital_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXW",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_shrewsbury_and_telford_hospital_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_shrewsbury_and_telford_hospital_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Shropshire Community Health NHS Trust",
@@ -2419,7 +2999,10 @@
         "id": "shropscommunityhealth",
         "wikipedia": "https://en.wikipedia.org/wiki/Shropshire_Community_Health_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/R1D",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/shropshire_community_health_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/shropshire_community_health_nhs_trust",
+        "tags": [
+        "community_services_trust"
+        ]
         },
         {
         "name": "Solent NHS Trust",
@@ -2428,7 +3011,11 @@
         "website": "https://www.solent.nhs.uk/",
         "id": "solent",
         "wikipedia": "https://en.wikipedia.org/wiki/Solent_NHS_Trust",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/solent_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/solent_nhs_trust",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Somerset NHS Foundation Trust",
@@ -2441,7 +3028,11 @@
         "id": "somersetft",
         "website": "https://www.somersetft.nhs.uk/",
         "cqc": "https://www.cqc.org.uk/provider/RH5",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/somerset_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/somerset_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "South Central Ambulance Service NHS Foundation Trust",
@@ -2451,7 +3042,10 @@
         "id": "scas",
         "wikipedia": "https://en.wikipedia.org/wiki/South_Central_Ambulance_Service",
         "cqc": "https://www.cqc.org.uk/provider/RYE",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_central_ambulance_service_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_central_ambulance_service_nhs_foundation_trust",
+        "tags": [
+        "ambulance_trust"
+        ]
         },
         {
         "name": "South East Coast Ambulance Service NHS Foundation Trust",
@@ -2461,7 +3055,10 @@
         "id": "secamb",
         "wikipedia": "https://en.wikipedia.org/wiki/South_East_Coast_Ambulance_Service",
         "cqc": "https://www.cqc.org.uk/provider/RYD",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_east_coast_ambulance_service_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_east_coast_ambulance_service_nhs_foundation_trust",
+        "tags": [
+        "ambulance_trust"
+        ]
         },
         {
         "name": "South London and Maudsley NHS Foundation Trust",
@@ -2472,7 +3069,10 @@
         "wikipedia": "https://en.wikipedia.org/wiki/South_London_and_Maudsley_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RV5",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_london_and_maudsley_nhs_foundation_trust",
-        "search" : "search?term=${query}"
+        "search": "search?term=${query}",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "South Tees Hospitals NHS Foundation Trust",
@@ -2482,7 +3082,11 @@
         "id": "southtees",
         "wikipedia": "https://en.wikipedia.org/wiki/South_Tees_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RTR",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_tees_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_tees_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "South Tyneside and Sunderland NHS Foundation Trust",
@@ -2492,7 +3096,11 @@
         "id": "stsft",
         "wikipedia": "https://en.wikipedia.org/wiki/South_Tyneside_and_Sunderland_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/R0B",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_tyneside_and_sunderland_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_tyneside_and_sunderland_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "South Warwickshire University NHS Foundation Trust",
@@ -2502,7 +3110,11 @@
         "id": "swft",
         "wikipedia": "https://en.wikipedia.org/wiki/South_Warwickshire_University_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RJC",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_warwickshire_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_warwickshire_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "South West London and St George’s Mental Health NHS Trust",
@@ -2512,7 +3124,11 @@
         "id": "swlstg",
         "wikipedia": "https://en.wikipedia.org/wiki/South_West_London_and_St_George%27s_Mental_Health_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RQY",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_west_london_and_st_georges_mental_health_nhs_trust"
+        "whatdotheyknow":
+        "https://www.whatdotheyknow.com/body/south_west_london_and_st_georges_mental_health_nhs_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "South West Yorkshire Partnership NHS Foundation Trust",
@@ -2522,7 +3138,11 @@
         "id": "southwestyorkshire",
         "wikipedia": "https://en.wikipedia.org/wiki/South_West_Yorkshire_Partnership_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXG",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_west_yorkshire_partnership_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_west_yorkshire_partnership_nhs_foundation_trust",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "South Western Ambulance Service NHS Foundation Trust",
@@ -2532,7 +3152,10 @@
         "id": "swast",
         "wikipedia": "https://en.wikipedia.org/wiki/South_Western_Ambulance_Service_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RYF",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_western_ambulance_service_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_western_ambulance_service_nhs_foundation_trust",
+        "tags": [
+        "ambulance_trust"
+        ]
         },
         {
         "name": "Southport and Ormskirk Hospital NHS Trust",
@@ -2542,7 +3165,11 @@
         "id": "southportandormskirk",
         "wikipedia": "https://en.wikipedia.org/wiki/Southport_and_Ormskirk_Hospital_NHS_Trust",
         "merged": "merseywestlancs",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/southport_and_ormskirk_hospital_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/southport_and_ormskirk_hospital_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "St George’s University Hospitals NHS Foundation Trust",
@@ -2552,7 +3179,11 @@
         "id": "stgeorges",
         "wikipedia": "https://en.wikipedia.org/wiki/St_George%27s_University_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RJ7",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/st_georges_university_hospitals_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/st_georges_university_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Stockport NHS Foundation Trust",
@@ -2562,7 +3193,11 @@
         "id": "stockport",
         "wikipedia": "https://en.wikipedia.org/wiki/Stockport_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWJ",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/stockport_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/stockport_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Surrey and Borders Partnership NHS Foundation Trust",
@@ -2572,7 +3207,10 @@
         "id": "sabp",
         "wikipedia": "https://en.wikipedia.org/wiki/Surrey_and_Borders_Partnership_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RXX",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/surrey_and_borders_partnership_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/surrey_and_borders_partnership_nhs_foundation_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Surrey and Sussex Healthcare NHS Trust",
@@ -2582,7 +3220,11 @@
         "id": "surreyandsussex",
         "wikipedia": "https://en.wikipedia.org/wiki/Surrey_and_Sussex_Healthcare_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RTP",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/surrey_and_sussex_healthcare_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/surrey_and_sussex_healthcare_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Sussex Community NHS Foundation Trust",
@@ -2592,7 +3234,10 @@
         "id": "sussexcommunity",
         "wikipedia": "https://en.wikipedia.org/wiki/Sussex_Community_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RDR",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/sussex_community_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/sussex_community_nhs_foundation_trust",
+        "tags": [
+        "community_services_trust"
+        ]
         },
         {
         "name": "Sussex Partnership NHS Foundation Trust",
@@ -2602,7 +3247,10 @@
         "id": "sussexpartnership",
         "wikipedia": "https://en.wikipedia.org/wiki/Sussex_Partnership_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RX2",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/sussex_partnership_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/sussex_partnership_nhs_foundation_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Tameside and Glossop Integrated Care NHS Foundation Trust",
@@ -2613,7 +3261,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Tameside_and_Glossop_Integrated_Care_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RMP",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/tameside_and_glossop_integrated_care_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/tameside_and_glossop_integrated_care_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Tavistock and Portman NHS Foundation Trust",
@@ -2623,7 +3275,10 @@
         "id": "tavistockandportman",
         "wikipedia": "https://en.wikipedia.org/wiki/Tavistock_and_Portman_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RNK",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/tavistock_and_portman_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/tavistock_and_portman_nhs_foundation_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Tees, Esk and Wear Valleys NHS Foundation Trust",
@@ -2633,7 +3288,10 @@
         "id": "tewv",
         "wikipedia": "https://en.wikipedia.org/wiki/Tees,_Esk_and_Wear_Valleys_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RX3",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/tees_esk_and_wear_valleys_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/tees_esk_and_wear_valleys_nhs_foundation_trust",
+        "tags": [
+        "mental_health_trust"
+        ]
         },
         {
         "name": "Torbay and South Devon NHS Foundation Trust",
@@ -2643,7 +3301,11 @@
         "id": "torbayandsouthdevon",
         "wikipedia": "https://en.wikipedia.org/wiki/Torbay_and_South_Devon_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RA9",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/torbay_and_south_devon_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/torbay_and_south_devon_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "United Lincolnshire Teaching Hospitals NHS Trust",
@@ -2653,7 +3315,11 @@
         "id": "ulh",
         "wikipedia": "https://en.wikipedia.org/wiki/United_Lincolnshire_Teaching_Hospitals_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWD",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/united_lincolnshire_hospitals_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/united_lincolnshire_hospitals_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "University College London Hospitals NHS Foundation Trust",
@@ -2663,7 +3329,11 @@
         "id": "uclh",
         "wikipedia": "https://en.wikipedia.org/wiki/University_College_London_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RRV",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/uclh"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/uclh",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "University Hospital Southampton NHS Foundation Trust",
@@ -2673,7 +3343,11 @@
         "id": "uhs",
         "wikipedia": "https://en.wikipedia.org/wiki/University_Hospital_Southampton_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RHM",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_hospital_southampton_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_hospital_southampton_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "University Hospitals Birmingham NHS Foundation Trust",
@@ -2683,7 +3357,11 @@
         "id": "uhb",
         "wikipedia": "https://en.wikipedia.org/wiki/University_Hospitals_Birmingham_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RRK",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_hospitals_birmingham_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_hospitals_birmingham_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "University Hospitals Bristol and Weston NHS Foundation Trust",
@@ -2697,7 +3375,11 @@
         "id": "uhbw",
         "website": "https://www.uhbw.nhs.uk/",
         "cqc": "https://www.cqc.org.uk/provider/RA7",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/uhbw"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/uhbw",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "University Hospitals Coventry and Warwickshire NHS Trust",
@@ -2707,7 +3389,12 @@
         "id": "uhcw",
         "wikipedia": "https://en.wikipedia.org/wiki/University_Hospital_Coventry",
         "cqc": "https://www.cqc.org.uk/provider/RKB",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_hospitals_coventry_and_warwickshire_nhs_trust"
+        "whatdotheyknow":
+        "https://www.whatdotheyknow.com/body/university_hospitals_coventry_and_warwickshire_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "University Hospitals Dorset NHS Foundation Trust",
@@ -2717,7 +3404,11 @@
         "id": "uhd",
         "website": "https://www.uhd.nhs.uk/",
         "cqc": "https://www.cqc.org.uk/provider/R0D",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_hospitals_dorset_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_hospitals_dorset_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "University Hospitals of Derby and Burton NHS Foundation Trust",
@@ -2729,7 +3420,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/University_Hospitals_of_Derby_and_Burton_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RTG",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/university_hospitals_of_derby_and_burton_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/university_hospitals_of_derby_and_burton_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "University Hospitals of Leicester NHS Trust",
@@ -2739,7 +3434,11 @@
         "id": "leicestershospitals",
         "wikipedia": "https://en.wikipedia.org/wiki/University_Hospitals_of_Leicester_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWE",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_hospitals_of_leicester_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_hospitals_of_leicester_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "University Hospitals of Morecambe Bay NHS Foundation Trust",
@@ -2751,7 +3450,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/University_Hospitals_of_Morecambe_Bay_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RTX",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/university_hospitals_of_morecambe_bay_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/university_hospitals_of_morecambe_bay_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "University Hospitals of North Midlands NHS Trust",
@@ -2761,7 +3464,11 @@
         "id": "uhnm",
         "wikipedia": "https://en.wikipedia.org/wiki/University_Hospitals_of_North_Midlands_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RJE",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_hospitals_of_north_midlands_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_hospitals_of_north_midlands_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "University Hospitals Plymouth NHS Trust",
@@ -2772,7 +3479,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/University_Hospitals_Plymouth_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RK9",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_hospitals_plymouth_nhs_trust",
-        "search": "search?term=${query}"
+        "search": "search?term=${query}",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "University Hospitals Sussex NHS Foundation Trust",
@@ -2785,7 +3496,11 @@
         "id": "uhsussex",
         "website": "https://www.uhsussex.nhs.uk/",
         "cqc": "https://www.cqc.org.uk/provider/RYR",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/uhsussex"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/uhsussex",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Walsall Healthcare NHS Trust",
@@ -2795,7 +3510,11 @@
         "id": "walsallhealthcare",
         "wikipedia": "https://en.wikipedia.org/wiki/Walsall_Healthcare_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RBK",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/walsall_healthcare_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/walsall_healthcare_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "The Walton Centre NHS Foundation Trust",
@@ -2805,7 +3524,10 @@
         "id": "thewaltoncentre",
         "wikipedia": "https://en.wikipedia.org/wiki/Walton_Centre",
         "cqc": "https://www.cqc.org.uk/provider/RET",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_walton_centre_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_walton_centre_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust"
+        ]
         },
         {
         "name": "Warrington and Halton Teaching Hospitals NHS Foundation Trust",
@@ -2816,7 +3538,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Warrington_and_Halton_Teaching_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWW",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/warrington_and_halton_teaching_hospitals_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/warrington_and_halton_teaching_hospitals_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "West Hertfordshire Hospitals NHS Trust",
@@ -2827,7 +3553,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/West_Hertfordshire_Teaching_Hospitals_NHS_Trust",
         "wikipediaName": "West Hertfordshire Teaching Hospitals NHS Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWG",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/west_hertfordshire_hospitals_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/west_hertfordshire_hospitals_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "West London NHS Trust",
@@ -2837,7 +3567,11 @@
         "id": "westlondon",
         "wikipedia": "https://en.wikipedia.org/wiki/West_London_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RKL",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/west_london_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/west_london_nhs_trust",
+        "tags": [
+        "community_services_trust",
+        "mental_health_trust"
+        ]
         },
         {
         "name": "West Midlands Ambulance Service University NHS Foundation Trust",
@@ -2850,7 +3584,10 @@
         "cqc": "https://www.cqc.org.uk/provider/RYA",
         "whatdotheyknow":
         "https://www.whatdotheyknow.com/body/west_midlands_ambulance_service_university_nhs_foundation_trust",
-        "search": "?s=${query}"
+        "search": "?s=${query}",
+        "tags": [
+        "ambulance_trust"
+        ]
         },
         {
         "name": "West Suffolk NHS Foundation Trust",
@@ -2860,7 +3597,11 @@
         "id": "wsh",
         "wikipedia": "https://en.wikipedia.org/wiki/West_Suffolk_Hospital",
         "cqc": "https://www.cqc.org.uk/provider/RGR",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/west_suffolk_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/west_suffolk_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Whittington Health NHS Trust",
@@ -2870,7 +3611,11 @@
         "id": "whittington",
         "wikipedia": "https://en.wikipedia.org/wiki/Whittington_Health_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RKE",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/whittington_health_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/whittington_health_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Wirral Community Health and Care NHS Foundation Trust",
@@ -2883,7 +3628,10 @@
         "id": "wchc",
         "website": "https://www.wchc.nhs.uk/",
         "cqc": "https://www.cqc.org.uk/provider/RY7",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/wirral_community_health_and_care_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/wirral_community_health_and_care_nhs_foundation_trust",
+        "tags": [
+        "community_services_trust"
+        ]
         },
         {
         "name": "Wirral University Teaching Hospital NHS Foundation Trust",
@@ -2893,7 +3641,12 @@
         "id": "wuth",
         "wikipedia": "https://en.wikipedia.org/wiki/Wirral_University_Teaching_Hospital_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RBL",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/wirral_university_teaching_hospital_nhs_foundation_trust"
+        "whatdotheyknow":
+        "https://www.whatdotheyknow.com/body/wirral_university_teaching_hospital_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Worcestershire Acute Hospitals NHS Trust",
@@ -2903,7 +3656,11 @@
         "id": "worcsacute",
         "wikipedia": "https://en.wikipedia.org/wiki/Worcestershire_Acute_Hospitals_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RWP",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/worcestershire_acute_hospitals_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/worcestershire_acute_hospitals_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Wrightington, Wigan and Leigh NHS Foundation Trust",
@@ -2916,7 +3673,11 @@
         "id": "wwl",
         "website": "https://www.wwl.nhs.uk/",
         "cqc": "https://www.cqc.org.uk/provider/RRF",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/wrightington_wigan_and_leigh_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/wrightington_wigan_and_leigh_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Wye Valley NHS Trust",
@@ -2926,7 +3687,11 @@
         "id": "wyevalley",
         "wikipedia": "https://en.wikipedia.org/wiki/Wye_Valley_NHS_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RLQ",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/wye_valley_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/wye_valley_nhs_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "York and Scarborough Teaching Hospitals NHS Foundation Trust",
@@ -2937,7 +3702,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/York_and_Scarborough_Teaching_Hospitals_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RCB",
         "whatdotheyknow":
-        "https://www.whatdotheyknow.com/body/york_and_scarborough_teaching_hospital_nhs_foundation_trust"
+        "https://www.whatdotheyknow.com/body/york_and_scarborough_teaching_hospital_nhs_foundation_trust",
+        "tags": [
+        "hospital_trust",
+        "major_ae"
+        ]
         },
         {
         "name": "Yorkshire Ambulance Service NHS Trust",
@@ -2947,7 +3716,10 @@
         "id": "yas",
         "wikipedia": "https://en.wikipedia.org/wiki/Yorkshire_Ambulance_Service",
         "cqc": "https://www.cqc.org.uk/provider/RX8",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/yorkshire_ambulance_service_nhs_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/yorkshire_ambulance_service_nhs_trust",
+        "tags": [
+        "ambulance_trust"
+        ]
         }
         ]
     </template>
