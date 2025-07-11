@@ -45,7 +45,17 @@
             return removeStart((new URL(u)).hostname, "www.");
         }
 
-        const trusts = JSON.parse(document.querySelector("#trust-data").content.textContent).sort((a, b) => a.shortName.localeCompare(b.shortName));
+        let trusts = JSON.parse(document.querySelector("#trust-data").content.textContent).sort((a, b) => a.shortName.localeCompare(b.shortName));
+
+        if (parameters.tags !== undefined) {
+            const requiredTags = parameters.tags.split(",").map(t => t.trim()).filter(t => t !== "");
+            if (requiredTags.length > 0) {
+                trusts = trusts.filter(trust => {
+                    const missing = requiredTags.find(t => trust.tags === undefined || !trust.tags.includes(t));
+                    return missing === undefined;
+                });
+            }
+        }
 
         function toID(u) {
             try {
