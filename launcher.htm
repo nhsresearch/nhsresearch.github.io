@@ -100,16 +100,25 @@
             color: gray;
         }
 
+        .param {
+            font-style: italic;
+        }
+
+        .app {
+            font-style: italic;
+        }
+
         
     </style>
 </head>
 
 <body>
     <h1>NHS Trust Research Launcher</h1>
+    <p>Use this page to customize the keywords and search engines that you see in the <span class="app">NHS Trust Research</span> app.</p>
     <div>
-        <h2>TERMS</h2>
+        <h2>KEYWORDS</h2>
         <input id="terms" type="text" value="">
-        <p class="comments">Comma-separated keywords for your searches</p>
+        <p class="comments">Comma-separated keywords for all types of search</p>
     </div>
     <div>
         <h2>CUSTOM SEARCH ENGINE</h2>
@@ -117,14 +126,14 @@
         <input id="search-name" type="text" value="">
         <h3>URL</h3>
         <input id="search-url" type="text" value="">
-        <p class="comments">${query} to add keywords</p>
-        <p class="comments">${shortName}, ${name}, ${id}, and ${website} to add trust-specific values</p>
+        <p class="comments"><span class="param">${query}</span> to add keywords</p>
+        <p class="comments"><span class="param">${shortName}</span>, <span class="param">${name}</span>, <span class="param">${id}</span>, and <span class="param">${website}</span> to add trust-specific values</p>
     </div>
     <div> </div>
     <div><a id="launch" href="index.htm" target="_blank">LAUNCH</a></div>
     <div> </div>
     <div id="comments" class="comments">
-        <p>Save a bookmark or share the launched page. All your settings will persist.</p>
+        <!--<p>Share the launched page. All your settings will persist.</p>-->
     </div>
 </body>
 
