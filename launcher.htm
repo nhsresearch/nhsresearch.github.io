@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Launcher - NHS Trust Research</title>
     <script type="module">
+        const pageParams = new URLSearchParams(document.location.search);
+
         const go = document.querySelector("#launch");
 
         const terms = document.querySelector("#terms");
@@ -36,12 +38,19 @@
 
             const url = new URL("index.htm", document.location);
             const params = url.searchParams;
+            
             params.set("terms", t)
+            
             const name = sn.trim();
             if (name !== "") {
                 params.set(name + "-engine", su.trim());
             }
-            params.set("settings", "{}");
+            
+            params.set("settings", pageParams.get("settings") ?? "{}");
+
+            if (pageParams.has("id")) {
+                params.set("id", pageParams.get("id"));
+            }
 
             go.href = url;
         };
