@@ -1,1 +1,93 @@
-placeholder
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EXTRACT LINKS</title>
+    <script type="module">
+        async function getLinksFromClipboard() {
+            // Only returns links from the first item
+            const items = await navigator.clipboard.read();
+            for (const item of items) {
+                if (!item.types.includes("text/html")) {
+                    continue;
+                }
+                const blob = await item.getType("text/html");
+                if (blob !== undefined) {
+                    const doc = (new DOMParser().parseFromString(await blob.text(), "text/html"));
+                    const links = [...doc.querySelectorAll("a")].map(a => ({ text: a.innerText.trim(), url: a.href }));
+                    return links;
+                }
+            }
+        }
+
+        const results = document.querySelector("#results");
+
+        // document.querySelector("#csv").onclick = (e) => {
+        //     e.preventDefault();
+        //     (async ()=>{
+        //         const links = await getLinksFromClipboard();
+        //     })();
+        // };
+
+        document.querySelector("#paste-json").onclick = (e) => {
+            e.preventDefault();
+            (async () => {
+                const links = await getLinksFromClipboard();
+                if (links !== undefined) {
+                    results.innerText = JSON.stringify(links, null, 2);
+                } else {
+                    alert("No HTML on clipboard");
+                }
+            })();
+        };
+
+        document.querySelector("#convert-json").onclick = (e) => {
+            e.preventDefault();
+            (async () => {
+                const links = await getLinksFromClipboard();
+                if (links !== undefined) {
+                    const count = links.length;
+                    const json = JSON.stringify(links, null, 2);
+                    await navigator.clipboard.writeText(json);
+                    results.innerText = json;
+                    alert(`Clipboard converted to ${count} JSON links`);
+                } else {
+                    alert("No HTML on clipboard");
+                }
+            })();
+        };
+    </script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+                Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            padding: 0 15px;
+            max-width: 650px;
+            font-size: 115%;
+            line-height: 1.4;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        #results {
+            white-space: pre-wrap;
+            font-family: "Monaco", "Andale Mono", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+                Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        }
+    </style>
+</head>
+
+<body>
+    <h1>EXTRACT LINKS FROM CLIPBOARD</h1>
+    <p>Copy part of another web page and click to extract only the links</p>
+    <div><a id="paste-json" href="#">VIEW LINK DATA</a></div>
+    <div><a id="convert-json" href="#">CONVERT CLIPBOARD</a></div>
+    <div> </div>
+    <div id="results"></div>
+</body>
+
+</html>
