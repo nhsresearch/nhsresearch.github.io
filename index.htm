@@ -13,6 +13,13 @@
         // This means that parameters at the end of the URL are more important than earlier ones with the same name
         const parameters = Object.fromEntries([...params.entries()].map(([k, v]) => [k.trim(), v.trim()]));
 
+        if (parameters.tags !== undefined) {
+            parameters.tags = parameters.tags.split(",").map(t => t.trim()).filter(t => t !== "");
+            if (parameters.tags.length === 0) {
+                parameters.tags = undefined;
+            }
+        }
+
         function searchParamsDelete(name) {
             const name_ = name.trim();
             const keys = [...params.keys()].filter(k => k.trim() === name_);
@@ -45,17 +52,9 @@
             return removeStart((new URL(u)).hostname, "www.");
         }
 
-        let trusts = JSON.parse(document.querySelector("#trust-data").content.textContent).sort((a, b) => a.shortName.localeCompare(b.shortName));
+        const trusts = JSON.parse(document.querySelector("#trust-data").content.textContent).sort((a, b) => a.shortName.localeCompare(b.shortName));
 
-        if (parameters.tags !== undefined) {
-            const requiredTags = parameters.tags.split(",").map(t => t.trim()).filter(t => t !== "");
-            if (requiredTags.length > 0) {
-                trusts = trusts.filter(trust => {
-                    const missing = requiredTags.find(t => trust.tags === undefined || !trust.tags.includes(t));
-                    return missing === undefined;
-                });
-            }
-        }
+
 
         function toID(u) {
             try {
@@ -322,12 +321,61 @@
             }
         }
 
+        function tagToTitle(tag) {
+            const tags = {
+                "major_ae": "Major A&E",
+                "mental_health_trust": "Mental Health",
+                "community_services_trust": "Community Services",
+                "hospital_trust": "Hospital",
+                "ambulance_trust": "Ambulance",
+
+                "east": "East of England",
+                "london": "London",
+                "midlands": "Midlands",
+                "northeast": "North East and Yorkshire",
+                "northwest": "North West",
+                "southeast": "South East",
+                "southwest": "South West"
+            };
+            return tags[tag] ?? tag;
+        }
+
+        function tagsToTitle(tags) {
+            return tags.map(tagToTitle).join(", ") + " Trusts";
+        }
+
         function listTrusts() {
+            let trustsToList = trusts;
+
+            const tags = parameters.tags;
+
+            if (tags !== undefined) {
+                trustsToList = trustsToList.filter(trust => {
+                    const missing = tags.find(t => trust.tags === undefined || !trust.tags.includes(t));
+                    return missing === undefined;
+                });
+            }
             const template = document.querySelector("#all-trusts-template") ?? undefined;
             const clone = template.content.cloneNode(true);
 
+            if (parameters.tags !== undefined) {
+                const title = clone.querySelector("h1");
+                title.innerText = tagsToTitle(tags);
+
+                document.title = `[${tagsToTitle(tags)}] NHS Trust Research`
+
+                const e = document.createElement("div");
+                const a = document.createElement("a");
+                a.innerText = "← ALL TRUSTS";
+                const newParams = new URLSearchParams(params);
+                newParams.delete("tags");
+                a.href = `?${newParams}`
+                e.append(a);
+                clone.querySelector("#footer").prepend(e);
+            }
+
             const content = clone.querySelector("#content");
-            for (const trust of trusts) {
+            for (const trust of trustsToList) {
                 const newParams = new URLSearchParams(params);
                 newParams.set("id", trust.id);
 
@@ -530,7 +578,11 @@
 
                 const at = document.querySelector("#all-trusts a") ?? undefined;
                 if (at !== undefined) {
-                    at.href = `?${params}#${this.current.id}`;
+                    const newParams = new URLSearchParams(params);
+                    if (parameters.tags !== undefined) {
+                        at.innerText = `← ${tagsToTitle(parameters.tags)}`;
+                    }
+                    at.href = `?${newParams}#${this.current.id}`;
                 }
 
                 document.querySelector("#name").innerText = this.current.name;
@@ -680,6 +732,7 @@
         <h1>ALL TRUSTS</h1>
         <div id="content"></div>
         <div> </div>
+        <div id="footer"></div>
         <div><a href="launcher.htm">← LAUNCHER</a></div>
     </template>
 
