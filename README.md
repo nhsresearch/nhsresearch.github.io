@@ -65,7 +65,19 @@ URL:
 
 These settings will give you one link to DuckDuckGo for each keyword set that you have defined (because it contains `${query}`) and the search results are limited to those on the trust's own websites (because of `site:${host}`).
 
+## Non-traditional search engines
 
+A custom search engine in the NHS Trust Research app is not limited to commercial search engines like Google and DuckDuckGo, it can be any URL.
+
+For example, you may be interested in social media conversations about NHS trusts. You can define a custom search engine using the search function on any social media platform.
+
+Here's how you might do that:
+1. Go to the social media website and perform an example search that returns results you're interested in
+2. Copy the URL of the search results page into another browser tab and confirm that the search results still appear as you'd expect.
+   This shows that all the information for performing the search is contained in the URL.
+3. Paste the URL into the URL field for a custom search engine in the NHS Trust Research app
+4. If appropriate, replace the specific information that you searched for that identified the trust (perhaps the trust's name) with a property token (perhaps `${shortName}`)
+5. If appropriate, replace the specific information that you searched for that did not identify the trust (keywords, etc) with the `${query}` token
 
 ## Running the NHS Trust Research App from the local file system
 
