@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIST EDITOR</title>
+    <script type="module">
+        let links = [];
+        let trusts = [];
+
+        function toID(u) {
+            try {
+                const url = new URL(u);
+                const pieces = url.hostname.split(".");
+                return pieces[0] !== "www" ? pieces[0] : pieces[1];
+            } catch (e) {
+            }
+            return undefined;
+        }
+
+        function allowDownload(selector, text) {
+            // Create a BLOB so that we can create a URL
+            var blob = new Blob([text], { type: "text/plain" });
+
+            // Create a URL from the BLOB
+            var url = URL.createObjectURL(blob);
+
+            // Allow download
+            document.querySelector(selector).href = url;
+        }
+
+        function update() {
+            allowDownload("#download-trusts", JSON.stringify(trusts, null, 2));
+
+            document.querySelector("#link-count").innerText = `${links.length} links`;
+            document.querySelector("#trust-count").innerText = `${trusts.length} trusts`;
+
+            const results = document.querySelector("#results");
+            results.innerHTML = "";
+
+            for (const link of links) {
+                const id = toID(link.url);
+                const matched = trusts.find(trust => trust.id === id);
+
+                const e = document.createElement("div");
+                e.classList.add("result");
+                if (matched === undefined) {
+                    e.classList.add("unmatched");
+                }
+
+                const l = document.createElement("div");
+                l.classList.add("source");
+                l.dataset.id = id;
+                l.innerText = link.url;
+
+                const m = document.createElement("div");
+                m.classList.add("target");
+                if (matched !== undefined) {
+                    m.innerText = matched.shortName ?? matched.name ?? matched.id;
+                } else {
+                    m.innerText = "NO MATCH";
+                }
+
+                e.append(l, m);
+                results.append(e);
+            }
+        }
+
+        async function* getHTMLOrJSONOrText() {
+            const items = await navigator.clipboard.read();
+            for (const item of items) {
+                if (item.types.includes("text/html")) {
+                    const blob = await item.getType("text/html");
+                    const text = await blob.text();
+                    try {
+                        const document = (new DOMParser().parseFromString(text, "text/html"));
+                        yield { document, type: "text/html" };
+                    } catch (e) { }
+                } else if (item.types.includes("text/plain")) {
+                    const blob = await item.getType("text/plain");
+                    const text = await blob.text();
+                    try {
+                        const document = (new DOMParser().parseFromString(text, "text/html"));
+                        yield { document, type: "text/html" };
+                        continue;
+                    } catch (e) { }
+                    try {
+                        const json = JSON.parse(text);
+                        yield { json, type: "text/json" };
+                        continue;
+                    } catch (e) { }
+
+                    yield { text, type: "text/plain" };
+                }
+            }
+        }
+
+        /**
+         * Currently recognize these formats:
+         * 1. HTML
+         * 2. A JSON array of objects with a `url` property
+         * */
+        async function getLinksFromClipboard() {
+            for await (const o of getHTMLOrJSONOrText()) {
+                if (o.document !== undefined) {
+                    const links = [...o.document.querySelectorAll("a")].map(a => ({ text: a.innerText.trim(), url: a.href }));
+                    return links;
+                } else if (o.json !== undefined) {
+                    const links = o.json;
+                    if (Array.isArray(links) && links.length > 0 && typeof links[0].url === "string") {
+                        return links;
+                    }
+                }
+            }
+        }
+
+        function trustsFromDOM(document) {
+            const text = document.querySelector("#trust-data")?.content.textContent;
+            try {
+                const trusts = JSON.parse(text);
+                if (Array.isArray(trusts) && trusts.length > 0 && typeof trusts[0].id === "string") {
+                    return trusts;
+                }
+            } catch (e) { }
+        }
+
+        /**
+         * Currently recognize these formats:
+         * 1. HTML with a template `trust-data` containing JSON
+         * 2. A JSON array of objects with a `id` property
+         * */
+        async function getTrustsFromClipboard() {
+            for await (const o of getHTMLOrJSONOrText()) {
+                if (o.document !== undefined) {
+                    const trusts = trustsFromDOM(o.document);
+                    if (trusts !== undefined) {
+                        return trusts;
+                    }
+                } else if (o.json !== undefined) {
+                    const trusts = o.json;
+                    if (Array.isArray(trusts) && trusts.length > 0 && typeof trusts[0].id === "string") {
+                        return trusts;
+                    }
+                }
+            }
+        }
+
+        const results = document.querySelector("#results");
+
+        document.querySelector("#paste-links").onclick = (e) => {
+            e.preventDefault();
+            (async () => {
+                const l = await getLinksFromClipboard();
+                if (l !== undefined && l.length > 0) {
+                    console.log(l.length, l);
+                    links = l;
+                    update();
+                } else {
+                    alert("No links on clipboard");
+                }
+            })();
+        };
+
+        const trustsButton = document.querySelector("#paste-trusts");
+        trustsButton.onclick = (e) => {
+            e.preventDefault();
+            (async () => {
+                const t = await getTrustsFromClipboard();
+                if (t !== undefined && t.length > 0) {
+                    console.log(t.length, t);
+                    trusts = t;
+                    update();
+                } else {
+                    alert("No trusts on clipboard");
+                }
+            })();
+        };
+
+        trustsButton.ondragover = (e) => e.preventDefault();
+        trustsButton.ondrop = (e) => {
+            e.preventDefault();
+
+            let files = [...e.dataTransfer.files];
+            let file = files[0];
+
+            if (file) {
+                let reader = new FileReader();
+                reader.onload = function (event) {
+                    let text = event.target.result;
+                    console.log(text);
+
+                    let t;
+                    if (file.name.endsWith(".json")) {
+                        t = JSON.parse(text);
+                    } else {
+                        try {
+                            const document = (new DOMParser().parseFromString(text, "text/html"));
+                            t = trustsFromDOM(document);
+                        } catch (e) { }
+                    }
+
+                    if (t !== undefined) {
+                        trusts = t;
+                        update();
+                    }
+                };
+                reader.readAsText(file);
+            }
+        };
+
+        document.querySelector("#act").onclick = (e) => {
+            e.preventDefault();
+
+            const matched = links.map(link => {
+                const id = toID(link.url);
+                return trusts.find(t => t.id === id);
+            }).filter(m => m);
+
+            const text = document.querySelector("#tags").value.trim();
+            if (text.startsWith("-")) {
+                const tag = text.substring(1);
+                for (const match of matched) {
+                    if (match.tags) {
+                        match.tags = match.tags.filter(t => t !== tag);
+                    }
+                }
+            } else {
+                const tag = text;
+                for (const match of matched) {
+                    if (match.tags && !match.tags.find(t => t === tag)) {
+                        match.tags.push(tag);
+                    }
+                }
+            }
+
+            update();
+        };
+    </script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+                Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            padding: 0 15px;
+            max-width: 650px;
+            font-size: 115%;
+            line-height: 1.4;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        #results {
+            white-space: pre-wrap;
+            font-family: "Monaco", "Andale Mono", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+                Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        }
+
+        .result {
+            padding: 0.5rem;
+        }
+
+        .unmatched {
+            background-color: yellow;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>LIST EDITOR</h1>
+    <p>Give this page a list of links and some trust data and the page will let you add or remove tags to the subset of
+        trusts that either match or do not match the list of links</p>
+    <div><a id="paste-links" href="#">PASTE LINK DATA</a></div>
+    <div><a id="paste-trusts" href="#">PASTE TRUST DATA</a></div>
+    <div><a id="download-trusts" download="trusts.json">DOWNLOAD TRUST DATA</a></div>
+    <div><input id="tags" type="text"><a id="act" href="#">Add/remove tag</a></div>
+    <div> </div>
+    <div><span id="link-count">0 links</span> <span id="trust-count">0 trusts</span></div>
+    <div> </div>
+    <div id="results">
+
+    </div>
+</body>
+
+</html>
