@@ -54,8 +54,6 @@
 
         const trusts = JSON.parse(document.querySelector("#trust-data").content.textContent).sort((a, b) => a.shortName.localeCompare(b.shortName));
 
-
-
         function toID(u) {
             try {
                 const url = new URL(u);
@@ -76,6 +74,13 @@
                 trust.search = searchLink;
             }
         }
+
+        ////////////////////////////////////////////////////////////////
+        // trust data has been fully loaded
+        ////////////////////////////////////////////////////////////////
+
+        const tagsAllTrusts = [...new Set(trusts.flatMap(t => t.tags ?? []))];
+        console.log("tags in use", tagsAllTrusts);
 
         let settings = {
             // Queries can be a simple string or an object with "name" and "value" properties.
@@ -344,6 +349,25 @@
             return tags.map(tagToTitle).join(", ") + " Trusts";
         }
 
+        /** Creates a list of links one for each tag */
+        function createTagLinks(tags) {
+            const e = document.createElement("div");
+            e.classList.add("tags");
+            e.append(...tags.map(tag => {
+                const d = document.createElement("div");
+                d.classList.add("tag");
+                d.dataset.tag = tag;
+                const a = document.createElement("a");
+                a.innerText = tagsToTitle([tag]);
+                const newParams = new URLSearchParams(params);
+                newParams.set("tags", tag);
+                a.href = `?${newParams}`;
+                d.append(a);
+                return d;
+            }));
+            return e;
+        }
+
         function listTrusts() {
             let trustsToList = trusts;
 
@@ -390,6 +414,8 @@
                 e.append(a);
                 content.append(e);
             }
+
+            clone.querySelector("#footer").append(createTagLinks(tagsAllTrusts));
 
             document.body.replaceChildren(clone);
         }
