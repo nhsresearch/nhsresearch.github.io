@@ -32,6 +32,30 @@ You can share your entire environment including your keywords and custom search 
 
 You can bookmark URLs to save your research environment and you can go back to the launcher to make changes to start a new research environment with different keywords and search engines.
 
+## Custom search engines
+
+You can use the launcher to add a custom search engine to the NHS Trust Research app.
+
+If you add a custom search engine, you will see one or more links on the page for each trust that uses the search engine.
+
+A custom search engine is nothing more than a name and a URL.
+
+The name will be used as link text and the URL will be used as the basis for the destination of the link.
+
+If the URL contains `${query}`, you will get one link per keyword search that you've defined and `${query}` will be replaced by each set of keywords.
+
+If the URL does not contain `${query}`, you will get a single link.
+
+The link on each trust page will be different for each trust if the URL contains any of the following:
+* `${shortName}`
+* `${name}`
+* `${id}`
+* `${host}`
+* `${website}`
+
+These symbols are replaced with the relevant property for that trust.
+
+
 ## Running the NHS Trust Research App from the local file system
 
 If you download `index.htm` and `launcher.htm` to the same folder on your local disk, you can run the NHS Trust Research app locally by opening either file in a web browser.
