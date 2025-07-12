@@ -79,7 +79,27 @@
         // trust data has been fully loaded
         ////////////////////////////////////////////////////////////////
 
-        const tagsAllTrusts = [...new Set(trusts.flatMap(t => t.tags ?? []))];
+        const tagRegions = ["east", "london", "midlands", "northeast", "northwest", "southeast", "southwest"];
+        const tagOrder = [
+            ...tagRegions
+        ];
+
+        const tagCompare = (a, b) => {
+            const l = tagOrder.indexOf(a);
+            const r = tagOrder.indexOf(b);
+            if (l !== -1) {
+                if (r === -1) {
+                    return -1;
+                }
+                return l - r;
+            } else if (r !== -1) {
+                return +1;
+            }
+
+            return a.localeCompare(b);
+        };
+
+        const tagsAllTrusts = [...new Set(trusts.flatMap(t => t.tags ?? []))].sort(tagCompare);
         console.log("tags in use", tagsAllTrusts);
 
         let settings = {
@@ -1580,7 +1600,8 @@
         "cqc": "https://www.cqc.org.uk/provider/RX9",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_midlands_ambulance_service_nhs_trust",
         "tags": [
-        "ambulance_trust"
+        "ambulance_trust",
+        "midlands"
         ]
         },
         {
@@ -2641,7 +2662,6 @@
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_west_ambulance_service_nhs_trust",
         "tags": [
         "ambulance_trust",
-        "northeast",
         "northwest"
         ]
         },
@@ -3860,7 +3880,8 @@
         "https://www.whatdotheyknow.com/body/west_midlands_ambulance_service_university_nhs_foundation_trust",
         "search": "?s=${query}",
         "tags": [
-        "ambulance_trust"
+        "ambulance_trust",
+        "midlands"
         ]
         },
         {
