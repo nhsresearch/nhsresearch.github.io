@@ -31,3 +31,19 @@ Once you launch the app, you'll have access to all your custom keyword searches 
 You can share your entire environment including your keywords and custom search engines by sharing the URL of any page that you're looking at in the NHS Trust Research app.
 
 You can bookmark URLs to save your research environment and you can go back to the launcher to make changes to start a new research environment with different keywords and search engines.
+
+## Running the NHS Trust Research App from the local file system
+
+If you download `index.htm` and `launcher.htm` to the same folder on your local disk, you can run the NHS Trust Research app locally by opening either file in a web browser.
+
+One advantage to running the app locally from your file system is that you can use the custom search engine feature to link to a trust-specific folder on your disk.
+
+For example, if you are keeping trust-specific documents in a folder called `nhs-research` in your documents folder on Mac OS X, with a subfolder for each trust named using the trust's ID, you could create a custom search engine in the launcher with the following settings to produce a link to the correct folder on the page for each NHS trust:
+
+Name:
+**Research**
+
+URL:
+**`file:///Users/user/Documents/nhs-research/${id}`**
+
+`user` should change to match your own local user name.
