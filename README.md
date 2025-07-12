@@ -36,7 +36,7 @@ You can bookmark URLs to save your research environment and you can go back to t
 
 You can use the launcher to add a custom search engine to the NHS Trust Research app.
 
-If you add a custom search engine, you will see one or more links on the page for each trust that uses the search engine.
+If you add a custom search engine, you will see one or more links added to the page for each trust. The additional link(s) will use the search engine.
 
 A custom search engine is nothing more than a name and a URL.
 
@@ -54,6 +54,17 @@ The link on each trust page will be different for each trust if the URL contains
 * `${website}`
 
 These symbols are replaced with the relevant property for that trust.
+
+This is what your settings would look like if you wanted to add DuckDuckGo as a custom search engine:
+
+Name:
+**DuckDuckGo**
+
+URL:
+**`https://duckduckgo.com/?q=${query}+site%3A${host}`**
+
+These settings will give you one link to DuckDuckGo for each keyword set that you have defined (because it contains `${query}`) and the search results are limited to those on the trust's own websites (because of `site:${host}`).
+
 
 
 ## Running the NHS Trust Research App from the local file system
