@@ -30,6 +30,12 @@
             document.querySelector(selector).href = url;
         }
 
+        function matchLink(link) {
+            const id = toID(link.url);
+            const matched = trusts.find(trust => trust.id === id || (trust.legacyIDs ?? []).includes(id)) ?? trusts.find(trust => [trust.wikipedia, trust.whatdotheyknow, trust.provider].includes(link.url));
+            return matched;
+        }
+
         function update() {
             allowDownload("#download-trusts", JSON.stringify(trusts, null, 2));
 
@@ -41,7 +47,7 @@
 
             for (const link of links) {
                 const id = toID(link.url);
-                const matched = trusts.find(trust => trust.id === id);
+                const matched = matchLink(link);
 
                 const e = document.createElement("div");
                 e.classList.add("result");
@@ -212,10 +218,7 @@
         document.querySelector("#act").onclick = (e) => {
             e.preventDefault();
 
-            const matched = links.map(link => {
-                const id = toID(link.url);
-                return trusts.find(t => t.id === id);
-            }).filter(m => m);
+            const matched = links.map(matchLink).filter(m => m);
 
             const text = document.querySelector("#tags").value.trim();
             if (text.startsWith("-")) {
@@ -269,8 +272,8 @@
 
 <body>
     <h1>LIST EDITOR</h1>
-    <p>Give this page a list of links and some trust data and the page will let you add or remove tags to the subset of
-        trusts that either match or do not match the list of links</p>
+    <p>Give this page a list of links and some trust data and the page will let you add or remove tags to the 
+        trusts that can be matched to the links</p>
     <div><a id="paste-links" href="#">PASTE LINK DATA</a></div>
     <div><a id="paste-trusts" href="#">PASTE TRUST DATA</a></div>
     <div><a id="download-trusts" download="trusts.json">DOWNLOAD TRUST DATA</a></div>
