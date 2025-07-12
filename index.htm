@@ -79,10 +79,41 @@
         // trust data has been fully loaded
         ////////////////////////////////////////////////////////////////
 
-        const tagRegions = ["east", "london", "midlands", "northeast", "northwest", "southeast", "southwest"];
+        const tagRegions = ["east", "london", "midlands", "northeast", "northwest", "southeast", "southwest", "england"];
+        const tagTypes = ["ambulance_trust", "community_services_trust", "hospital_trust", "major_ae", "mental_health_trust", "national_body"];
         const tagOrder = [
             ...tagRegions
         ];
+
+        function getRegions(trust) {
+            return (trust.tags ?? []).filter(tag => tagRegions.includes(tag));
+        }
+
+        function getTypes(trust) {
+            return (trust.tags ?? []).filter(tag => tagTypes.includes(tag));
+        }
+
+        function addTag(trust, tag) {
+            const tags = trust.tags ?? [];
+            if (!tags.includes(tag)) {
+                tags.push(tag);
+            }
+            trust.tags = tags;
+        }
+
+        for (const trust of trusts) {
+            const regions = getRegions(trust);
+            if (regions.length === 0) {
+                addTag(trust, "noregion");
+            }
+        }
+
+        for (const trust of trusts) {
+            const regions = getTypes(trust);
+            if (regions.length === 0) {
+                addTag(trust, "notype");
+            }
+        }
 
         const tagCompare = (a, b) => {
             const l = tagOrder.indexOf(a);
@@ -353,6 +384,7 @@
                 "community_services_trust": "Community Services",
                 "hospital_trust": "Hospital",
                 "ambulance_trust": "Ambulance",
+                "national_body": "National",
 
                 "east": "East of England",
                 "london": "London",
@@ -360,7 +392,8 @@
                 "northeast": "North East and Yorkshire",
                 "northwest": "North West",
                 "southeast": "South East",
-                "southwest": "South West"
+                "southwest": "South West",
+                "england": "England",
             };
             return tags[tag] ?? tag;
         }
@@ -435,7 +468,7 @@
                 content.append(e);
             }
 
-            clone.querySelector("#footer").append(createTagLinks(tagsAllTrusts));
+            clone.querySelector("#footer").append(createTagLinks(tagsAllTrusts.filter(t => !["england", "national_body"].includes(t))));
 
             document.body.replaceChildren(clone);
         }
@@ -797,7 +830,8 @@
         "wikipedia": "https://en.wikipedia.org/wiki/NHS_England",
         "cqc": "https://www.cqc.org.uk/search/all?filters[]=services:service-provider",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_england",
-        "search": "?s=${query}"
+        "search": "?s=${query}",
+        "tags": [ "england", "national_body" ]
         },
         {
         "name": "Airedale NHS Foundation Trust",
@@ -886,7 +920,11 @@
         "website": "https://www.beh-mht.nhs.uk/",
         "id": "beh-mht",
         "wikipedia": "https://en.wikipedia.org/wiki/Barnet,_Enfield_and_Haringey_Mental_Health_NHS_Trust",
-        "merged": "northlondonmentalhealth"
+        "merged": "northlondonmentalhealth",
+        "tags": [
+        "mental_health_trust",
+        "london"
+        ]
         },
         {
         "name": "Barnsley Hospital NHS Foundation Trust",
@@ -1038,7 +1076,8 @@
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/blackpool_teaching_hospitals_nhs_foundation_trust",
         "tags": [
         "hospital_trust",
-        "major_ae"
+        "major_ae",
+        "northwest"
         ]
         },
         {
@@ -1396,7 +1435,8 @@
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/dartford_and_gravesham_nhs_trust",
         "tags": [
         "hospital_trust",
-        "major_ae"
+        "major_ae",
+        "southeast"
         ]
         },
         {
@@ -1492,13 +1532,15 @@
         "name": "The Dudley Group NHS Foundation Trust",
         "provider": "https://www.england.nhs.uk/publication/the-dudley-group-nhs-foundation-trust/",
         "shortName": "Dudley Group",
-        "website": "https://www.dgoh.nhs.uk/",
-        "id": "dgoh",
+        "website": "https://www.dgft.nhs.uk/",
+        "id": "dgft",
         "cqc": "https://www.cqc.org.uk/provider/RNA",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/the_dudley_group_nhs_foundation_trust",
+        "legacyIDs": ["dgoh", "dudleygroup"],
         "tags": [
         "hospital_trust",
-        "major_ae"
+        "major_ae",
+        "midlands"
         ]
         },
         {
@@ -1614,7 +1656,8 @@
         "cqc": "https://www.cqc.org.uk/provider/RYC",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_of_england_ambulance_service_nhs_trust",
         "tags": [
-        "ambulance_trust"
+        "ambulance_trust",
+        "east"
         ]
         },
         {
@@ -1643,7 +1686,8 @@
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/east_sussex_healthcare_nhs_trust",
         "tags": [
         "hospital_trust",
-        "major_ae"
+        "major_ae",
+        "southeast"
         ]
         },
         {
@@ -1685,9 +1729,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Frimley_Health_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RDU",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/frimley_health_nhs_foundation_trust",
+        "legacyIDs": ["frimleyhealth"],
         "tags": [
         "hospital_trust",
-        "major_ae"
+        "major_ae",
+        "southeast"
         ]
         },
         {
@@ -1830,7 +1876,8 @@
         "https://www.whatdotheyknow.com/body/hampshire_and_isle_of_wight_healthcare_nhs_foundation_trust",
         "tags": [
         "community_services_trust",
-        "mental_health_trust"
+        "mental_health_trust",
+        "southeast"
         ]
         },
         {
@@ -2108,7 +2155,11 @@
         "wikipedia": "https://en.wikipedia.org/wiki/Lancashire_and_South_Cumbria_NHS_Foundation_Trust",
         "id": "lscft",
         "website": "https://www.lscft.nhs.uk/",
-        "cqc": "https://www.cqc.org.uk/provider/RW5"
+        "cqc": "https://www.cqc.org.uk/provider/RW5",
+        "tags":[
+        "mental_health_trust",
+        "northwest"
+        ]
         },
         {
         "name": "Lancashire Teaching Hospitals NHS Foundation Trust",
@@ -2133,7 +2184,11 @@
         "id": "leedsandyorkpft",
         "wikipedia": "https://en.wikipedia.org/wiki/Leeds_and_York_Partnership_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RGD",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/leeds_and_york_partnership_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/leeds_and_york_partnership_nhs_foundation_trust",
+        "tags": [
+        "mental_health_trust",
+        "northeast"
+        ]
         },
         {
         "name": "Leeds Community Healthcare NHS Trust",
@@ -2242,7 +2297,8 @@
         "provider": "https://www.england.nhs.uk/publication/liverpool-university-hospitals-nhs-ft/",
         "shortName": "Liverpool University Hospitals",
         "legacyIDs": [
-        "aintreehospitals"
+        "aintreehospitals",
+        "liverpoolft"
         ],
         "wikipedia": "https://en.wikipedia.org/wiki/Liverpool_University_Hospitals_NHS_Foundation_Trust",
         "id": "uhliverpool",
@@ -2251,7 +2307,8 @@
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/luhft",
         "tags": [
         "hospital_trust",
-        "major_ae"
+        "major_ae",
+        "northwest"
         ]
         },
         {
@@ -2559,7 +2616,8 @@
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/ncic",
         "tags": [
         "hospital_trust",
-        "major_ae"
+        "major_ae",
+        "northwest"
         ]
         },
         {
@@ -2604,7 +2662,8 @@
         "cqc": "https://www.cqc.org.uk/provider/G6V2S",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_london_nhs_foundation_trust",
         "tags": [
-        "mental_health_trust"
+        "mental_health_trust",
+        "london"
         ]
         },
         {
@@ -2690,7 +2749,12 @@
         "website": "https://www.nwbh.nhs.uk/",
         "id": "nwbh",
         "wikipedia": "https://en.wikipedia.org/wiki/North_West_Boroughs_Healthcare_NHS_Foundation_Trust",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_west_boroughs_healthcare_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/north_west_boroughs_healthcare_nhs_foundation_trust",
+        "merged": "gmmh",
+        "tags":[
+        "mental_health_trust",
+        "northwest"
+        ]
         },
         {
         "name": "Northampton General Hospital NHS Trust",
@@ -2992,7 +3056,12 @@
         "website": "https://www.rbht.nhs.uk/",
         "id": "rbht",
         "wikipedia": "https://en.wikipedia.org/wiki/Royal_Brompton_and_Harefield_NHS_Foundation_Trust",
-        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_brompton_and_harefield_nhs_foundation_trust"
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/royal_brompton_and_harefield_nhs_foundation_trust",
+        "merged": "guysandstthomas",
+        "tags": [
+        "hospital_trust",
+        "london"
+        ]
         },
         {
         "name": "Royal Cornwall Hospitals NHS Trust",
@@ -3357,12 +3426,14 @@
         "shortName": "South Tyneside and Sunderland",
         "website": "https://www.stsft.nhs.uk/",
         "id": "stsft",
+        "legacyIDs": ["stft"],
         "wikipedia": "https://en.wikipedia.org/wiki/South_Tyneside_and_Sunderland_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/R0B",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/south_tyneside_and_sunderland_nhs_foundation_trust",
         "tags": [
         "hospital_trust",
-        "major_ae"
+        "major_ae",
+        "northeast"
         ]
         },
         {
@@ -3435,7 +3506,8 @@
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/southport_and_ormskirk_hospital_nhs_trust",
         "tags": [
         "hospital_trust",
-        "major_ae"
+        "major_ae",
+        "northwest"
         ]
         },
         {
@@ -3529,15 +3601,17 @@
         "name": "Tameside and Glossop Integrated Care NHS Foundation Trust",
         "provider": "https://www.england.nhs.uk/publication/tameside-and-glossop-integrated-care-nhs-foundation-trust/",
         "shortName": "Tameside and Glossop Integrated Care",
-        "website": "https://www.tamesidehospital.nhs.uk/",
-        "id": "tamesidehospital",
+        "website": "https://www.tamesideandglossopicft.nhs.uk/",
+        "id": "tamesideandglossopicft",
+        "legacyIDs": ["tamesidehospital"],
         "wikipedia": "https://en.wikipedia.org/wiki/Tameside_and_Glossop_Integrated_Care_NHS_Foundation_Trust",
         "cqc": "https://www.cqc.org.uk/provider/RMP",
         "whatdotheyknow":
         "https://www.whatdotheyknow.com/body/tameside_and_glossop_integrated_care_nhs_foundation_trust",
         "tags": [
         "hospital_trust",
-        "major_ae"
+        "major_ae",
+        "northwest"
         ]
         },
         {
@@ -3927,7 +4001,8 @@
         "cqc": "https://www.cqc.org.uk/provider/RY7",
         "whatdotheyknow": "https://www.whatdotheyknow.com/body/wirral_community_health_and_care_nhs_foundation_trust",
         "tags": [
-        "community_services_trust"
+        "community_services_trust",
+        "northwest"
         ]
         },
         {
