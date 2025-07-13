@@ -82,7 +82,7 @@
         const tagRegions = ["east", "london", "midlands", "northeast", "northwest", "southeast", "southwest", "england"];
         const tagTypes = ["ambulance_trust", "community_services_trust", "hospital_trust", "major_ae", "mental_health_trust", "national_body"];
         const tagOrder = [
-            ...tagRegions
+            ...tagRegions, "foundation_trust"
         ];
 
         function getRegions(trust) {
@@ -102,16 +102,27 @@
         }
 
         for (const trust of trusts) {
+
             const regions = getRegions(trust);
             if (regions.length === 0) {
                 addTag(trust, "noregion");
             }
-        }
 
-        for (const trust of trusts) {
-            const regions = getTypes(trust);
-            if (regions.length === 0) {
+            const types = getTypes(trust);
+            if (types.length === 0) {
                 addTag(trust, "notype");
+            }
+
+            if (trust.name.includes("Foundation")) {
+                addTag(trust, "foundation_trust");
+            }
+
+            if (trust.name.includes("University") || trust.name.includes("College")) {
+                addTag(trust, "University");
+            }
+
+            if (trust.name.includes("Teaching")) {
+                addTag(trust, "Teaching");
             }
         }
 
@@ -394,6 +405,8 @@
                 "southeast": "South East",
                 "southwest": "South West",
                 "england": "England",
+
+                "foundation_trust": "Foundation"
             };
             return tags[tag] ?? tag;
         }
@@ -468,7 +481,15 @@
                 content.append(e);
             }
 
-            clone.querySelector("#footer").append(createTagLinks(tagsAllTrusts.filter(t => !["england", "national_body"].includes(t))));
+            const countsElement = clone.querySelector("#counts") ?? undefined;
+            if (countsElement !== undefined) {
+                countsElement.innerText = `${trustsToList.length} trusts`;
+            }
+
+            const footer = clone.querySelector("#footer") ?? undefined;
+            footer.append(
+                createTagLinks(tagsAllTrusts.filter(t => !["england", "national_body"].includes(t)))
+            );
 
             document.body.replaceChildren(clone);
         }
@@ -763,6 +784,11 @@
             color: lightgray;
         }
 
+        #counts {
+            color: gray;
+            margin-top: 1rem;
+        }
+
         #environment-save {
             display: none;
         }
@@ -787,7 +813,7 @@
 
 <body>
     <h1 id="shortName"></h1>
-    
+
     <div id="website"><a href="">Website</a></div>
     <div id="search-queries" class="queries"></div>
     <div id="provider"><a href="">NHS Report & Accounts</a></div>
@@ -806,12 +832,13 @@
     <div> </div>
     <div id="environment-share"><a>Share Customisations ⇧</a></div>
     <div id="environment-save"><a>Keep Customisations ⇩</a></div>
-    
+
     <div id="name"></div>
 
     <template id="all-trusts-template">
         <h1>ALL TRUSTS</h1>
         <div id="content"></div>
+        <div id="counts"></div>
         <div> </div>
         <div id="footer"></div>
         <div><a href="launcher.htm">← LAUNCHER</a></div>
