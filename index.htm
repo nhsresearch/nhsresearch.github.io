@@ -8,11 +8,11 @@
     <script type="module">
         document.addEventListener("keydown", (e)=>{
             // console.log(e);
-            if (e.key === "-") { document.body.dataset.negative = true; }
+            if (e.key === "-" && !(e.metaKey || e.shiftKey || e.altKey || e.ctrlKey)) { document.body.dataset.negative = true; }
         });
         document.addEventListener("keyup", (e)=>{
             // console.log(e);
-            if (e.key === "-") { delete document.body.dataset.negative; }
+            if (e.key === "-" && !(e.metaKey || e.shiftKey || e.altKey || e.ctrlKey)) { delete document.body.dataset.negative; }
         });
 
         const params = new URLSearchParams(document.location.search);
@@ -56,13 +56,20 @@
                 if (nv.value !== undefined) {
                     this.title_ = nv.name;
                     this.list = nv.value;
+                    if (this.list && this.list.length > 0) {
+                        const first = this.list[0];
+                        if (first[0] === "-") {
+                            this.reverse = true;
+                            this.list[0] = first.substring(1);
+                        }
+                    }
                 }
             }
 
             isMatch(trust) {
                 if (this.list !== undefined) {
                     const foundID = this.list.find(id => trust.id === id || (trust.legacyIDs && trust.legacyIDs.includes(id)));
-                    return foundID !== undefined;
+                    return this.reverse ? foundID === undefined : foundID !== undefined;
                 }
 
                 const isTagMatch = (trust, tag, reverse) => {
