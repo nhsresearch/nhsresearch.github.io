@@ -32,7 +32,11 @@
 
         function matchLink(link) {
             const id = toID(link.url);
-            const matched = trusts.find(trust => trust.id === id || (trust.legacyIDs ?? []).includes(id)) ?? trusts.find(trust => [trust.wikipedia, trust.whatdotheyknow, trust.provider].includes(link.url));
+            let matched = trusts.find(trust => trust.id === id || (trust.legacyIDs ?? []).includes(id)) ?? trusts.find(trust => [trust.wikipedia, trust.whatdotheyknow, trust.provider].includes(link.url));
+            if (matched === undefined) {
+                const id2 = (new URL(link.url, document.location)).searchParams.get("id")?.trim();
+                matched = trusts.find(trust => trust.id === id2 || (trust.legacyIDs ?? []).includes(id2));
+            }
             return matched;
         }
 
