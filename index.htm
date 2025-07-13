@@ -13,11 +13,82 @@
         // This means that parameters at the end of the URL are more important than earlier ones with the same name
         const parameters = Object.fromEntries([...params.entries()].map(([k, v]) => [k.trim(), v.trim()]));
 
-        if (parameters.tags !== undefined) {
-            parameters.tags = parameters.tags.split(",").map(t => t.trim()).filter(t => t !== "");
-            if (parameters.tags.length === 0) {
-                parameters.tags = undefined;
+        function separatedList(text, separator = " ") {
+            if (text === undefined) { return undefined; }
+            return text.split(separator).map(t => t.trim()).filter(t => t !== "");
+        }
+
+        class List {
+            constructor(parameters) {
+                this.tags = separatedList(parameters.tags)?.map(tag => {
+                    if (tag[0] === "-") {
+                        return { id: tag.substring(1), reverse: true };
+                    }
+                    return { id: tag };
+                });
+                this.list = separatedList(parameters.list);
             }
+
+            isMatch(trust) {
+                if (this.list !== undefined) {
+                    const foundID = list.find(id => trust.id === id || (trust.legacyIDs && trust.legacyIDs.includes(id)));
+                    return foundID !== undefined;
+                }
+
+                const isTagMatch = (trust, tag, reverse) => {
+                    const match = (trust.tags ?? []).includes(tag);
+                    return reverse ? !match : match;
+                };
+                const isTagsMatch = (trust, tags) => {
+                    const missingTag = tags.find(tag => !isTagMatch(trust, tag.id, tag.reverse));
+                    return missingTag === undefined;
+                };
+                if (this.tags !== undefined) {
+                    return isTagsMatch(trust, this.tags);
+                }
+
+                return true;
+            }
+
+            filter(trusts) {
+                return trusts.filter(t => this.isMatch(t));
+            }
+
+            get isPassthrough() {
+                return (this.list === undefined) && (this.tags === undefined);
+            }
+
+            get title() {
+                if (this.title_ !== undefined) {
+                    return this.title_;
+                }
+
+                if (this.list !== undefined) {
+                    return `Custom List`;
+                }
+
+                function tagTitle(tag) {
+                    const title = tagToTitle(tag.id);
+                    return tag.reverse ? `Not ${title}` : title;
+                }
+
+                if (this.tags !== undefined) {
+                    return this.tags.map(tagTitle).join(" & ") + " Trusts";
+                }
+
+                return `All Trusts`;
+            }
+        }
+
+        const list = new List(parameters);
+
+        /** Returns a copy of params without any of the list page or item page params being set */
+        function paramsForListPage() {
+            const p = new URLSearchParams(params);
+            p.delete("id");   // No ID or else not a list page
+            p.delete("list"); // Remove list page param in prep for new ones
+            p.delete("tags"); // Remove list page param in prep for new ones
+            return p;
         }
 
         function searchParamsDelete(name) {
@@ -425,7 +496,7 @@
                 d.dataset.tag = tag;
                 const a = document.createElement("a");
                 a.innerText = tagsToTitle([tag]);
-                const newParams = new URLSearchParams(params);
+                const newParams = paramsForListPage();
                 newParams.set("tags", tag);
                 a.href = `?${newParams}`;
                 d.append(a);
@@ -435,30 +506,23 @@
         }
 
         function listTrusts() {
-            let trustsToList = trusts;
+            let trustsToList = list.filter(trusts);
 
-            const tags = parameters.tags;
-
-            if (tags !== undefined) {
-                trustsToList = trustsToList.filter(trust => {
-                    const missing = tags.find(t => trust.tags === undefined || !trust.tags.includes(t));
-                    return missing === undefined;
-                });
-            }
             const template = document.querySelector("#all-trusts-template") ?? undefined;
             const clone = template.content.cloneNode(true);
 
-            if (parameters.tags !== undefined) {
-                const title = clone.querySelector("h1");
-                title.innerText = tagsToTitle(tags);
+            if (!list.isPassthrough) {
+                const title = list.title;
 
-                document.title = `[${tagsToTitle(tags)}] NHS Trust Research`
+                const h1 = clone.querySelector("h1");
+                h1.innerText = title;
+
+                document.title = `[${title}] NHS Trust Research`
 
                 const e = document.createElement("div");
                 const a = document.createElement("a");
                 a.innerText = "← ALL TRUSTS";
-                const newParams = new URLSearchParams(params);
-                newParams.delete("tags");
+                const newParams = paramsForListPage(params);
                 a.href = `?${newParams}`
                 e.append(a);
                 clone.querySelector("#footer").prepend(e);
@@ -679,8 +743,8 @@
                 const at = document.querySelector("#all-trusts a") ?? undefined;
                 if (at !== undefined) {
                     const newParams = new URLSearchParams(params);
-                    if (parameters.tags !== undefined) {
-                        at.innerText = `← ${tagsToTitle(parameters.tags)}`;
+                    if (!list.isPassthrough) {
+                        at.innerText = `← ${list.title}`;
                     }
                     at.href = `?${newParams}#${this.current.id}`;
                 }
