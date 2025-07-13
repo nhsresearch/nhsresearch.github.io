@@ -18,6 +18,14 @@
             return text.split(separator).map(t => t.trim()).filter(t => t !== "");
         }
 
+        function namedList(text, separator = " ") {
+            const pieces = separatedList(text, "=");
+            if (pieces && pieces.length === 2) {
+                return { name: pieces[0], value: separatedList(pieces[1], separator) };
+            }
+            return { value: separatedList(text, separator) };
+        }
+
         class List {
             constructor(parameters) {
                 this.tags = separatedList(parameters.tags)?.map(tag => {
@@ -26,12 +34,15 @@
                     }
                     return { id: tag };
                 });
-                this.list = separatedList(parameters.list);
+
+                const nv = namedList(parameters.list);
+                this.title_ = nv.name;
+                this.list = nv.value;                
             }
 
             isMatch(trust) {
                 if (this.list !== undefined) {
-                    const foundID = list.find(id => trust.id === id || (trust.legacyIDs && trust.legacyIDs.includes(id)));
+                    const foundID = this.list.find(id => trust.id === id || (trust.legacyIDs && trust.legacyIDs.includes(id)));
                     return foundID !== undefined;
                 }
 
