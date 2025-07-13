@@ -6,6 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NHS Trust Research</title>
     <script type="module">
+        document.addEventListener("keydown", (e)=>{
+            // console.log(e);
+            if (e.key === "-") { document.body.dataset.negative = true; }
+        });
+        document.addEventListener("keyup", (e)=>{
+            // console.log(e);
+            if (e.key === "-") { delete document.body.dataset.negative; }
+        });
+
         const params = new URLSearchParams(document.location.search);
 
         // Users may edit URLs directly, so we want to be able to deal with extraneous spaces
@@ -27,17 +36,27 @@
         }
 
         class List {
+            static fromTag(tag) {
+                return new List({ tags: tag });
+            }
+
             constructor(parameters) {
-                this.tags = separatedList(parameters.tags)?.map(tag => {
-                    if (tag[0] === "-") {
-                        return { id: tag.substring(1), reverse: true };
-                    }
-                    return { id: tag };
-                });
+                const nv0 = namedList(parameters.tags);
+                if (nv0.value !== undefined) {
+                    this.title_ = nv0.name;
+                    this.tags = nv0.value.map(tag => {
+                        if (tag[0] === "-") {
+                            return { id: tag.substring(1), reverse: true };
+                        }
+                        return { id: tag };
+                    });
+                }
 
                 const nv = namedList(parameters.list);
-                this.title_ = nv.name;
-                this.list = nv.value;                
+                if (nv.value !== undefined) {
+                    this.title_ = nv.name;
+                    this.list = nv.value;
+                }
             }
 
             isMatch(trust) {
@@ -493,25 +512,31 @@
             return tags[tag] ?? tag;
         }
 
-        function tagsToTitle(tags) {
-            return tags.map(tagToTitle).join(", ") + " Trusts";
-        }
-
         /** Creates a list of links one for each tag */
         function createTagLinks(tags) {
-            const e = document.createElement("div");
-            e.classList.add("tags");
-            e.append(...tags.map(tag => {
+
+            function createTagLink(tag) {
                 const d = document.createElement("div");
                 d.classList.add("tag");
                 d.dataset.tag = tag;
                 const a = document.createElement("a");
-                a.innerText = tagsToTitle([tag]);
+                const l = List.fromTag(tag);
+                a.innerText = l.title;
                 const newParams = paramsForListPage();
                 newParams.set("tags", tag);
                 a.href = `?${newParams}`;
                 d.append(a);
                 return d;
+            }
+
+            const e = document.createElement("div");
+            e.classList.add("tags");
+            e.append(...tags.flatMap(tag => {
+                const p = createTagLink(tag);
+                p.classList.add("positive");
+                const n = createTagLink(`-${tag}`);
+                n.classList.add("negative");
+                return [p, n];
             }));
             return e;
         }
@@ -836,6 +861,22 @@
 
         a {
             text-decoration: none;
+        }
+
+        .positive {
+            display: block;
+        }
+
+        body[data-negative] .positive {
+            display: none;
+        }
+
+        .negative {
+            display: none;
+        }
+
+        body[data-negative] .negative {
+            display: block;
         }
 
         #name {
