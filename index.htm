@@ -17,10 +17,27 @@
 
         const params = new URLSearchParams(document.location.search);
 
+        // This allows shorter names to be used in the URL
+        // Also allows names to be migrated
+        function mapParameterName(name) {
+            if (name.endsWith("-q")) {
+                return removeEnd(name, "-q") + "-queries";
+            }
+            if (name.endsWith("-e")) {
+                return removeEnd(name, "-e") + "-engine";
+            }
+            if (name.endsWith("-en")) {
+                return removeEnd(name, "-en") + "-engine-name";
+            }
+            return name;
+        }
+
         // Users may edit URLs directly, so we want to be able to deal with extraneous spaces
         // We don't have any parameters that can be usefully stated more than once, so make an object from trimmed data
         // This means that parameters at the end of the URL are more important than earlier ones with the same name
-        const parameters = Object.fromEntries([...params.entries()].map(([k, v]) => [k.trim(), v.trim()]));
+        const parameters = Object.fromEntries([...params.entries()].map(([k, v]) => [mapParameterName(k.trim()), v.trim()]));
+
+        
 
         function separatedList(text, separator = " ") {
             if (text === undefined) { return undefined; }
@@ -737,15 +754,18 @@
                 const setting = "search-queries";
 
                 const searchURL = new URL(this.current.search ?? "search?query=${query}", this.current.website);
-                const [searchParamName] = [...searchURL.searchParams.entries()].find(e => e[1] === "${query}");
+                const queryParamEntry = [...searchURL.searchParams.entries()].find(e => e[1] === "${query}");
+                const [searchParamName] = queryParamEntry ?? [];
 
                 if (searchParamName === undefined) {
-                    console.log("invalid search URL");
+                    console.log("search URL has no ${query}", searchURL);
                 }
 
                 const createURL = (value) => {
                     const url = new URL(searchURL);
-                    url.searchParams.set(searchParamName, `${value}`);
+                    if (searchParamName !== undefined) {
+                        url.searchParams.set(searchParamName, `${value}`);
+                    }
                     return url;
                 };
 
@@ -931,6 +951,7 @@
 
         .queries {
             margin-left: 1rem;
+            font-style: italic;
         }
 
         .merged {
