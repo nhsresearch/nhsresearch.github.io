@@ -6,6 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EXTRACT LINKS</title>
     <script type="module">
+
+        // function linkMap(link) {
+        //     const u = new URL(link.url);
+        //     const id = u.pathname.split("/").filter(p => p).at(-1);
+        //     const name = link.text;
+        //     const shortName = name.replaceAll("NHS ", "");
+        //     const keyName = name.replaceAll("&", "and").replaceAll(" ", "_");
+        //     const wikipedia = `https://en.wikipedia.org/wiki/${keyName}`;
+        //     const whatdotheyknow = `https://www.whatdotheyknow.com/body/${keyName.toLowerCase()}`;
+        //     return {
+        //         name,
+        //         provider: link.url,
+        //         shortName,
+        //         website: `https://www.${name.replaceAll(" ", "").toLowerCase()}.scot.nhs.uk/about-us`,
+        //         id,
+        //         legacyIDs: [ id ],
+        //         wikipedia,
+        //         whatdotheyknow,
+        //         tags: ["scotland", "nhs_board"],
+        //         search: "/?s=${query}"
+        //     };
+        // }
+
         async function getLinksFromClipboard() {
             // Only returns links from the first item
             const items = await navigator.clipboard.read();
@@ -34,8 +57,12 @@
         document.querySelector("#paste-json").onclick = (e) => {
             e.preventDefault();
             (async () => {
-                const links = await getLinksFromClipboard();
+                let links = await getLinksFromClipboard();
                 if (links !== undefined) {
+                    if (globalThis.linkMap !== undefined) {
+                        // Define a map function in global variable `linkMap` if you like
+                        links = links.map(globalThis.linkMap).filter(l => l);
+                    }
                     results.innerText = JSON.stringify(links, null, 2);
                 } else {
                     alert("No HTML on clipboard");
