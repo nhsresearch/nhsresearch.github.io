@@ -337,11 +337,36 @@
         ////////////////////////////////////////////////////////////////
 
         function loadSearchEngines() {
+            function authoriseEngine(engine) {
+                let authorisedEngines;
+                const previousEngineText = localStorage.getItem("engines") ?? undefined;
+                if (previousEngineText !== undefined) {
+                    authorisedEngines = JSON.parse(previousEngineText);
+                    const previousEngine = authorisedEngines.find(p => p === engine.url);
+                    if (previousEngine !== undefined) {
+                        return engine;
+                    }
+                }
+
+                const url = new URL(engine.url);
+                if (confirm(`OK to enable search engine: '${url.hostname}' ?\n\nURL: ${engine.url}\n\nName: ${engine.name}\n\n`)) {
+                    authorisedEngines = authorisedEngines ?? [];
+                    authorisedEngines.push(engine.url);
+                    localStorage.setItem("engines", JSON.stringify(authorisedEngines));
+                    return engine;
+                } else {
+                    document.body.innerText = "AUTHORISATION FAILED";
+                }
+
+                throw "AUTHORISATION FAILURE";
+            }
+
             function loadEngine(key) {
                 const url = parameters[`${key}-engine`];
                 const id = key.toLowerCase().replaceAll(" ", "-");
                 const name = parameters[`${key}-engine-name`] ?? parameters[`${id}-engine-name`] ?? key;
-                return { id, name, url };
+                const engine = { id, name, url };
+                return authoriseEngine(engine);
             }
 
             const engineKeys = Object.keys(parameters).filter(k => k.endsWith("-engine")).map(k => removeEnd(k, "-engine"));
