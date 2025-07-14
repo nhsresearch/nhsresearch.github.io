@@ -190,5 +190,7 @@ For example:
 ?list=From the Capitals=clch nhslothian
 ```
 
+This creates a list titled **From the Capitals** containing two NHS bodies: one that provides services in London and one that provides services in Edinburgh.
+
 You can also provide a title for the `tags` parameter.
 
