@@ -612,7 +612,7 @@
 
             const footer = clone.querySelector("#footer") ?? undefined;
             footer.append(
-                createTagLinks(tagsAllTrusts.filter(t => !["england", "national_body"].includes(t)))
+                createTagLinks(tagsAllTrusts.filter(t => !["national_body"].includes(t)))
             );
 
             document.body.replaceChildren(clone);
