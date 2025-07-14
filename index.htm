@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NHS Trust Research</title>
     <script type="module">
-        document.addEventListener("keydown", (e)=>{
+        document.addEventListener("keydown", (e) => {
             // console.log(e);
             if (e.key === "-" && !(e.metaKey || e.shiftKey || e.altKey || e.ctrlKey)) { document.body.dataset.negative = true; }
         });
-        document.addEventListener("keyup", (e)=>{
+        document.addEventListener("keyup", (e) => {
             // console.log(e);
             if (e.key === "-" && !(e.metaKey || e.shiftKey || e.altKey || e.ctrlKey)) { delete document.body.dataset.negative; }
         });
@@ -110,10 +110,10 @@
                 }
 
                 if (this.tags !== undefined) {
-                    return this.tags.map(tagTitle).join(" & ") + " Trusts";
+                    return this.tags.map(tagTitle).join(" & ");
                 }
 
-                return `All Trusts`;
+                return `All`;
             }
         }
 
@@ -187,10 +187,10 @@
         // trust data has been fully loaded
         ////////////////////////////////////////////////////////////////
 
-        const tagRegions = ["east", "london", "midlands", "northeast", "northwest", "southeast", "southwest", "england"];
-        const tagTypes = ["ambulance_trust", "community_services_trust", "hospital_trust", "major_ae", "mental_health_trust", "national_body"];
+        const tagRegions = ["east", "london", "midlands", "northeast", "northwest", "southeast", "southwest", "england", "scotland"];
+        const tagTypes = ["ambulance_trust", "community_services_trust", "hospital_trust", "major_ae", "mental_health_trust", "national_body", "nhs_board"];
         const tagOrder = [
-            ...tagRegions, "foundation_trust"
+            ...tagRegions, "foundation_trust", "nhs_trust", "nhs_board"
         ];
 
         function getRegions(trust) {
@@ -199,6 +199,11 @@
 
         function getTypes(trust) {
             return (trust.tags ?? []).filter(tag => tagTypes.includes(tag));
+        }
+
+        function hasTag(trust, tag) {
+            const tags = trust.tags ?? [];
+            return tags.includes(tag);
         }
 
         function addTag(trust, tag) {
@@ -223,6 +228,14 @@
 
             if (trust.name.includes("Foundation")) {
                 addTag(trust, "foundation_trust");
+            }
+
+            if (!hasTag(trust, "nhs_board")) {
+                addTag(trust, "nhs_trust");
+            }
+
+            if (!hasTag(trust, "scotland")) {
+                addTag(trust, "england");
             }
 
             if (trust.name.includes("University") || trust.name.includes("College")) {
@@ -503,7 +516,10 @@
                 "community_services_trust": "Community Services",
                 "hospital_trust": "Hospital",
                 "ambulance_trust": "Ambulance",
+
                 "national_body": "National",
+                "nhs_trust" : "Trust",
+                "nhs_board" : "Health Board",
 
                 "east": "East of England",
                 "london": "London",
@@ -513,6 +529,7 @@
                 "southeast": "South East",
                 "southwest": "South West",
                 "england": "England",
+                "scotland": "Scotland",
 
                 "foundation_trust": "Foundation"
             };
@@ -564,7 +581,7 @@
 
                 const e = document.createElement("div");
                 const a = document.createElement("a");
-                a.innerText = "← ALL TRUSTS";
+                a.innerText = "← ALL";
                 const newParams = paramsForListPage(params);
                 a.href = `?${newParams}`
                 e.append(a);
@@ -590,7 +607,7 @@
 
             const countsElement = clone.querySelector("#counts") ?? undefined;
             if (countsElement !== undefined) {
-                countsElement.innerText = `${trustsToList.length} trusts`;
+                countsElement.innerText = `${trustsToList.length} bodies`;
             }
 
             const footer = clone.querySelector("#footer") ?? undefined;
@@ -826,8 +843,12 @@
                 a.href = `https://google.co.uk/search?q=FOI+site:${getHost(this.current.website)}`;
 
                 ((shortName) => {
-                    const url = new URL(`https://www.cqc.org.uk/search/all?filters%5B%5D=services%3Aservice-provider`);
+                    let url = new URL(`https://www.cqc.org.uk/search/all?filters%5B%5D=services%3Aservice-provider`);
                     url.searchParams.set("query", `${shortName} NHS`);
+
+                    if (hasTag(this.current, "scotland")) {
+                        url = new URL(`https://www.healthcareimprovementscotland.scot/inspections-reviews-and-regulation/inspections-of-nhs-hospitals-and-services/hospital-and-services-inspection-reports/`);
+                    }
 
                     const a = document.querySelector("#cqc a");
                     a.href = this.current.cqc ?? url.toString();
@@ -952,10 +973,10 @@
 
     <div id="website"><a href="">Website</a></div>
     <div id="search-queries" class="queries"></div>
-    <div id="provider"><a href="">NHS Report & Accounts</a></div>
+    <div id="provider"><a href="">Parent</a></div>
     <div id="jobs"><a href="">NHS Jobs</a></div>
     <div id="wikipedia"><a href="">Wikipedia</a></div>
-    <div id="cqc"><a href="">CQC</a></div>
+    <div id="cqc"><a href="">Care Quality</a></div>
     <div id="whatdotheyknow"><a href="">What Do They Know</a></div>
     <div id="wdtk-user-queries" class="queries"></div>
     <div id="wdtk-queries" class="queries"></div>
@@ -963,7 +984,7 @@
     <div id="google-queries" class="queries"></div>
     <div id="engines"></div>
     <div> </div>
-    <div id="all-trusts"><a href="?">← ALL TRUSTS</a></div>
+    <div id="all-trusts"><a href="?">← ALL</a></div>
     <div id="merged"><a></a></div>
     <div> </div>
     <div id="environment-share"><a>Share Customisations ⇧</a></div>
@@ -972,7 +993,7 @@
     <div id="name"></div>
 
     <template id="all-trusts-template">
-        <h1>ALL TRUSTS</h1>
+        <h1>ALL</h1>
         <div id="content"></div>
         <div id="counts"></div>
         <div> </div>
@@ -986,6 +1007,244 @@
 
     <template id="trust-data">
         [
+        {
+        "name": "NHS Ayrshire & Arran",
+        "provider": "https://www.scot.nhs.uk/organisations/ayrshire-arran/",
+        "shortName": "Ayrshire & Arran",
+        "website": "https://www.nhsaaa.net/about-us",
+        "id": "nhsaaa",
+        "legacyIDs": [
+        "ayrshire-arran"
+        ],
+        "wikipedia": "https://en.wikipedia.org/wiki/NHS_Ayrshire_and_Arran",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_ayrshire_and_arran",
+        "tags": [
+        "scotland",
+        "nhs_board"
+        ],
+        "search": "/?s=${query}"
+        },
+        {
+        "name": "NHS Borders",
+        "provider": "https://www.scot.nhs.uk/organisations/borders/",
+        "shortName": "Borders",
+        "website": "https://www.nhsborders.scot.nhs.uk/corporate-information/",
+        "id": "nhsborders",
+        "legacyIDs": [
+        "borders"
+        ],
+        "wikipedia": "https://en.wikipedia.org/wiki/NHS_Borders",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_borders",
+        "tags": [
+        "scotland",
+        "nhs_board"
+        ],
+        "search": "/Search-Results/?keyword=${query}"
+        },
+        {
+        "name": "NHS Dumfries & Galloway",
+        "provider": "https://www.scot.nhs.uk/organisations/dumfries-galloway/",
+        "shortName": "Dumfries & Galloway",
+        "website": "https://www.nhsdg.co.uk/publications/",
+        "id": "nhsdg",
+        "legacyIDs": [
+        "dumfries-galloway"
+        ],
+        "wikipedia": "https://en.wikipedia.org/wiki/NHS_Dumfries_and_Galloway",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_dumfries_and_galloway",
+        "tags": [
+        "scotland",
+        "nhs_board"
+        ],
+        "search": "/?s=${query}"
+        },
+        {
+        "name": "NHS Fife",
+        "provider": "https://www.scot.nhs.uk/organisations/fife/",
+        "shortName": "Fife",
+        "website": "https://www.nhsfife.org/about-us/",
+        "id": "nhsfife",
+        "legacyIDs": [
+        "fife"
+        ],
+        "wikipedia": "https://en.wikipedia.org/wiki/NHS_Fife",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_fife",
+        "tags": [
+        "scotland",
+        "nhs_board"
+        ],
+        "search": "/Search-Results/"
+        },
+        {
+        "name": "NHS Forth Valley",
+        "provider": "https://www.scot.nhs.uk/organisations/forth-valley/",
+        "shortName": "Forth Valley",
+        "website": "https://nhsforthvalley.com/about-us/",
+        "id": "nhsforthvalley",
+        "legacyIDs": [
+        "forth-valley"
+        ],
+        "wikipedia": "https://en.wikipedia.org/wiki/NHS_Forth_Valley",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_forth_valley",
+        "tags": [
+        "scotland",
+        "nhs_board"
+        ],
+        "search": "/?s=${query}"
+        },
+        {
+        "name": "NHS Grampian",
+        "provider": "https://www.scot.nhs.uk/organisations/grampian/",
+        "shortName": "Grampian",
+        "website": "https://www.nhsgrampian.org/about-us",
+        "id": "nhsgrampian",
+        "legacyIDs": [
+        "grampian"
+        ],
+        "wikipedia": "https://en.wikipedia.org/wiki/NHS_Grampian",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_grampian",
+        "tags": [
+        "scotland",
+        "nhs_board"
+        ],
+        "search": "/search?keywordsSearch=${query}"
+        },
+        {
+        "name": "NHS Greater Glasgow & Clyde",
+        "provider": "https://www.scot.nhs.uk/organisations/greater-glasgow-clyde/",
+        "shortName": "Greater Glasgow & Clyde",
+        "website": "https://www.nhsggc.scot/about-us/",
+        "id": "nhsggc",
+        "legacyIDs": [
+        "greater-glasgow-clyde"
+        ],
+        "wikipedia": "https://en.wikipedia.org/wiki/NHS_Greater_Glasgow_and_Clyde",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_greater_glasgow_and_clyde",
+        "tags": [
+        "scotland",
+        "nhs_board"
+        ],
+        "search": "/?s=${query}"
+        },
+        {
+        "name": "NHS Highland",
+        "provider": "https://www.scot.nhs.uk/organisations/highland/",
+        "shortName": "Highland",
+        "website": "https://www.nhshighland.scot.nhs.uk/about/publications-and-public-records/",
+        "id": "nhshighland",
+        "legacyIDs": [
+        "highland"
+        ],
+        "wikipedia": "https://en.wikipedia.org/wiki/NHS_Highland",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_highland",
+        "tags": [
+        "scotland",
+        "nhs_board"
+        ],
+        "search": "/search-results"
+        },
+        {
+        "name": "NHS Lanarkshire",
+        "provider": "https://www.scot.nhs.uk/organisations/lanarkshire/",
+        "shortName": "Lanarkshire",
+        "website": "https://www.nhslanarkshire.scot.nhs.uk/about-us/",
+        "id": "nhslanarkshire",
+        "legacyIDs": [
+        "lanarkshire"
+        ],
+        "wikipedia": "https://en.wikipedia.org/wiki/NHS_Lanarkshire",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_lanarkshire",
+        "tags": [
+        "scotland",
+        "nhs_board"
+        ],
+        "search": "/?s=${query}"
+        },
+        {
+        "name": "NHS Lothian",
+        "provider": "https://www.scot.nhs.uk/organisations/lothian/",
+        "shortName": "Lothian",
+        "website": "https://www.nhslothian.scot/",
+        "id": "nhslothian",
+        "legacyIDs": [
+        "lothian"
+        ],
+        "wikipedia": "https://en.wikipedia.org/wiki/NHS_Lothian",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_lothian",
+        "tags": [
+        "scotland",
+        "nhs_board"
+        ],
+        "search": "/?s=${query}"
+        },
+        {
+        "name": "NHS Orkney",
+        "provider": "https://www.scot.nhs.uk/organisations/orkney/",
+        "shortName": "Orkney",
+        "website": "https://www.ohb.scot.nhs.uk/about-us/",
+        "id": "ohb",
+        "legacyIDs": [
+        "orkney"
+        ],
+        "wikipedia": "https://en.wikipedia.org/wiki/NHS_Orkney",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_orkney",
+        "tags": [
+        "scotland",
+        "nhs_board"
+        ],
+        "search": "/?s=${query}"
+        },
+        {
+        "name": "NHS Shetland",
+        "provider": "https://www.scot.nhs.uk/organisations/shetland/",
+        "shortName": "Shetland",
+        "website": "https://www.nhsshetland.scot/us",
+        "id": "nhsshetland",
+        "legacyIDs": [
+        "shetland"
+        ],
+        "wikipedia": "https://en.wikipedia.org/wiki/NHS_Shetland",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_shetland",
+        "tags": [
+        "scotland",
+        "nhs_board"
+        ],
+        "search": "/site-search/results/?q=${query}"
+        },
+        {
+        "name": "NHS Tayside",
+        "provider": "https://www.scot.nhs.uk/organisations/tayside/",
+        "shortName": "Tayside",
+        "website": "https://www.nhstayside.scot.nhs.uk/",
+        "id": "nhstayside",
+        "legacyIDs": [
+        "tayside"
+        ],
+        "wikipedia": "https://en.wikipedia.org/wiki/NHS_Tayside",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_tayside",
+        "tags": [
+        "scotland",
+        "nhs_board"
+        ],
+        "search": "/Search/?searchterm=${query}"
+        },
+        {
+        "name": "NHS Western Isles",
+        "provider": "https://www.scot.nhs.uk/organisations/western-isles/",
+        "shortName": "Western Isles",
+        "website": "https://www.wihb.scot.nhs.uk/about-us/publications/",
+        "id": "wihb",
+        "legacyIDs": [
+        "western-isles"
+        ],
+        "wikipedia": "https://en.wikipedia.org/wiki/NHS_Western_Isles",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/nhs_western_isles",
+        "tags": [
+        "scotland",
+        "nhs_board"
+        ],
+        "search": "/?s=${query}"
+        },
         {
         "name": "NHS England",
         "provider": "https://www.england.nhs.uk/publication/",
