@@ -189,3 +189,6 @@ For example:
 ```
 ?list=From the Capitals=clch nhslothian
 ```
+
+You can also provide a title for the `tags` parameter.
+
