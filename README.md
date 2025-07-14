@@ -94,3 +94,33 @@ URL:
 **`file:///Users/user/Documents/nhs-research/${id}`**
 
 `user` should change to match your own local user name.
+
+## Lists and Tags
+
+The NHS Trust Research data contains tags on the NHS bodies that show up as lists in the app. You can see the lists at the bottom of any list page:
+
+Region:
+* East of England
+* London
+* Midlands
+* North East and Yorkshire
+* North West
+* South East
+* South West
+* England
+* Scotland
+
+Organisation type:
+* Foundation
+* Trust
+* Health Board
+
+Service type:
+* Ambulance
+* Community Services
+* Hospital
+* Major A&E
+* Mental Health
+* Teaching
+* University
+
