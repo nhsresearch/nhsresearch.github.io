@@ -662,12 +662,25 @@
                     return;
                 }
 
+                const realize = (text) => {
+                    for (const property of ["id", "name", "shortName", "website"]) {
+                        const token = "${" + property + "}";
+                        const value = this.current[property] ?? token;
+                        text = text.replaceAll(token, value);
+                    }
+
+                    text = text.replaceAll("${host}", getHost(this.current.website));
+
+                    return text;
+                };
+
                 for (const value of values) {
-                    const url = createURL(value.value ?? value);
+                    const realizedValue = realize(value.value ?? value);
+                    const url = createURL(realizedValue);
 
                     const clone = template.content.cloneNode(true);
                     const a = clone.querySelector("a");
-                    a.innerText = value.name ?? value;
+                    a.innerText = value.name ?? realizedValue;
                     a.href = url;
                     e.append(clone);
                 }
