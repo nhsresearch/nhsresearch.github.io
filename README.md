@@ -95,7 +95,7 @@ URL:
 
 `user` should change to match your own local user name.
 
-## Lists and Tags
+## Lists
 
 The NHS Trust Research data contains tags on the NHS bodies that show up as lists in the app. You can see the lists at the bottom of any list page:
 
@@ -126,3 +126,66 @@ Service type:
 
 If you want the bodies that are *not* in one of these lists, hold down the `-` key on your keyboard and you will see links to lists of bodies that are not in one of these categories.
 
+### Complex Lists with `tags`
+
+The app does not currently provide a UI for creating complex lists, but you can edit parameters directly in the URL to achieve lists that combine different categories.
+
+`tags` is a URL parameter that takes a space-separated list of tags.
+
+Using multiple tags means that items shown in the list must have all the tags.
+
+For example:
+```
+?tags=london mental_health_trust
+```
+means show all the bodies that are both in London and are mental health trusts.
+
+You can also reverse each tag with a `-` (minus sign). For example:
+```
+?tags=london -mental_health_trust
+```
+means show all the bodies that are both in London and are *not* mental health trusts.
+
+
+Available tags:
+
+Region:
+* `east`
+* `london`
+* `midlands`
+* `northeast`
+* `northwest`
+* `southeast`
+* `southwest`
+* `england`
+* `scotland`
+
+Organisation type:
+* `foundation_trust`
+* `nhs_trust`
+* `nhs_board`
+
+Service type:
+* `ambulance_trust`
+* `community_services_trust`
+* `hospital_trust`
+* `major_ae`
+* `mental_health_trust`
+* `Teaching`
+* `University`
+
+### Complex Lists with `list`
+
+You can also create complex lists with the `list` URL parameter which takes a space-separated list of IDs
+
+If `list` is present, `tags` is ignored.
+
+### Naming complex lists
+
+If you don't like the standard title the app creates for a list, you can provide your own title by adding it before `=`.
+
+For example:
+
+```
+?list=From the Capitals=clch nhslothian
+```
