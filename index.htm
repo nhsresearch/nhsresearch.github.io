@@ -9,6 +9,21 @@
     <meta property="og:image" content="https://nhsresearch.github.io/image.png">
 
     <script type="module">
+        function cloneTemplate(selector) {
+            const template = document.querySelector(selector) ?? undefined;
+            if (template !== undefined) {
+                const clone = template.content.cloneNode(true);
+                return clone;
+            }
+        }
+
+        const licenceAccepted = localStorage.getItem("licence-accepted") ?? undefined;
+        if (licenceAccepted === undefined) {
+            const e = cloneTemplate("#licence");
+            document.body.replaceChildren(e);
+            throw "Early exit";
+        }
+
         document.addEventListener("keydown", (e) => {
             // console.log(e);
             if (e.key === "-" && !(e.metaKey || e.shiftKey || e.altKey || e.ctrlKey)) { document.body.dataset.negative = true; }
@@ -40,7 +55,7 @@
         // This means that parameters at the end of the URL are more important than earlier ones with the same name
         const parameters = Object.fromEntries([...params.entries()].map(([k, v]) => [mapParameterName(k.trim()), v.trim()]));
 
-        
+
 
         function separatedList(text, separator = " ") {
             if (text === undefined) { return undefined; }
@@ -337,25 +352,61 @@
         ////////////////////////////////////////////////////////////////
 
         function loadSearchEngines() {
-            function authoriseEngine(engine) {
-                let authorisedEngines;
-                const previousEngineText = localStorage.getItem("engines") ?? undefined;
-                if (previousEngineText !== undefined) {
-                    authorisedEngines = JSON.parse(previousEngineText);
-                    const previousEngine = authorisedEngines.find(p => p === engine.url);
-                    if (previousEngine !== undefined) {
-                        return engine;
+            function authoriseURL(url) {
+                try {
+                    if (typeof url !== "string") {
+                        return undefined;
                     }
-                }
 
-                const url = new URL(engine.url);
-                if (confirm(`OK to enable search engine: '${url.hostname}' ?\n\nURL: ${engine.url}\n\nName: ${engine.name}\n\n`)) {
-                    authorisedEngines = authorisedEngines ?? [];
-                    authorisedEngines.push(engine.url);
-                    localStorage.setItem("engines", JSON.stringify(authorisedEngines));
-                    return engine;
-                } else {
-                    document.body.innerText = "AUTHORISATION FAILED";
+                    if (url.length > 1024) { // TODO review limits
+                        return undefined;
+                    }
+
+                    const u = new URL(url);
+
+                    if (u.protocol !== "https:") {
+                        return undefined;
+                    }
+
+                    const acceptList = undefined;
+                    if (acceptList && !acceptList.includes(u.hostname)) {
+                        return undefined;
+                    }
+
+                    const denyList = [];
+                    if (denyList && denyList.includes(u.hostname)) {
+                        return undefined;
+                    }
+
+                    return u;
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+
+            function authoriseEngine(engine) {
+                const url = authoriseURL(engine.url);
+                if (url !== undefined) {
+                    engine.url = url.toString();
+
+                    let authorisedEngines;
+                    const previousEngineText = localStorage.getItem("engines") ?? undefined;
+                    if (previousEngineText !== undefined) {
+                        authorisedEngines = JSON.parse(previousEngineText);
+                        const previousEngine = authorisedEngines.find(p => p === engine.url);
+                        if (previousEngine !== undefined) {
+                            return engine;
+                        }
+                    }
+
+                    if (confirm(`OK to enable search engine: '${url.hostname}' ?\n\nURL: ${url}\n\nName: ${engine.name}\n\n`)) {
+                        authorisedEngines = authorisedEngines ?? [];
+                        authorisedEngines.push(url.toString());
+                        localStorage.setItem("engines", JSON.stringify(authorisedEngines));
+                        return engine;
+                    } else {
+                        document.body.innerText = "AUTHORISATION FAILED";
+                    }
                 }
 
                 throw "AUTHORISATION FAILURE";
@@ -563,8 +614,8 @@
                 "ambulance_trust": "Ambulance",
 
                 "national_body": "National",
-                "nhs_trust" : "Trust",
-                "nhs_board" : "Health Board",
+                "nhs_trust": "Trust",
+                "nhs_board": "Health Board",
 
                 "east": "East of England",
                 "london": "London",
@@ -772,7 +823,8 @@
                 const setting = "google-queries";
                 const createURL = (value) => {
                     const url = new URL(`https://google.co.uk/search`);
-                    url.searchParams.set("q", `${value} site:${getHost(this.current.website)}`);
+                    const q = /site(:|%3A)/.test(value) ? value : `${value} site:${getHost(this.current.website)}`;
+                    url.searchParams.set("q", q);
                     return url;
                 };
                 this.populateQueries(setting, createURL);
@@ -828,19 +880,25 @@
 
                     engineElement.append(engineTitleElement, engineQueriesElement);
 
-                    const searchURL = realize(engine.url);
-                    console.log(searchURL);
-
                     // If the URL includes ${query}, its only for queries and we won't show section if no queries
                     // If it doesn't include ${query}, its a trust-relevant link and we always show it
 
-                    if (searchURL.includes("${query}")) {
+                    if (engine.url.includes("${query}")) {
                         if (settings[setting] === undefined || settings[setting].length === 0) {
                             console.log("No queries", engine);
                             continue;
                         }
 
                         const createURL = (value) => {
+                            let u = engine.url;
+
+                            // There can only be one site, so allow the one in the term to replace the one in the URL
+                            // This requires that we delay realising the URL until after term-specific code runs
+                            if (/site(:|%3A)/.test(value)) {
+                                u = u.replaceAll(/site(:|%3A)[$]{host}/g, "");
+                            }
+
+                            const searchURL = realize(u);
                             const url = new URL(searchURL.replaceAll("${query}", encodeURIComponent(value)));
                             return url;
                         };
@@ -848,12 +906,12 @@
                         enginesElement.append(engineElement);
                         this.populateQueries(setting, createURL);
                     } else {
+                        const searchURL = realize(engine.url);
                         engineElement.innerHTML = `<a></a>`; // TODO
                         const a = engineElement.querySelector("a");
                         a.href = searchURL;
                         a.innerText = engine.name;
                         enginesElement.append(engineElement);
-                        console.log(searchURL);
                     }
                 }
             }
@@ -1052,6 +1110,21 @@
 
     <template id="query-template">
         <div><a></a></div>
+    </template>
+
+    <template id="licence">
+        <h1>Welcome to 'NHS Trust Research' (BETA)</h1>
+        <p>This web app makes it easy for investigators and journalists to conduct research on NHS trusts and health
+            boards by providing useful links all in one place so that you can perform searches with a single click.</p>
+        <p>This app is produced by volunteers and comes with no warranties or guarantees of any kind.</p>
+        <p>You must be in the United Kingdom to use this app.</p>
+        <p></p>
+        <p>If you're in the UK and you're prepared to accept any and all risk from using this BETA software, click 'I
+            ACCEPT' to get started.</p>
+        <p><button onclick='localStorage.setItem("licence-accepted", "true"); document.location = document.location;'>I
+                ACCEPT</button></p>
+        <p><button onclick='localStorage.removeItem("licence-accepted"); document.location = document.location;'>I
+                DECLINE</button></p>
     </template>
 
     <template id="trust-data">
