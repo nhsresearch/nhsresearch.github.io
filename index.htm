@@ -784,7 +784,7 @@
                     return;
                 }
 
-                const values = settings[setting];
+                const values = settings[setting] ?? [...getTerms(setting)];
                 if (values === undefined) {
                     return;
                 }
@@ -980,8 +980,36 @@
                 [...document.querySelectorAll("[data-realize]")].map(a => {
                     a.innerText = this.realize(a.innerText, { encode: noop });
                     if (a.href !== undefined) {
-                        a.href = this.realize(a.href);
+                        try {
+                            const host = getHost(a.href);
+                            a.innerText = a.innerText.replaceAll("${self.host}", host);
+                        } catch (e) { }
+                        const u = this.realize(a.href);
+                        a.href = u;
                     }
+                });
+
+                // Queries from HTML
+                [...document.querySelectorAll("[data-queries]")].map(e => {
+                    const url = e.dataset.queries;
+                    console.log(e.id, url);
+
+                    e.classList.add("queries");
+
+                    const createURL = (value) => {
+                        let u = url;
+
+                        // There can only be one site, so allow the one in the term to replace the one in the URL
+                        // This requires that we delay realising the URL until after term-specific code runs
+                        if (/site(:|%3A)/.test(value)) {
+                            u = u.replaceAll(/site(:|%3A)[$]{host}/g, "");
+                        }
+
+                        const searchURL = this.realize(u);
+                        return new URL(searchURL.replaceAll("${query}", encodeURIComponent(value)));
+                    };
+
+                    this.populateQueries(e.id, createURL);
                 });
             }
         }
@@ -1011,6 +1039,14 @@
 
         a {
             text-decoration: none;
+        }
+
+        .next-child {
+            display: none;
+        }
+
+        .next-child:has(+ * > *) {
+            display: block;
         }
 
         .positive {
@@ -1083,24 +1119,36 @@
 
     <div id="website"><a href="">Website</a></div>
     <div id="search-queries" class="queries"></div>
-    <div id="provider"><a href="">Parent</a></div>
+    <div id="provider"><a href="" data-realize>${self.host}</a></div>
     <div id="jobs"><a href="">NHS Jobs</a></div>
     <div id="wikipedia"><a href="">Wikipedia</a></div>
     <div id="cqc"><a href="">Care Quality</a></div>
+
+    <div id="tribunals"><a href="https://www.gov.uk/employment-tribunal-decisions?keywords=${name}"
+            data-realize>Tribunals (GOV.UK)</a></div>
+    <div id="tribunals-queries" data-queries="https://www.gov.uk/employment-tribunal-decisions?keywords=${query}"></div>
+    <div id="caselaw"><a href="https://caselaw.nationalarchives.gov.uk/search?query=${name}" data-realize>Case Law
+            (National Archives)</a></div>
+    <div id="caselaw-queries" data-queries="https://caselaw.nationalarchives.gov.uk/search?query=${query}"></div>
+
+    <div><a href="https://www.mumsnet.com/search/advanced#/?query=${name}&type=thread_subject&topics=Feminism%253A%2520Sex%2520and%2520gender%2520discussions&page=1&sort=created_at:desc" data-realize>Mumsnet</a></div>
+    <div id="mumsnet-queries" data-queries="https://www.mumsnet.com/search/advanced#/?query=${query}&type=thread_subject&topics=Feminism%253A%2520Sex%2520and%2520gender%2520discussions&page=1&sort=created_at:desc"></div>
+
     <div id="whatdotheyknow"><a href="">What Do They Know</a></div>
     <div id="wdtk-user-queries" class="queries"></div>
     <div id="wdtk-queries" class="queries"></div>
     <div id="google"><a href="">Google</a></div>
     <div id="google-queries" class="queries"></div>
 
-    <div id="tribunals"><a href="https://www.gov.uk/employment-tribunal-decisions?keywords=${name}"
-            data-realize>Tribunals GOV.UK</a></div>
-
     <div id="engines"></div>
+
     <div> </div>
+
     <div id="all-trusts"><a href="?">← ALL</a></div>
     <div id="merged"><a></a></div>
+
     <div> </div>
+
     <div id="environment-share"><a>Share Customisations ⇧</a></div>
     <div id="environment-save"><a>Keep Customisations ⇩</a></div>
 
