@@ -9,6 +9,8 @@
     <meta property="og:image" content="https://nhsresearch.github.io/image.png">
 
     <script type="module">
+        const noop = (x) => x;
+
         function cloneTemplate(selector) {
             const template = document.querySelector(selector) ?? undefined;
             if (template !== undefined) {
@@ -752,6 +754,18 @@
                 this.oncurrentchanged();
             }
 
+            realize(text, { encode } = { encode: encodeURIComponent }) {
+                for (const property of ["id", "name", "shortName", "website"]) {
+                    const token = "${" + property + "}";
+                    const value = this.current[property] ?? token;
+                    text = text.replaceAll(token, encode(value));
+                }
+
+                text = text.replaceAll("${host}", encode(getHost(this.current.website)));
+
+                return text;
+            }
+
             populateQueries(setting, createURL, templateSelector) {
                 const e = document.querySelector(`#${setting}`) ?? undefined;
                 if (e === undefined) {
@@ -775,20 +789,8 @@
                     return;
                 }
 
-                const realize = (text) => {
-                    for (const property of ["id", "name", "shortName", "website"]) {
-                        const token = "${" + property + "}";
-                        const value = this.current[property] ?? token;
-                        text = text.replaceAll(token, value);
-                    }
-
-                    text = text.replaceAll("${host}", getHost(this.current.website));
-
-                    return text;
-                };
-
                 for (const value of values) {
-                    const realizedValue = realize(value.value ?? value);
+                    const realizedValue = this.realize(value.value ?? value, { encode: noop });
                     const url = createURL(realizedValue);
 
                     const clone = template.content.cloneNode(true);
@@ -853,16 +855,6 @@
             }
 
             engineQueries() {
-                const realize = (text) => {
-                    for (const property of ["id", "name", "shortName", "website"]) {
-                        text = text.replaceAll("${" + property + "}", encodeURIComponent(this.current[property]));
-                    }
-
-                    text = text.replaceAll("${host}", encodeURIComponent(getHost(this.current.website)));
-
-                    return text;
-                };
-
                 const enginesElement = document.querySelector("#engines");
 
                 for (const engine of Object.values(settings.engines)) {
@@ -898,7 +890,7 @@
                                 u = u.replaceAll(/site(:|%3A)[$]{host}/g, "");
                             }
 
-                            const searchURL = realize(u);
+                            const searchURL = this.realize(u);
                             const url = new URL(searchURL.replaceAll("${query}", encodeURIComponent(value)));
                             return url;
                         };
@@ -906,7 +898,7 @@
                         enginesElement.append(engineElement);
                         this.populateQueries(setting, createURL);
                     } else {
-                        const searchURL = realize(engine.url);
+                        const searchURL = this.realize(engine.url);
                         engineElement.innerHTML = `<a></a>`; // TODO
                         const a = engineElement.querySelector("a");
                         a.href = searchURL;
@@ -928,8 +920,8 @@
                     at.href = `?${newParams}#${this.current.id}`;
                 }
 
-                document.querySelector("#name").innerText = this.current.name;
-                document.querySelector("#shortName").innerText = this.current.shortName;
+                // document.querySelector("#name").innerText = this.current.name;
+                // document.querySelector("#shortName").innerText = this.current.shortName;
 
                 document.querySelector("#website a").href = this.current.website ?? "#";
                 document.querySelector("#provider a").href = this.current.provider ?? "#";
@@ -979,11 +971,18 @@
 
                 })(this.current.shortName);
 
+                this.searchQueries();
                 this.wdtkUserQueries();
                 this.wdtkQueries();
                 this.googleQueries();
-                this.searchQueries();
                 this.engineQueries();
+
+                [...document.querySelectorAll("[data-realize]")].map(a => {
+                    a.innerText = this.realize(a.innerText, { encode: noop });
+                    if (a.href !== undefined) {
+                        a.href = this.realize(a.href);
+                    }
+                });
             }
         }
 
@@ -1076,7 +1075,7 @@
 </head>
 
 <body>
-    <h1 id="shortName"></h1>
+    <h1 id="shortName" data-realize>${shortName}</h1>
 
     <div id="website"><a href="">Website</a></div>
     <div id="search-queries" class="queries"></div>
@@ -1089,6 +1088,10 @@
     <div id="wdtk-queries" class="queries"></div>
     <div id="google"><a href="">Google</a></div>
     <div id="google-queries" class="queries"></div>
+
+    <div id="tribunals"><a href="https://www.gov.uk/employment-tribunal-decisions?keywords=${shortName}"
+            data-realize>Tribunals GOV.UK</a></div>
+
     <div id="engines"></div>
     <div> </div>
     <div id="all-trusts"><a href="?">← ALL</a></div>
@@ -1097,7 +1100,7 @@
     <div id="environment-share"><a>Share Customisations ⇧</a></div>
     <div id="environment-save"><a>Keep Customisations ⇩</a></div>
 
-    <div id="name"></div>
+    <div id="name" data-realize>${name}</div>
 
     <template id="all-trusts-template">
         <h1>ALL</h1>
