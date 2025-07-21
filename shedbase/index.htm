@@ -71,7 +71,9 @@
 
                     const name = e("div");
                     name.classList.add("name");
-                    name.innerText = k;
+                    name.dataset.value = k;
+                    name.innerText = k.toUpperCase();
+
                     const value = e("div");
                     value.classList.add("value");
 
@@ -113,7 +115,7 @@
                 const parameters = qsa("#url-parameters .url-parameter");
                 const params = new URLSearchParams();
                 for (const p of parameters) {
-                    const name = qs(".name", p)?.innerText;
+                    const name = qs(".name", p)?.dataset.value;
                     const value = (() => {
                         const v = qs(".value", p);
                         if (v !== undefined) {
