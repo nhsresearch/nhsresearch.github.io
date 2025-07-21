@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHEDBASE</title>
+    <script type="module">
+        (() => {
+
+            ////////////////////////////////////////////////////////////////
+
+            function qs(selector, context = document) {
+                return context.querySelector(selector) ?? undefined;
+            }
+
+            function qsa(selector, context = document) {
+                return [...context.querySelectorAll(selector)];
+            }
+
+            function e(tagName) {
+                return document.createElement(tagName);
+            }
+
+            ////////////////////////////////////////////////////////////////
+
+            function separatedList(text, separator = " ") {
+                if (text === undefined) { return undefined; }
+                return text.split(separator).map(t => t.trim()).filter(t => t !== "");
+            }
+
+            function namedList(text, separator = " ") {
+                const pieces = separatedList(text, "=");
+                if (pieces && pieces.length === 2) {
+                    return { name: pieces[0], value: separatedList(pieces[1], separator) };
+                }
+                return { value: separatedList(text, separator) };
+            }
+
+            function urlParametersToHTML() {
+                const params = new URLSearchParams(document.location.search);
+
+                function adjustParameters() {
+                    if (!params.has("page")) {
+                        if (params.has("id")) {
+                            params.set("page", "one");
+                        } else if (params.has("tags") || params.has("list")) {
+                            params.set("page", "many");
+                        } else {
+                            params.set("page", "many");
+                        }
+                    }
+                }
+
+                function getListInfo(k) {
+                    if (["terms"].includes(k) || k.endsWith("-q")) {
+                        return { separator: "," };
+                    }
+                    if (["tags", "list"].includes(k)) {
+                        return { separator: " " };
+                    }
+                    return undefined;
+                }
+
+                adjustParameters();
+
+                const c = qs(`#url-parameters`);
+                for (const [k, v] of params.entries()) {
+                    const p = e("div");
+                    p.classList.add("url-parameter");
+
+                    const name = e("div");
+                    name.classList.add("name");
+                    name.innerText = k;
+                    const value = e("div");
+                    value.classList.add("value");
+
+                    const listInfo = getListInfo(k);
+                    if (listInfo !== undefined) {
+                        const list = namedList(v, listInfo.separator);
+                        p.dataset.separator = listInfo.separator;
+
+                        const title = e("div");
+                        title.classList.add("title");
+
+                        if (list.name !== undefined) {
+                            title.innerText = list.name;
+                        }
+
+                        const l = e("ol");
+
+                        value.append(title, l);
+
+                        for (const item of list.value) {
+                            const i = e("li");
+                            i.innerText = item;
+
+                            l.append(i);
+                        }
+
+                    } else {
+                        value.innerText = v;
+                    }
+
+                    p.append(name, value);
+
+                    c.append(p);
+                }
+
+            }
+
+            function htmlToURLParameters() {
+                const parameters = qsa("#url-parameters .url-parameter");
+                const params = new URLSearchParams();
+                for (const p of parameters) {
+                    const name = qs(".name", p)?.innerText;
+                    const value = (() => {
+                        const v = qs(".value", p);
+                        if (v !== undefined) {
+                            const separator = p.dataset.separator;
+                            if (separator !== undefined) {
+                                const title = qs(".title", v);
+                                const values = qsa("ol li", v).map(li => li.innerText).join(separator);
+                                return (title != undefined) && (title.innerText !== "") ? `${title.innerText}=${values}` : values;
+                            } else {
+                                return v.innerText;
+                            }
+                        }
+                    })() ?? "";
+
+                    params.append(name, value);
+                }
+                return params;
+            }
+
+            urlParametersToHTML();
+            console.log(htmlToURLParameters().toString());
+
+        })();
+    </script>
+    <style>
+        .url-parameter {
+            padding: 0.5rem;
+        }
+
+        .name {
+            font-weight: bold;
+        }
+
+        .value {
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="url-parameters">
+    </div>
+</body>
+
+</html>
