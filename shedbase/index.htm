@@ -11,10 +11,12 @@
             ////////////////////////////////////////////////////////////////
 
             function qs(selector, context = document) {
+                if (context === undefined) return undefined;
                 return context.querySelector(selector) ?? undefined;
             }
 
             function qsa(selector, context = document) {
+                if (context === undefined) return [];
                 return [...context.querySelectorAll(selector)];
             }
 
@@ -52,35 +54,28 @@
                     }
                 }
 
-                function getListInfo(k) {
-                    if (["terms"].includes(k) || k.endsWith("-q")) {
-                        return { separator: "," };
-                    }
-                    if (["tags", "list"].includes(k)) {
-                        return { separator: " " };
-                    }
-                    return undefined;
-                }
-
                 adjustParameters();
 
                 const c = qs(`#url-parameters`);
                 for (const [k, v] of params.entries()) {
+                    const description = qs(`#url-parameter-descriptions > [data-id='${k}']`);
+                    const displayName = qs(".name", description)?.innerText;
+
                     const p = e("div");
                     p.classList.add("url-parameter");
 
                     const name = e("div");
                     name.classList.add("name");
                     name.dataset.value = k;
-                    name.innerText = k.toUpperCase();
+                    name.innerText = displayName ?? k.toUpperCase();
 
                     const value = e("div");
                     value.classList.add("value");
 
-                    const listInfo = getListInfo(k);
-                    if (listInfo !== undefined) {
-                        const list = namedList(v, listInfo.separator);
-                        p.dataset.separator = listInfo.separator;
+                    const separator = description?.dataset.separator;
+                    if (separator !== undefined) {
+                        const list = namedList(v, separator);
+                        p.dataset.separator = separator;
 
                         const title = e("div");
                         title.classList.add("title");
@@ -95,13 +90,15 @@
 
                         for (const item of list.value) {
                             const i = e("li");
-                            i.innerText = item;
+                            i.dataset.value = item;
+                            i.innerText = item.toUpperCase();
 
                             l.append(i);
                         }
 
                     } else {
-                        value.innerText = v;
+                        value.dataset.value = v;
+                        value.innerText = v.toUpperCase();
                     }
 
                     p.append(name, value);
@@ -122,10 +119,10 @@
                             const separator = p.dataset.separator;
                             if (separator !== undefined) {
                                 const title = qs(".title", v);
-                                const values = qsa("ol li", v).map(li => li.innerText).join(separator);
+                                const values = qsa("ol li", v).map(li => li.dataset.value).join(separator);
                                 return (title != undefined) && (title.innerText !== "") ? `${title.innerText}=${values}` : values;
                             } else {
-                                return v.innerText;
+                                return v.dataset.value;
                             }
                         }
                     })() ?? "";
@@ -141,6 +138,51 @@
         })();
     </script>
     <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+                Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            padding: 0 15px;
+            max-width: 650px;
+            font-size: 115%;
+            line-height: 1.4;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .next-child {
+            display: none;
+        }
+
+        .next-child:has(+ * > *) {
+            display: block;
+        }
+
+        .positive {
+            display: block;
+        }
+
+        body[data-negative] .positive {
+            display: none;
+        }
+
+        .negative {
+            display: none;
+        }
+
+        body[data-negative] .negative {
+            display: block;
+        }
+
         .url-parameter {
             padding: 0.5rem;
         }
@@ -156,7 +198,77 @@
 </head>
 
 <body>
+    <div id="url-parameter-descriptions">
+        <div data-id="list" data-separator=" " data-kind="entity">
+            <div class="name">List</div>
+        </div>
+        <div data-id="tags" data-separator=" " data-kind="tag">
+            <div class="name">Tags</div>
+        </div>
+        <div data-id="id" data-kind="entity">
+            <div class="name">ID</div>
+        </div>
+        <div data-id="terms" data-separator=",">
+            <div class="name">Terms</div>
+        </div>
+        <div data-id="page">
+            <div class="name">Page</div>
+        </div>
+    </div>
     <div id="url-parameters">
+    </div>
+    <div id="tags">
+        <div data-category="region">
+            <div class="name">Region</div>
+            <div data-id="east">East</div>
+            <div data-id="london">London</div>
+            <div data-id="midlands">Midlands</div>
+            <div data-id="northeast">North East</div>
+            <div data-id="northwest">North West</div>
+            <div data-id="southeast">South East</div>
+            <div data-id="southwest">South West</div>
+            <div data-id="england">England</div>
+            <div data-id="scotland">Scotland</div>
+        </div>
+        <div data-category="organisation">
+            <div class="name">Organisation</div>
+            <div data-id="foundation_trust">Foundation</div>
+            <div data-id="nhs_trust">Trust</div>
+            <div data-id="nhs_board">Board</div>
+        </div>
+        <div data-category="service">
+            <div class="name">Service</div>
+            <div data-id="ambulance_trust">Ambulance</div>
+            <div data-id="community_services_trust">Community Services</div>
+            <div data-id="hospital_trust">Hospital</div>
+            <div data-id="major_ae">Major A & E</div>
+            <div data-id="mental_health_trust">Mental Health</div>
+            <div data-id="Teaching">Teaching</div>
+            <div data-id="University">University</div>
+        </div>
+    </div>
+    <div id="lists">
+        <div class="list">
+            <div class="name">List One</div>
+            <div data-entity="my-entity-1"></div>
+            <div data-entity="my-entity-2"></div>
+        </div>
+        <div class="list">
+            <div class="name">List Two</div>
+            <div data-entity="my-entity-2"/>
+            <div data-entity="my-entity-1"/>
+        </div>
+    </div>
+    <div id="entities">
+        <div class="entity" data-id="my-entity-1">
+            <div class="name">My Entity 1</div>
+        </div>
+        <div class="entity" data-id="my-entity-2">
+            <div class="name">My Entity 2</div>
+            <div class="tags">
+                <div data-tag="major_ae"/>
+            </div>
+        </div>
     </div>
 </body>
 
