@@ -11,6 +11,10 @@ const selector = `#directory-button`;
 
 let directory_;
 
+export function directory() {
+    return directory_;
+}
+
 async function verifyPermission(fileHandle, readWrite) {
     const options = {};
     if (readWrite) {
@@ -79,7 +83,7 @@ async function init() {
                 await set(dataKey, handle);
                 directory_ = handle;
                 context.dataset.directoryAvailable = handle.name;
-                context.dispatchEvent(new Event(eventKey));
+                context.dispatchEvent(new Event(eventKey, { bubbles: true }));
             }
         });
     }
@@ -87,12 +91,8 @@ async function init() {
     if (await isReadable(handle)) {
         directory_ = handle;
         context.dataset.directoryAvailable = handle.name;
-        context.dispatchEvent(new Event(eventKey));
+        context.dispatchEvent(new Event(eventKey, { bubbles: true }));
     }
 }
 
 await init();
-
-export function directory() {
-    return directory_;
-}
