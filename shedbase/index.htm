@@ -10,8 +10,11 @@
 
         // Provide a clickable element with ID "directory-button". This can be used to select a directory
         // whose handle will be stored for later use.
-        // When a directory is available, "data-directory-available" will be added to the document's body
-        // and a "directory-available" bubbling event will be dispatched to the document's body.
+        //
+        // When a directory is available:
+        // 1. "data-directory-available" attribute will be added to the document's body
+        // 2. A "directory-available" bubbling event will be dispatched to the document's body
+        // 3. The `localDirectory` property of `document` will return the handle to the directory
 
         const eventKey = "directory-available";
         const dataKey = "directory-handle";
