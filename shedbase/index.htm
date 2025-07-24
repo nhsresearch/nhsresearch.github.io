@@ -26,6 +26,13 @@
 
             ////////////////////////////////////////////////////////////////
 
+            const formatters = {
+                lowercase: (t) => t.toLowerCase(),
+                uppercase: (t) => t.toUpperCase(),
+            };
+
+            ////////////////////////////////////////////////////////////////
+
             function separatedList(text, separator = " ") {
                 if (text === undefined) { return undefined; }
                 return text.split(separator).map(t => t.trim()).filter(t => t !== "");
@@ -198,6 +205,8 @@
 </head>
 
 <body>
+    <div id="url-parameters">
+    </div>
     <div id="url-parameter-descriptions">
         <div data-id="list" data-separator=" " data-kind="entity">
             <div class="name">List</div>
@@ -215,7 +224,16 @@
             <div class="name">Page</div>
         </div>
     </div>
-    <div id="url-parameters">
+    <div id="formatters">
+        <div class="formatter" data-id="lowercase">
+            <div class="name">lower case</div>
+        </div>
+        <div class="formatter" data-id="uppercase">
+            <div class="name">UPPER CASE</div>
+        </div>
+        <!-- <div class="formatter" data-id="url-name">
+            <div class="name">url-name</div>
+        </div> -->
     </div>
     <div id="tags">
         <div data-category="region">
@@ -247,16 +265,18 @@
             <div data-id="University">University</div>
         </div>
     </div>
-    <div id="lists">
-        <div class="list">
-            <div class="name">List One</div>
-            <div data-entity="my-entity-1"></div>
-            <div data-entity="my-entity-2"></div>
+    <div id="link-generators">
+        <div class="link-generator" data-id="website" data-allows-terms>
+            <div class="name">Website</div>
+            <div class="url" data-property>website</div>
         </div>
-        <div class="list">
-            <div class="name">List Two</div>
-            <div data-entity="my-entity-2"/>
-            <div data-entity="my-entity-1"/>
+        <div class="link-generator" data-id="google" data-allows-terms>
+            <div class="name">Google</div>
+            <div class="url"></div>
+        </div>
+        <div class="link-generator" data-id="wdtk" data-allows-terms>
+            <div class="name">What Do They Know</div>
+            <div class="url" data-property>wdtk</div>
         </div>
     </div>
     <div id="entities">
@@ -266,7 +286,28 @@
         <div class="entity" data-id="my-entity-2">
             <div class="name">My Entity 2</div>
             <div class="tags">
-                <div data-tag="major_ae"/>
+                <div data-tag="major_ae" />
+            </div>
+        </div>
+    </div>
+    <!--
+    If you need to provide an ordered list of entities where the order isn't name order, you can use a list. 
+    Otherwise, you can use tags and rely on name-ordering.
+    Lists can also be used for trees/hierarchies.
+     -->
+    <div id="lists">
+        <div class="list">
+            <div class="name">A List</div>
+            <div data-entity="my-entity-1"></div>
+            <div data-entity="my-entity-2"></div>
+        </div>
+        <div class="list">
+            <div class="name">A Tree</div>
+            <div data-entity="my-entity-2" />
+            <div data-entity="my-entity-1" />
+            <div class="list">
+                <div data-entity="my-entity-2" />
+                <div data-entity="my-entity-1" />
             </div>
         </div>
     </div>
