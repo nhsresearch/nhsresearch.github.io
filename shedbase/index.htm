@@ -6,7 +6,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SHEDBASE</title>
     <script type="module">
-        (() => {
+        import { get, set } from 'https://unpkg.com/idb-keyval@5.0.2/dist/esm/index.js';
+
+        // Provide a clickable element with ID "directory-button". This can be used to select a directory
+        // whose handle will be stored for later use.
+        // When a directory is available, "data-directory-available" will be added to the document's body
+        // and a "directory-available" bubbling event will be dispatched to the document's body.
+
+        const eventKey = "directory-available";
+        const dataKey = "directory-handle";
+        const selector = `#directory-button`;
+
+        let directory_;
+
+        globalThis.directory = () => directory_;
+
+        async function verifyPermission(fileHandle, readWrite) {
+            const options = {};
+            if (readWrite) {
+                options.mode = 'readwrite';
+            }
+
+            // Check if permission was already granted. If so, return true.
+            // if ((await fileHandle.queryPermission(options)) === 'granted') {
+            //     return true;
+            // }
+
+            // Request permission. If the user grants permission, return true.
+            if ((await fileHandle.requestPermission(options)) === 'granted') {
+                return true;
+            }
+
+            // The user didn't grant permission, so return false.
+            return false;
+        }
+
+        async function isReadable(directory) {
+            if (directory === undefined) {
+                return false;
+            }
+
+            const granted = await verifyPermission(directory, true);
+            if (!granted) {
+                return false;
+            }
+
+            try {
+                for await (const entry of directory.values()) {
+                    // console.log(entry.kind, entry.name);
+                    return true;
+                }
+                return true;
+            } catch (e) {
+            }
+
+            return false;
+        }
+
+        async function init() {
+            if (!('showOpenFilePicker' in self)) {
+                return;
+            }
+
+            const context = document.body;
+
+            let handle = await get(dataKey);
+
+            const btn = document.querySelector(selector) ?? undefined;
+
+            if (btn !== undefined) {
+                btn.addEventListener("click", async () => {
+
+                    const name = context.dataset.appName ?? globalThis.appName ?? document.location.hostname ?? "unnamed";
+
+                    handle = await self.showDirectoryPicker({
+                        id: name,
+                        suggestedName: name,
+                        startIn: "documents",
+                    });
+
+                    if (await isReadable(handle)) {
+                        await set(dataKey, handle);
+                        directory_ = handle;
+                        context.dataset.directoryAvailable = handle.name;
+                        context.dispatchEvent(new Event(eventKey, { bubbles: true }));
+                    }
+                });
+            }
+
+            if (await isReadable(handle)) {
+                directory_ = handle;
+                context.dataset.directoryAvailable = handle.name;
+                context.dispatchEvent(new Event(eventKey, { bubbles: true }));
+            }
+        }
+
+        await init();
+        
+    </script>
+    <script type="module">
+        // import { directory } from "./directory.js";
+
+        (async () => {
+            const appName = "NHSResearch";
+
+            document.body.dataset.appName = appName;
+
+            const d = globalThis.directory && globalThis.directory();
+            if (d === undefined) {
+                document.addEventListener("directory-available", () => {
+                    console.log(globalThis.directory().name);
+                });
+            }
 
             ////////////////////////////////////////////////////////////////
 
@@ -139,6 +250,10 @@
                 return params;
             }
 
+            function processURLParameters() {
+
+            }
+
             urlParametersToHTML();
             console.log(htmlToURLParameters().toString());
 
@@ -164,6 +279,10 @@
 
         a {
             text-decoration: none;
+        }
+
+        ol {
+            margin: 0;
         }
 
         .next-child {
@@ -201,10 +320,36 @@
         .value {
             font-style: italic;
         }
+
+        #url-parameters {
+            background-color: antiquewhite;
+        }
+
+        #tags {
+            background-color: aliceblue;
+        }
+
+        #link-generators {
+            background-color: yellow;
+        }
+
+        #directory-available {
+            display: none;
+        }
+
+        body[data-directory-available] #directory-available {
+            display: block;
+        }
+
+        body[data-directory-available] #directory-button {
+            display: none;
+        }
     </style>
 </head>
 
 <body>
+    <div id="directory-available">CONNECTED TO LOCAL FOLDER</div>
+    <button id="directory-button">CONNECT TO LOCAL FOLDER...</button>
     <div id="url-parameters">
     </div>
     <div id="url-parameter-descriptions">
@@ -220,7 +365,7 @@
         <div data-id="terms" data-separator=",">
             <div class="name">Terms</div>
         </div>
-        <div data-id="page">
+        <div data-id="page" data-options="one many">
             <div class="name">Page</div>
         </div>
     </div>
@@ -250,8 +395,8 @@
         </div>
         <div data-category="organisation">
             <div class="name">Organisation</div>
-            <div data-id="foundation_trust">Foundation</div>
             <div data-id="nhs_trust">Trust</div>
+            <div data-id="foundation_trust">Foundation</div>
             <div data-id="nhs_board">Board</div>
         </div>
         <div data-category="service">
@@ -261,8 +406,8 @@
             <div data-id="hospital_trust">Hospital</div>
             <div data-id="major_ae">Major A & E</div>
             <div data-id="mental_health_trust">Mental Health</div>
-            <div data-id="Teaching">Teaching</div>
-            <div data-id="University">University</div>
+            <div data-id="Teaching" data-property="name" data-regex="\bTeaching\b">Teaching</div>
+            <div data-id="University" data-property="name" data-regex="\bUniversity\b">University</div>
         </div>
     </div>
     <div id="link-generators">
@@ -280,13 +425,16 @@
         </div>
     </div>
     <div id="entities">
-        <div class="entity" data-id="my-entity-1">
-            <div class="name">My Entity 1</div>
-        </div>
-        <div class="entity" data-id="my-entity-2">
-            <div class="name">My Entity 2</div>
-            <div class="tags">
-                <div data-tag="major_ae" />
+        <div data-category="trust">
+            <div class="name">Trusts & Boards</div>
+            <div class="entity" data-id="my-entity-1">
+                <div class="name">My Entity 1</div>
+            </div>
+            <div class="entity" data-id="my-entity-2">
+                <div class="name">My Entity 2</div>
+                <div class="tags">
+                    <div data-tag="major_ae" />
+                </div>
             </div>
         </div>
     </div>
@@ -311,6 +459,11 @@
             </div>
         </div>
     </div>
+
+    <template id="create-tag">
+        <div class="name"></div>
+        <div class="id"></div>
+    </template>
 </body>
 
 </html>
