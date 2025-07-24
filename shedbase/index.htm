@@ -16,10 +16,13 @@
         const eventKey = "directory-available";
         const dataKey = "directory-handle";
         const selector = `#directory-button`;
+        const propertyKey = "localDirectory";
 
         let directory_;
 
-        globalThis.directory = () => directory_;
+        Object.defineProperty(document, propertyKey, {
+            get: () => directory_
+        });
 
         async function verifyPermission(fileHandle, readWrite) {
             const options = {};
@@ -112,10 +115,10 @@
 
             document.body.dataset.appName = appName;
 
-            const d = globalThis.directory && globalThis.directory();
+            const d = document.localDirectory;
             if (d === undefined) {
                 document.addEventListener("directory-available", () => {
-                    console.log(globalThis.directory().name);
+                    console.log(document.localDirectory.name);
                 });
             }
 
