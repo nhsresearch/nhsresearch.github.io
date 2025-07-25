@@ -8,8 +8,9 @@
     <script type="module">
         import { get, set } from 'https://unpkg.com/idb-keyval@5.0.2/dist/esm/index.js';
 
-        // Provide a clickable element with ID `directory-button`. This can be used to select a directory
-        // whose handle will be stored for later use.
+        // Provide clickable elements with IDs `directory-connect` and `directory-disconnect`.
+        // The first will be used to select a directory whose handle will be stored for later use.
+        // The second will be used to forget the selected directory.
         //
         // When a directory is available:
         // 1. `data-directory-available` attribute will be added to the document's body
@@ -21,10 +22,11 @@
         // 2. Dispatch a `directory-changed` bubbling event from the document's body
         // 3. Cause `document.localDirectory` to return `undefined`
 
-        const eventKey = "directory-changed";
-        const dataKey = "directory-handle";
-        const selector = `#directory-button`;
         const propertyKey = "localDirectory";
+        const eventKey = "directory-changed";
+        const connectSelector = `#directory-connect`;
+        const disconnectSelector = `#directory-disconnect`;
+        const dataKey = "directory-handle";
 
         let directory_;
 
@@ -96,16 +98,14 @@
                 return;
             }
 
-            const context = document.body;
-
             let handle = await get(dataKey);
 
-            const btn = document.querySelector(selector) ?? undefined;
+            const connector = document.querySelector(connectSelector) ?? undefined;
 
-            if (btn !== undefined) {
-                btn.addEventListener("click", async () => {
+            if (connector !== undefined) {
+                connector.addEventListener("click", async () => {
 
-                    const name = context.dataset.appName ?? globalThis.appName ?? document.location.hostname ?? "unnamed";
+                    const name = document.body.dataset.appName ?? globalThis.appName ?? document.location.hostname ?? "unnamed";
 
                     handle = await self.showDirectoryPicker({
                         id: name,
@@ -116,6 +116,14 @@
                     if (await isReadable(handle)) {
                         document[propertyKey] = handle;
                     }
+                });
+            }
+
+            const disconnector = document.querySelector(disconnectSelector) ?? undefined;
+
+            if (disconnector !== undefined) {
+                disconnector.addEventListener("click", () => {
+                    document[propertyKey] = undefined;
                 });
             }
 
@@ -147,7 +155,7 @@
             const d = document.localDirectory;
             if (d === undefined) {
                 document.addEventListener("directory-changed", () => {
-                    console.log(document.localDirectory.name);
+                    console.log("DIR:", document.localDirectory?.name);
                 });
             }
 
@@ -373,15 +381,15 @@
             display: block;
         }
 
-        body[data-directory-available] #directory-button {
+        body[data-directory-available] #directory-connect {
             display: none;
         }
     </style>
 </head>
 
 <body>
-    <div id="directory-available">CONNECTED TO LOCAL FOLDER</div>
-    <button id="directory-button">CONNECT TO LOCAL FOLDER...</button>
+    <div id="directory-available">CONNECTED TO LOCAL FOLDER <button id="directory-disconnect">DISCONNECT</button></div>
+    <button id="directory-connect">CONNECT TO LOCAL FOLDER...</button>
     <div id="url-parameters">
     </div>
     <div id="url-parameter-descriptions">
