@@ -12,6 +12,9 @@
         // The first will be used to select a directory whose handle will be stored for later use.
         // The second will be used to forget the selected directory.
         //
+        // When it is technically possible to connect a directory, a `data-directory-possible` attribute is added to the body.
+        // Use this attribute in your CSS to show connection/disconnection UI; otherwise default to hidden.
+        //
         // When a directory is available:
         // 1. `data-directory-available` attribute will be added to the document's body
         // 2. A `directory-changed` bubbling event will be dispatched to the document's body
@@ -23,11 +26,14 @@
         // 3. Cause `document.localDirectory` to return `undefined`
 
         const propertyKey = "localDirectory";
+        const attributeKeyDirectoryPossible = "data-directory-possible";
+        const attributeKeyDirectoryAvailable = "data-directory-available";
         const eventKey = "directory-changed";
-        const connectSelector = `#directory-connect`;
-        const disconnectSelector = `#directory-disconnect`;
         const dataKey = "directory-handle";
 
+        const selectorConnect = `#directory-connect`;
+        const selectorDisconnect = `#directory-disconnect`;
+        
         let directory_;
 
         Object.defineProperty(document, propertyKey, {
@@ -42,9 +48,9 @@
                 const context = document.body;
 
                 if (handle === undefined) {
-                    delete context.dataset.directoryAvailable;
+                    context.removeAttribute(attributeKeyDirectoryAvailable);
                 } else {
-                    context.dataset.directoryAvailable = handle.name;
+                    context.setAttribute(attributeKeyDirectoryAvailable, handle.name);
                 }
 
                 context.dispatchEvent(new Event(eventKey, { bubbles: true }));
@@ -94,13 +100,15 @@
         }
 
         async function init() {
-            if (!('showOpenFilePicker' in self)) {
+            if (!('showDirectoryPicker' in self)) {
                 return;
             }
 
+            document.body.setAttribute(attributeKeyDirectoryPossible, "");
+
             let handle = await get(dataKey);
 
-            const connector = document.querySelector(connectSelector) ?? undefined;
+            const connector = document.querySelector(selectorConnect) ?? undefined;
 
             if (connector !== undefined) {
                 connector.addEventListener("click", async () => {
@@ -119,7 +127,7 @@
                 });
             }
 
-            const disconnector = document.querySelector(disconnectSelector) ?? undefined;
+            const disconnector = document.querySelector(selectorDisconnect) ?? undefined;
 
             if (disconnector !== undefined) {
                 disconnector.addEventListener("click", () => {
@@ -378,6 +386,14 @@
         }
 
         body[data-directory-available] #directory-available {
+            display: block;
+        }
+
+        #directory-connect {
+            display: none;
+        }
+
+        body[data-directory-possible] #directory-connect {
             display: block;
         }
 
