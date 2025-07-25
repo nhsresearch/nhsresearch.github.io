@@ -12,6 +12,8 @@
         // The first will be used to select a directory whose handle will be stored for later use.
         // The second will be used to forget the selected directory.
         //
+        // Alternatively provide a div with ID `directory-auto-ui` and have all the buttons, labels, and CSS created for you.
+        //
         // When it is technically possible to connect a directory, a `data-directory-possible` attribute is added to the body.
         // Use this attribute in your CSS to show connection/disconnection UI; otherwise default to hidden.
         //
@@ -31,9 +33,10 @@
         const eventKey = "directory-changed";
         const dataKey = "directory-handle";
 
-        const selectorConnect = `#directory-connect`;
-        const selectorDisconnect = `#directory-disconnect`;
-        
+        const idConnect = `directory-connect`;
+        const idDisconnect = `directory-disconnect`;
+        const idAutoUI = `directory-auto-ui`;
+
         let directory_;
 
         Object.defineProperty(document, propertyKey, {
@@ -108,7 +111,42 @@
 
             let handle = await get(dataKey);
 
-            const connector = document.querySelector(selectorConnect) ?? undefined;
+            const autoUI = document.querySelector(`#${idAutoUI}`) ?? undefined;
+
+            if (autoUI !== undefined) {
+                autoUI.innerHTML = `
+                <style>
+                #${idAutoUI} {
+                    display: none;
+                }
+
+                body[${attributeKeyDirectoryPossible}] #${idAutoUI} {
+                    display: block;
+                }
+                
+                .directory-connector {
+                    display: block;
+                }
+
+                body[${attributeKeyDirectoryAvailable}] .directory-connector {
+                    display: none;
+                }
+
+                .directory-disconnector {
+                    display: none;
+                }
+
+                body[${attributeKeyDirectoryAvailable}] .directory-disconnector {
+                    display: block;
+                }
+                
+                </style>
+                <div class="directory-connector"><button id="${idConnect}">Connect to local folder...</button></div>
+                <div class="directory-disconnector">Connected to local folder <button id="${idDisconnect}">Disconnect</button></div>
+                `;
+            }
+
+            const connector = document.querySelector(`#${idConnect}`) ?? undefined;
 
             if (connector !== undefined) {
                 connector.addEventListener("click", async () => {
@@ -127,13 +165,15 @@
                 });
             }
 
-            const disconnector = document.querySelector(selectorDisconnect) ?? undefined;
+            const disconnector = document.querySelector(`#${idDisconnect}`) ?? undefined;
 
             if (disconnector !== undefined) {
                 disconnector.addEventListener("click", () => {
                     document[propertyKey] = undefined;
                 });
             }
+
+
 
             if (await isReadable(handle)) {
                 document[propertyKey] = handle;
@@ -404,8 +444,9 @@
 </head>
 
 <body>
-    <div id="directory-available">CONNECTED TO LOCAL FOLDER <button id="directory-disconnect">DISCONNECT</button></div>
-    <button id="directory-connect">CONNECT TO LOCAL FOLDER...</button>
+    <div id="directory-auto-ui"></div>
+    <!-- <div id="directory-available">CONNECTED TO LOCAL FOLDER <button id="directory-disconnect">DISCONNECT</button></div>
+    <button id="directory-connect">CONNECT TO LOCAL FOLDER...</button> -->
     <div id="url-parameters">
     </div>
     <div id="url-parameter-descriptions">
