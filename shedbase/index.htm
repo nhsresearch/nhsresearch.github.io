@@ -8,15 +8,20 @@
     <script type="module">
         import { get, set } from 'https://unpkg.com/idb-keyval@5.0.2/dist/esm/index.js';
 
-        // Provide a clickable element with ID "directory-button". This can be used to select a directory
+        // Provide a clickable element with ID `directory-button`. This can be used to select a directory
         // whose handle will be stored for later use.
         //
         // When a directory is available:
-        // 1. "data-directory-available" attribute will be added to the document's body
-        // 2. A "directory-available" bubbling event will be dispatched to the document's body
+        // 1. `data-directory-available` attribute will be added to the document's body
+        // 2. A `directory-changed` bubbling event will be dispatched to the document's body
         // 3. The `localDirectory` property of `document` will return the handle to the directory
+        //
+        // You can remove the directory by `document.localDirectory = undefined` which will:
+        // 1. Remove the `data-directory-available` attribute
+        // 2. Dispatch a `directory-changed` bubbling event from the document's body
+        // 3. Cause `document.localDirectory` to return `undefined`
 
-        const eventKey = "directory-available";
+        const eventKey = "directory-changed";
         const dataKey = "directory-handle";
         const selector = `#directory-button`;
         const propertyKey = "localDirectory";
@@ -24,7 +29,24 @@
         let directory_;
 
         Object.defineProperty(document, propertyKey, {
-            get: () => directory_
+            get: () => directory_,
+            set: (handle) => {
+                if (handle === directory_) return;
+
+                set(dataKey, handle); // no-await
+
+                directory_ = handle;
+
+                const context = document.body;
+
+                if (handle === undefined) {
+                    delete context.dataset.directoryAvailable;
+                } else {
+                    context.dataset.directoryAvailable = handle.name;
+                }
+
+                context.dispatchEvent(new Event(eventKey, { bubbles: true }));
+            }
         });
 
         async function verifyPermission(fileHandle, readWrite) {
@@ -92,26 +114,30 @@
                     });
 
                     if (await isReadable(handle)) {
-                        await set(dataKey, handle);
-                        directory_ = handle;
-                        context.dataset.directoryAvailable = handle.name;
-                        context.dispatchEvent(new Event(eventKey, { bubbles: true }));
+                        document[propertyKey] = handle;
                     }
                 });
             }
 
             if (await isReadable(handle)) {
-                directory_ = handle;
-                context.dataset.directoryAvailable = handle.name;
-                context.dispatchEvent(new Event(eventKey, { bubbles: true }));
+                document[propertyKey] = handle;
             }
         }
 
         await init();
-        
+
     </script>
     <script type="module">
         // import { directory } from "./directory.js";
+
+        async function findDirectory(directory, candidates) {
+            for await (const entry of directory.values()) {
+                if (entry.kind === "directory" && candidates.includes(entry.name)) {
+                    return entry;
+                }
+            }
+            return undefined;
+        }
 
         (async () => {
             const appName = "NHSResearch";
@@ -120,7 +146,7 @@
 
             const d = document.localDirectory;
             if (d === undefined) {
-                document.addEventListener("directory-available", () => {
+                document.addEventListener("directory-changed", () => {
                     console.log(document.localDirectory.name);
                 });
             }
