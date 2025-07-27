@@ -9,6 +9,286 @@
     <meta property="og:image" content="https://nhsresearch.github.io/image.png">
 
     <script type="module">
+        import { get, set } from 'https://unpkg.com/idb-keyval@5.0.2/dist/esm/index.js';
+
+        // Optionally, give your app an ID as a `data-app` attribute on the `body` element.
+        //
+        // Provide clickable elements with IDs `directory-connect` and `directory-disconnect`.
+        // The first will be used to select a directory whose handle will be stored for later use.
+        // The second will be used to forget the selected directory.
+        //
+        // Alternatively provide a div with ID `directory-auto-ui` and all the buttons, labels, and CSS will be created for you.
+        //
+        // When it is technically possible to connect a directory, a `data-directory-possible` attribute is added to the body.
+        // Use this attribute in your CSS to show connection/disconnection UI; otherwise default to hidden.
+        //
+        // When a directory is available:
+        // 1. `local-data-directory` attribute will be added to the document's body
+        // 2. A `local-data-directory-changed` bubbling event will be dispatched to the document's body
+        // 3. The `localDataDirectory` property of `document` will return the handle to the directory
+        //
+        // You can remove the directory by `document.localDataDirectory = undefined` which will:
+        // 1. Remove the `local-data-directory` attribute
+        // 2. Dispatch a `local-data-directory-changed` bubbling event from the document's body
+        // 3. Cause `document.localDataDirectory` to return `undefined`
+
+        const appID = document.body.dataset.app ?? document.location.hostname ?? "unnamed";
+
+        const propertyKeyData = "localData";
+        const attributeKeyData = "local-data";
+
+        const propertyKeyDirectory = `${propertyKeyData}Directory`;
+        const propertyKeyNeedsSave = `${propertyKeyData}NeedsSave`;
+        const attributeKeyPossible = `${attributeKeyData}-possible`;
+        const attributeKeyDirectory = `${attributeKeyData}-directory`;
+        const attributeKeyNeedsSave = `${attributeKeyData}-needs-save`;
+        const eventKeyDirectoryChanged = `${attributeKeyData}-directory-changed`;
+        const eventKeyDataChanged = `${attributeKeyData}-changed`;
+        const dataKey = `directory-${appID}`;
+
+        const idConnect = `directory-connect`;
+        const idDisconnect = `directory-disconnect`;
+        const idAutoUI = `directory-auto-ui`;
+
+        const context = document.body;
+
+        let directory_ = undefined;
+
+        Object.defineProperty(document, propertyKeyDirectory, {
+            get: () => directory_,
+            set: (handle) => {
+                if (handle === directory_) return;
+
+                set(dataKey, handle); // no-await
+
+                directory_ = handle;
+
+                if (handle === undefined) {
+                    context.removeAttribute(attributeKeyDirectory);
+                } else {
+                    context.setAttribute(attributeKeyDirectory, handle.name);
+                }
+
+                context.dispatchEvent(new Event(eventKeyDirectoryChanged, { bubbles: true }));
+            }
+        });
+
+        let data_ = undefined;
+        let dataNeedsSave_ = false;
+
+        async function load() {
+            if (directory_ !== undefined) {
+                try {
+                    const handle = await directory_.getFileHandle(`${appID}.json`);
+                    const file = await handle.getFile();
+                    const text = await file.text();
+                    const o = JSON.parse(text);
+                    data_ = o;
+
+                    context.dispatchEvent(new Event(eventKeyDataChanged, { bubbles: true }));
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+            return data_;
+        }
+
+        async function save() {
+            console.log("SAVING...");
+
+            const json = JSON.stringify(data_, null, 2);
+            const file = await directory_.getFileHandle(`${appID}.json`, { create: true });
+            const stream = await file.createWritable();
+            await stream.write(json);
+            await stream.close();
+
+            console.log("SAVED");
+
+            dataNeedsSave_ = false;
+            context.removeAttribute(attributeKeyNeedsSave);
+        }
+
+        async function conditionalSave() {
+            if (!dataNeedsSave_) {
+                return;
+            }
+
+            if (data_ === undefined) {
+                dataNeedsSave_ = false;
+                context.removeAttribute(attributeKeyNeedsSave);
+                return;
+            }
+
+            if (directory_ === undefined) {
+                document.addEventListener(eventKeyDirectoryChanged, conditionalSave, { once: true });
+                return;
+            }
+
+            await save();
+        }
+
+        Object.defineProperty(document, propertyKeyNeedsSave, {
+            get: () => dataNeedsSave_,
+            set: (needsSave) => {
+                if (dataNeedsSave_ === needsSave) {
+                    return;
+                }
+
+                dataNeedsSave_ = needsSave;
+
+                if (dataNeedsSave_) {
+                    context.setAttribute(attributeKeyNeedsSave, "");
+                    queueMicrotask(conditionalSave);
+                } else {
+                    context.removeAttribute(attributeKeyNeedsSave);
+                }
+            }
+        });
+
+        Object.defineProperty(document, propertyKeyData, {
+            get: () => data_,
+            set: (data) => {
+                data_ = data;
+                document[propertyKeyNeedsSave] = true;
+            }
+        });
+
+        document.addEventListener(eventKeyDirectoryChanged, async () => {
+            if (directory_ === undefined) {
+                file_ = undefined;
+                data_ = undefined;
+                context.dispatchEvent(new Event(eventKeyDataChanged, { bubbles: true }));
+                return;
+            }
+
+            if (data_ !== undefined) {
+                console.log("POTENTIAL DATA LOSS");
+            }
+
+            await load();
+        });
+
+        async function verifyPermission(fileHandle, readWrite) {
+            const options = {};
+            if (readWrite) {
+                options.mode = 'readwrite';
+            }
+
+            // Check if permission was already granted. If so, return true.
+            // if ((await fileHandle.queryPermission(options)) === 'granted') {
+            //     return true;
+            // }
+
+            // Request permission. If the user grants permission, return true.
+            if ((await fileHandle.requestPermission(options)) === 'granted') {
+                return true;
+            }
+
+            // The user didn't grant permission, so return false.
+            return false;
+        }
+
+        async function isReadable(directory) {
+            if (directory === undefined) {
+                return false;
+            }
+
+            const granted = await verifyPermission(directory, true);
+            if (!granted) {
+                return false;
+            }
+
+            try {
+                for await (const entry of directory.values()) {
+                    // console.log(entry.kind, entry.name);
+                    return true;
+                }
+                return true;
+            } catch (e) {
+            }
+
+            return false;
+        }
+
+        async function init() {
+            if (!('showDirectoryPicker' in self)) {
+                return;
+            }
+
+            context.setAttribute(attributeKeyPossible, "");
+
+            let handle = await get(dataKey);
+
+            const autoUI = document.querySelector(`#${idAutoUI}`) ?? undefined;
+
+            if (autoUI !== undefined) {
+                autoUI.innerHTML = `
+                <style>
+                #${idAutoUI} {
+                    display: none;
+                }
+
+                body[${attributeKeyPossible}] #${idAutoUI} {
+                    display: block;
+                }
+                
+                .directory-connector {
+                    display: block;
+                }
+
+                body[${attributeKeyDirectory}] .directory-connector {
+                    display: none;
+                }
+
+                .directory-disconnector {
+                    display: none;
+                }
+
+                body[${attributeKeyDirectory}] .directory-disconnector {
+                    display: block;
+                }
+                
+                </style>
+                <div class="directory-connector"><button id="${idConnect}">Connect to local folder...</button></div>
+                <div class="directory-disconnector">Connected to local folder <button id="${idDisconnect}">Disconnect</button></div>
+                `;
+            }
+
+            const connector = document.querySelector(`#${idConnect}`) ?? undefined;
+
+            if (connector !== undefined) {
+                connector.addEventListener("click", async () => {
+
+                    handle = await self.showDirectoryPicker({
+                        id: appID,
+                        suggestedName: appID,
+                        startIn: "documents",
+                    });
+
+                    if (await isReadable(handle)) {
+                        document[propertyKeyDirectory] = handle;
+                    }
+                });
+            }
+
+            const disconnector = document.querySelector(`#${idDisconnect}`) ?? undefined;
+
+            if (disconnector !== undefined) {
+                disconnector.addEventListener("click", () => {
+                    document[propertyKeyDirectory] = undefined;
+                });
+            }
+
+            if (await isReadable(handle)) {
+                document[propertyKeyDirectory] = handle;
+            }
+        }
+
+        await init();
+
+    </script>
+
+    <script type="module">
         const noop = (x) => x;
 
         function cloneTemplate(selector) {
@@ -579,7 +859,7 @@
             };
         }
 
-        function getTrust(key) {
+        function getTrust(key, { fuzzy } = { fuzzy: true }) {
             if (key === undefined || key === "") {
                 return undefined;
             }
@@ -601,9 +881,11 @@
                 return trust;
             }
 
-            trust = trusts.find(trust => trust.shortName.toLowerCase().includes(key));
-            if (trust !== undefined) {
-                return trust;
+            if (fuzzy) {
+                trust = trusts.find(trust => trust.shortName.toLowerCase().includes(key));
+                if (trust !== undefined) {
+                    return trust;
+                }
             }
         }
 
@@ -1012,6 +1294,37 @@
 
                     this.populateQueries(e.id, createURL);
                 });
+
+                if (document.localDataDirectory !== undefined) {
+                    this.doLocal();
+                } else {
+                    document.addEventListener("local-data-directory-changed", () => this.doLocal());
+                }
+
+            }
+
+            async doLocal() {
+                if (document.localDataDirectory === undefined) {
+                    return;
+                }
+
+                async function findTrustDirectory(directory, trust) {
+                    for await (const entry of directory.values()) {
+                        if (entry.kind === "directory" && entry.name[0] !== "-") {
+                            const t = getTrust(entry.name, { fuzzy: false });
+                            if (trust === t) {
+                                return entry;
+                            }
+                        }
+                    }
+                    return undefined;
+                }
+
+                console.log(document.localDataDirectory.name);
+
+                const trustDirectory = await findTrustDirectory(document.localDataDirectory, this.current);
+
+                console.log(trustDirectory?.name);
             }
         }
 
@@ -1112,10 +1425,14 @@
         body[data-advanced][data-settings-loaded] #environment-share {
             display: block;
         }
+
+        .directory-disconnector {
+            color: lightgray;
+        }
     </style>
 </head>
 
-<body>
+<body data-app="nhs-trust-research">
     <h1 id="shortName" data-realize>${shortName}</h1>
 
     <div id="website"><a href="">Website</a></div>
@@ -1131,8 +1448,12 @@
     <div id="caselaw"><a href="https://caselaw.nationalarchives.gov.uk/search?query=${name}" data-realize>Case Law
             (National Archives)</a></div>
     <div id="caselaw-queries" data-queries="https://caselaw.nationalarchives.gov.uk/search?query=${query}"></div>
-    <div id="bailii"><a href="http://www.bailii.org/cgi-bin/lucy_search_1.cgi?highlight=1&mask_path=/&method=boolean&query=(${name})&results=200&sort=rank" data-realize>BAILII</a></div>
-    <div id="bailii-queries" data-queries="http://www.bailii.org/cgi-bin/lucy_search_1.cgi?highlight=1&mask_path=/&method=boolean&query=(${query})&results=200&sort=rank"></div>
+    <div id="bailii"><a
+            href="http://www.bailii.org/cgi-bin/lucy_search_1.cgi?highlight=1&mask_path=/&method=boolean&query=(${name})&results=200&sort=rank"
+            data-realize>BAILII</a></div>
+    <div id="bailii-queries"
+        data-queries="http://www.bailii.org/cgi-bin/lucy_search_1.cgi?highlight=1&mask_path=/&method=boolean&query=(${query})&results=200&sort=rank">
+    </div>
 
     <div id="whatdotheyknow"><a href="">What Do They Know</a></div>
     <div id="wdtk-user-queries" class="queries"></div>
@@ -1145,8 +1466,11 @@
     <div><a href="https://www.bbc.co.uk/search?q=${name}" data-realize>BBC</a></div>
     <div id="bbc-queries" data-queries="https://www.bbc.co.uk/search?q=${query}"></div>
 
-    <div><a href="https://www.mumsnet.com/search/advanced#/?query=${name}&type=thread_subject&topics=Feminism%253A%2520Sex%2520and%2520gender%2520discussions&page=1&sort=created_at:desc" data-realize>Mumsnet</a></div>
-    <div id="mumsnet-queries" data-queries="https://www.mumsnet.com/search/advanced#/?query=${query}&type=thread_subject&topics=Feminism%253A%2520Sex%2520and%2520gender%2520discussions&page=1&sort=created_at:desc"></div>
+    <div><a href="https://www.mumsnet.com/search/advanced#/?query=${name}&type=thread_subject&topics=Feminism%253A%2520Sex%2520and%2520gender%2520discussions&page=1&sort=created_at:desc"
+            data-realize>Mumsnet</a></div>
+    <div id="mumsnet-queries"
+        data-queries="https://www.mumsnet.com/search/advanced#/?query=${query}&type=thread_subject&topics=Feminism%253A%2520Sex%2520and%2520gender%2520discussions&page=1&sort=created_at:desc">
+    </div>
 
     <div><a href="https://sex-matters.org/?s=${name}" data-realize>Sex Matters</a></div>
     <div id="sm-queries" data-queries="https://sex-matters.org/?s=${query}"></div>
@@ -1164,6 +1488,8 @@
     <div id="environment-save"><a>Keep Customisations ⇩</a></div>
 
     <div id="name" data-realize>${name}</div>
+
+    <div id="directory-auto-ui"></div>
 
     <template id="all-trusts-template">
         <h1>ALL</h1>
