@@ -61,31 +61,34 @@
         //
         // Alternatively provide a div with ID `directory-auto-ui` and all the buttons, labels, and CSS will be created for you.
         //
-        // When it is technically possible to connect a directory, a `data-directory-possible` attribute is added to the body.
+        // When it is technically possible to connect a directory, a `data-directory-possible` attribute is added to the body
+        // and `document.localDataPossible` will return true. Currently Chrome/Edge make local data possible and Safari does not.
         // Use this attribute in your CSS to show connection/disconnection UI; otherwise default to hidden.
         //
         // When a directory is available:
         // 1. `local-data-directory` attribute will be added to the document's body
-        // 2. A `local-data-directory-changed` bubbling event will be dispatched to the document's body
-        // 3. The `localDataDirectory` property of `document` will return the handle to the directory
+        // 2. The `localDataDirectory` property of `document` will return the handle to the directory
+        // 3. The `localData` property of `document` will return an object that either represents data loaded from the data file or will be a new object
+        // 4. A `local-data-directory-changed` bubbling event will be dispatched to the document's body
         //
         // You can remove the directory by `document.localDataDirectory = undefined` which will:
         // 1. Remove the `local-data-directory` attribute
-        // 2. Dispatch a `local-data-directory-changed` bubbling event from the document's body
-        // 3. Cause `document.localDataDirectory` to return `undefined`
+        // 2. Cause `document.localDataDirectory` to return `undefined`
+        // 3. Cause `document.localData` to return `undefined`
+        // 4. Dispatch a `local-data-directory-changed` bubbling event from the document's body
 
         const appID = document.body.dataset.app ?? document.location.hostname ?? "unnamed";
 
         const propertyKeyData = "localData";
         const attributeKeyData = "local-data";
 
+        const propertyKeyPossible = `${propertyKeyData}Possible`;
         const propertyKeyDirectory = `${propertyKeyData}Directory`;
         const propertyKeyNeedsSave = `${propertyKeyData}NeedsSave`;
         const attributeKeyPossible = `${attributeKeyData}-possible`;
         const attributeKeyDirectory = `${attributeKeyData}-directory`;
         const attributeKeyNeedsSave = `${attributeKeyData}-needs-save`;
         const eventKeyDirectoryChanged = `${attributeKeyData}-directory-changed`;
-        const eventKeyDataChanged = `${attributeKeyData}-changed`;
         const dataKey = `directory-${appID}`;
 
         const idConnect = `directory-connect`;
@@ -95,119 +98,113 @@
         const context = document.body;
 
         let directory_ = undefined;
-
-        Object.defineProperty(document, propertyKeyDirectory, {
-            get: () => directory_,
-            set: (handle) => {
-                if (handle === directory_) return;
-
-                set(dataKey, handle); // no-await
-
-                directory_ = handle;
-
-                if (handle === undefined) {
-                    context.removeAttribute(attributeKeyDirectory);
-                } else {
-                    context.setAttribute(attributeKeyDirectory, handle.name);
-                }
-
-                context.dispatchEvent(new Event(eventKeyDirectoryChanged, { bubbles: true }));
-            }
-        });
-
         let data_ = undefined;
         let dataNeedsSave_ = false;
 
-        async function load() {
-            if (directory_ !== undefined) {
+        Object.defineProperty(document, propertyKeyPossible, {
+            get: () => 'showDirectoryPicker' in self
+        });
+
+        Object.defineProperty(document, propertyKeyData, {
+            get: () => data_
+        });
+
+        Object.defineProperty(document, propertyKeyDirectory, {
+            get: () => directory_
+        });
+
+        async function setDirectory(handle) {
+            if (handle === directory_) return;
+
+            directory_ = handle;
+
+            dataNeedsSave_ = false;
+            context.removeAttribute(attributeKeyNeedsSave);
+
+            data_ = (directory_ === undefined) ? undefined : {};
+
+            if (handle === undefined) {
+                context.removeAttribute(attributeKeyDirectory);
+            } else {
+                context.setAttribute(attributeKeyDirectory, handle.name);
+            }
+
+            set(dataKey, handle); // no-await
+
+            // We wait for the data file to load (or not) before dispatching the event
+            if (handle !== undefined) {
                 try {
-                    const handle = await directory_.getFileHandle(`${appID}.json`);
-                    const file = await handle.getFile();
+                    const fileHandle = await directory_.getFileHandle(`${appID}.json`);
+                    const file = await fileHandle.getFile();
                     const text = await file.text();
                     const o = JSON.parse(text);
                     data_ = o;
-
-                    context.dispatchEvent(new Event(eventKeyDataChanged, { bubbles: true }));
                 } catch (e) {
                     console.log(e);
                 }
             }
-            return data_;
+
+            context.dispatchEvent(new Event(eventKeyDirectoryChanged, { bubbles: true }));
         }
+
+        let savedVersion = 0;
+        let currentVersion = 0;
+
+        let saving = false;
 
         async function save() {
-            console.log("SAVING...");
+            // Only one save function executing at a time
+            // and keeps looping until there are no further changes to save
 
-            const json = JSON.stringify(data_, null, 2);
-            const file = await directory_.getFileHandle(`${appID}.json`, { create: true });
-            const stream = await file.createWritable();
-            await stream.write(json);
-            await stream.close();
+            if (saving) {
+                return;
+            } else {
+                saving = true;
+            }
 
-            console.log("SAVED");
+            while (currentVersion !== savedVersion) {
+                console.log("SAVING...");
 
+                const versionToSave = currentVersion;
+
+                const file = await directory_.getFileHandle(`${appID}.json`, { create: true });
+                const stream = await file.createWritable();
+
+                const json = JSON.stringify(data_, null, 2);
+
+                await stream.write(json);
+                await stream.close();
+
+                savedVersion = versionToSave;
+
+                console.log("SAVED");
+            }
+
+            saving = false;
             dataNeedsSave_ = false;
             context.removeAttribute(attributeKeyNeedsSave);
-        }
-
-        async function conditionalSave() {
-            if (!dataNeedsSave_) {
-                return;
-            }
-
-            if (data_ === undefined) {
-                dataNeedsSave_ = false;
-                context.removeAttribute(attributeKeyNeedsSave);
-                return;
-            }
-
-            if (directory_ === undefined) {
-                document.addEventListener(eventKeyDirectoryChanged, conditionalSave, { once: true });
-                return;
-            }
-
-            await save();
         }
 
         Object.defineProperty(document, propertyKeyNeedsSave, {
             get: () => dataNeedsSave_,
             set: (needsSave) => {
+                currentVersion += 1;
+
                 if (dataNeedsSave_ === needsSave) {
                     return;
                 }
 
                 dataNeedsSave_ = needsSave;
 
-                if (dataNeedsSave_) {
+                if (dataNeedsSave_) {    
                     context.setAttribute(attributeKeyNeedsSave, "");
-                    queueMicrotask(conditionalSave);
+                    queueMicrotask(save);
                 } else {
                     context.removeAttribute(attributeKeyNeedsSave);
                 }
             }
         });
 
-        Object.defineProperty(document, propertyKeyData, {
-            get: () => data_,
-            set: (data) => {
-                data_ = data;
-                document[propertyKeyNeedsSave] = true;
-            }
-        });
-
-        document.addEventListener(eventKeyDirectoryChanged, async () => {
-            if (directory_ === undefined) {
-                data_ = undefined;
-                context.dispatchEvent(new Event(eventKeyDataChanged, { bubbles: true }));
-                return;
-            }
-
-            if (data_ !== undefined) {
-                console.log("POTENTIAL DATA LOSS");
-            }
-
-            await load();
-        });
 
         async function verifyPermission(fileHandle, readWrite) {
             const options = {};
@@ -252,7 +249,7 @@
         }
 
         async function init() {
-            if (!('showDirectoryPicker' in self)) {
+            if (!document[propertyKeyPossible]) {
                 return;
             }
 
@@ -307,7 +304,7 @@
                     });
 
                     if (await isReadable(handle)) {
-                        document[propertyKeyDirectory] = handle;
+                        await setDirectory(handle);
                     }
                 });
             }
@@ -315,13 +312,13 @@
             const disconnector = document.querySelector(`#${idDisconnect}`) ?? undefined;
 
             if (disconnector !== undefined) {
-                disconnector.addEventListener("click", () => {
-                    document[propertyKeyDirectory] = undefined;
+                disconnector.addEventListener("click", async () => {
+                    await setDirectory(undefined);
                 });
             }
 
             if (await isReadable(handle)) {
-                document[propertyKeyDirectory] = handle;
+                await setDirectory(handle);
             }
         }
 
@@ -329,7 +326,62 @@
 
     </script>
 
-    <script type="module">
+    <script type="module" blocking="render">
+
+        function listAdd(list, id) {
+            list = Array.isArray(list) ? list : list.entries;
+            list.push({ id, date: new Date().toISOString() });
+        }
+
+        function listGet(list, id) {
+            list = Array.isArray(list) ? list : list.entries;
+            return list.find((o) => o.id === id);
+        }
+
+        function listHas(list, id) {
+            return listGet(list, id) !== undefined;
+        }
+
+        function listRemove(list, id) {
+            list = Array.isArray(list) ? list : list.entries;
+            const index = list.findIndex((o) => o.id === id);
+            if (index !== -1) {
+                list.splice(index, 1);
+            }
+        }
+
+        function dataEnsureList(o, title) {
+            if (o === undefined) {
+                return undefined;
+            }
+
+            if (o.lists === undefined) {
+                o.lists = [];
+            }
+
+            let list = o.lists.find(list => list.title === title);
+            if (list === undefined) {
+                list = { title, entries: [] };
+                o.lists.push(list);
+            }
+
+            return list;
+        }
+
+        function dataGetList(o, title) {
+            if (o.lists === undefined) {
+                return undefined;
+            }
+
+            return o.lists.find(list => list.title === title);
+        }
+
+        function dataHasList(o, title) {
+            return dataGetList(o, title) !== undefined;
+        }
+
+
+
         const noop = (x) => x;
 
         function cloneTemplate(selector) {
@@ -1337,14 +1389,14 @@
                 });
 
                 if (document.localDataDirectory !== undefined) {
-                    this.doLocal();
+                    this.doLocalDirectory();
                 } else {
-                    document.addEventListener("local-data-directory-changed", () => this.doLocal());
+                    document.addEventListener("local-data-directory-changed", () => this.doLocalDirectory());
                 }
 
             }
 
-            async doLocal() {
+            async doLocalDirectory() {
                 if (document.localDataDirectory === undefined) {
                     return;
                 }
@@ -1367,7 +1419,64 @@
 
                 console.log(trustDirectory?.name);
 
+                const b = document.querySelector(".bookmark") ?? undefined;
+                if (b !== undefined) {
+                    const id = this.current.id;
+                    const list = dataEnsureList(document.localData, "Bookmarks");
+                    if (list !== undefined && listHas(list, id)) {
+                        b.dataset.active = true;
+                    }
 
+                    b.onclick = () => {
+                        const id = this.current.id;
+                        const list = dataEnsureList(document.localData, "Bookmarks");
+
+                        if (b.dataset.active) {
+                            delete b.dataset.active;
+                            if (list !== undefined) {
+                                listRemove(list, id);
+                                document.localDataNeedsSave = true;
+                            }
+                        } else {
+                            b.dataset.active = true;
+                            if (list !== undefined) {
+                                listAdd(list, id);
+                                document.localDataNeedsSave = true;
+                            }
+                        }
+                    };
+                }
+
+                const ta = document.querySelector(".notes textarea") ?? undefined;
+                if (ta !== undefined) {
+                    const id = this.current.id;
+                    const m = document.localData?.entities?.[id];
+                    if (m !== undefined) {
+                        ta.value = m.notes ?? "";
+                    }
+
+                    ta.oninput = () => {
+                        console.log("INP", ta.value);
+                        const o = document.localData;
+                        if (o === undefined) {
+                            return;
+                        }
+
+                        if (o.entities === undefined) {
+                            o.entities = {};
+                        }
+
+                        const id = this.current.id;
+                        let m = o.entities[id];
+                        if (m === undefined) {
+                            m = {};
+                            o.entities[id] = m;
+                        }
+
+                        m.notes = ta.value;
+                        document.localDataNeedsSave = true;
+                    };
+                }
             }
         }
 
@@ -1472,11 +1581,46 @@
         .directory-disconnector {
             color: lightgray;
         }
+
+        .bookmark {
+            display: none;
+            padding: 0.25rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            text-align: center;
+            border-radius: 0.25rem;
+            border-style: solid;
+            border-color: black;
+            border-width: 0.15rem;
+        }
+
+        body[local-data-directory] .bookmark {
+            display: block;
+        }
+
+        .bookmark[data-active] {
+            color: yellow;
+            background-color: brown;
+        }
+
+        .notes {
+            display: none;
+        }
+
+        body[local-data-directory] .notes {
+            display: block;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 4rem;
+        }
     </style>
 </head>
 
 <body data-app="nhs-trust-research">
     <h1 id="shortName" data-realize>${shortName}</h1>
+
 
     <div id="website"><a href="">Website</a></div>
     <div id="search-queries" class="queries"></div>
@@ -1532,6 +1676,11 @@
 
     <div id="name" data-realize>${name}</div>
 
+    <div class="bookmark">★</div>
+    <div class="notes">
+        <h4>Notes</h4>
+        <textarea></textarea>
+    </div>
     <div id="directory-auto-ui"></div>
 
     <template id="all-trusts-template">
