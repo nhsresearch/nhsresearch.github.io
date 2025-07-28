@@ -1425,6 +1425,8 @@
                     const list = dataEnsureList(document.localData, "Bookmarks");
                     if (list !== undefined && listHas(list, id)) {
                         b.dataset.active = true;
+                    } else {
+                        delete b.dataset.active;
                     }
 
                     b.onclick = () => {
@@ -1453,6 +1455,8 @@
                     const m = document.localData?.entities?.[id];
                     if (m !== undefined) {
                         ta.value = m.notes ?? "";
+                    } else {
+                        ta.value = "";
                     }
 
                     ta.oninput = () => {
