@@ -1454,9 +1454,9 @@
                 const ta = document.querySelector(".notes textarea") ?? undefined;
                 if (ta !== undefined) {
                     const id = this.current.id;
-                    const m = document.localData?.entities?.[id];
-                    if (m !== undefined) {
-                        ta.value = m.notes ?? "";
+                    const entity = document.localData?.entities?.[id];
+                    if (entity !== undefined) {
+                        ta.value = entity.notes?.text ?? "";
                     } else {
                         ta.value = "";
                     }
@@ -1473,13 +1473,13 @@
                         }
 
                         const id = this.current.id;
-                        let m = o.entities[id];
-                        if (m === undefined) {
-                            m = {};
-                            o.entities[id] = m;
+                        let entity = o.entities[id];
+                        if (entity === undefined) {
+                            entity = {};
+                            o.entities[id] = entity;
                         }
 
-                        m.notes = ta.value;
+                        entity.notes = { text: ta.value, edited: new Date().toISOString() };
                         document.localDataNeedsSave = true;
                     };
                 }
