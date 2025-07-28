@@ -194,3 +194,10 @@ This creates a list titled **From the Capitals** containing two NHS bodies: one 
 
 You can also provide a title for the `tags` parameter.
 
+## Local Data
+
+In Chrome or Edge, you will see a button `Connect to local folder...` at the bottom of the page for a trust.
+
+If you click the button and allow the web app to access a local folder, the web app will create a file within the folder which can be used to store notes.
+
+Safari does not currently support this feature.
