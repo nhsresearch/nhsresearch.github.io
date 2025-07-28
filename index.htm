@@ -1442,7 +1442,9 @@
                         } else {
                             b.dataset.active = true;
                             if (list !== undefined) {
-                                listAdd(list, id);
+                                if (!listHas(list, id)) {
+                                    listAdd(list, id);
+                                }
                                 document.localDataNeedsSave = true;
                             }
                         }
