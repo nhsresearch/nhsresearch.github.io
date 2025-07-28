@@ -199,5 +199,6 @@ You can also provide a title for the `tags` parameter.
 In Chrome or Edge, you will see a button `Connect to local folder...` at the bottom of the page for a trust.
 
 If you click the button and allow the web app to access a local folder, the web app will create a file within the folder which can be used to store notes.
+You will only have to connect to the folder once. The app will remember the connection across sessions.
 
 Safari does not currently support this feature.
