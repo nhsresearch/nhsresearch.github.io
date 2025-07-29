@@ -262,33 +262,35 @@
             if (autoUI !== undefined) {
                 autoUI.innerHTML = `
                 <style>
-                #${idAutoUI} {
+                .directory-possible {
                     display: none;
                 }
 
-                body[${attributeKeyPossible}] #${idAutoUI} {
+                body[${attributeKeyPossible}] .directory-possible {
                     display: block;
                 }
                 
-                .directory-connector {
+                .directory-absent {
                     display: block;
                 }
 
-                body[${attributeKeyDirectory}] .directory-connector {
+                body[${attributeKeyDirectory}] .directory-absent {
                     display: none;
                 }
 
-                .directory-disconnector {
+                .directory-present {
                     display: none;
                 }
 
-                body[${attributeKeyDirectory}] .directory-disconnector {
+                body[${attributeKeyDirectory}] .directory-present {
                     display: block;
                 }
                 
                 </style>
-                <div class="directory-connector"><button id="${idConnect}">Connect to local folder...</button></div>
-                <div class="directory-disconnector">Connected to local folder <button id="${idDisconnect}">Disconnect</button></div>
+                <div class="directory-possible">
+                <div class="directory-connector directory-absent"><button id="${idConnect}">Connect to local folder...</button></div>
+                <div class="directory-disconnector directory-present">Connected to local folder <button id="${idDisconnect}">Disconnect</button></div>
+                </div>
                 `;
             }
 
@@ -1599,7 +1601,6 @@
         }
 
         .bookmark {
-            display: none;
             padding: 0.25rem;
             width: 1.5rem;
             height: 1.5rem;
@@ -1610,21 +1611,9 @@
             border-width: 0.15rem;
         }
 
-        body[local-data-directory] .bookmark {
-            display: block;
-        }
-
         .bookmark[data-active] {
             color: yellow;
             background-color: brown;
-        }
-
-        .notes {
-            display: none;
-        }
-
-        body[local-data-directory] .notes {
-            display: block;
         }
 
         textarea {
@@ -1692,11 +1681,14 @@
 
     <div id="name" data-realize>${name}</div>
 
+    <div class="directory-present">
     <div class="bookmark">★</div>
     <div class="notes">
         <h4>Notes</h4>
         <textarea id="notes"></textarea>
     </div>
+    </div>
+
     <div id="directory-auto-ui"></div>
 
     <template id="all-trusts-template">
