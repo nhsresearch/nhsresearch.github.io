@@ -249,14 +249,6 @@
         }
 
         async function init() {
-            if (!document[propertyKeyPossible]) {
-                return;
-            }
-
-            context.setAttribute(attributeKeyPossible, "");
-
-            let handle = await get(dataKey);
-
             const autoUI = document.querySelector(`#${idAutoUI}`) ?? undefined;
 
             if (autoUI !== undefined) {
@@ -293,6 +285,14 @@
                 </div>
                 `;
             }
+
+            if (!document[propertyKeyPossible]) {
+                return;
+            }
+
+            context.setAttribute(attributeKeyPossible, "");
+
+            let handle = await get(dataKey);
 
             const connector = document.querySelector(`#${idConnect}`) ?? undefined;
 
