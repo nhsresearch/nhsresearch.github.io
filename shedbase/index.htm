@@ -6,59 +6,202 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SHEDBASE</title>
     <script type="module">
-        import { get, set } from 'https://unpkg.com/idb-keyval@5.0.2/dist/esm/index.js';
+        function promisifyRequest(request) {
+            return new Promise((resolve, reject) => {
+                // @ts-ignore - file size hacks
+                request.oncomplete = request.onsuccess = () => resolve(request.result);
+                // @ts-ignore - file size hacks
+                request.onabort = request.onerror = () => reject(request.error);
+            });
+        }
+        function createStore(dbName, storeName) {
+            const request = indexedDB.open(dbName);
+            request.onupgradeneeded = () => request.result.createObjectStore(storeName);
+            const dbp = promisifyRequest(request);
+            return (txMode, callback) => dbp.then((db) => callback(db.transaction(storeName, txMode).objectStore(storeName)));
+        }
+        let defaultGetStoreFunc;
+        function defaultGetStore() {
+            if (!defaultGetStoreFunc) {
+                defaultGetStoreFunc = createStore('keyval-store', 'keyval');
+            }
+            return defaultGetStoreFunc;
+        }
+        /**
+         * Get a value by its key.
+         *
+         * @param key
+         * @param customStore Method to get a custom store. Use with caution (see the docs).
+         */
+        function get(key, customStore = defaultGetStore()) {
+            return customStore('readonly', (store) => promisifyRequest(store.get(key)));
+        }
+        /**
+         * Set a value with a key.
+         *
+         * @param key
+         * @param value
+         * @param customStore Method to get a custom store. Use with caution (see the docs).
+         */
+        function set(key, value, customStore = defaultGetStore()) {
+            return customStore('readwrite', (store) => {
+                store.put(value, key);
+                return promisifyRequest(store.transaction);
+            });
+        }
 
+        // Optionally, give your app an ID as a `data-app` attribute on the `body` element.
+        //
         // Provide clickable elements with IDs `directory-connect` and `directory-disconnect`.
         // The first will be used to select a directory whose handle will be stored for later use.
         // The second will be used to forget the selected directory.
         //
-        // Alternatively provide a div with ID `directory-auto-ui` and have all the buttons, labels, and CSS created for you.
+        // Alternatively provide a div with ID `directory-auto-ui` and all the buttons, labels, and CSS will be created for you.
         //
-        // When it is technically possible to connect a directory, a `data-directory-possible` attribute is added to the body.
+        // When it is technically possible to connect a directory, a `data-directory-possible` attribute is added to the body
+        // and `document.localDataPossible` will return true. Currently Chrome/Edge make local data possible and Safari does not.
         // Use this attribute in your CSS to show connection/disconnection UI; otherwise default to hidden.
         //
         // When a directory is available:
-        // 1. `data-directory-available` attribute will be added to the document's body
-        // 2. A `directory-changed` bubbling event will be dispatched to the document's body
-        // 3. The `localDirectory` property of `document` will return the handle to the directory
+        // 1. `local-data-directory` attribute will be added to the document's body
+        // 2. The `localDataDirectory` property of `document` will return the handle to the directory
+        // 3. The `localData` property of `document` will return an object that either represents data loaded from the data file or will be a new object
+        // 4. A `local-data-directory-changed` bubbling event will be dispatched to the document's body
         //
-        // You can remove the directory by `document.localDirectory = undefined` which will:
-        // 1. Remove the `data-directory-available` attribute
-        // 2. Dispatch a `directory-changed` bubbling event from the document's body
-        // 3. Cause `document.localDirectory` to return `undefined`
+        // You can remove the directory by `document.localDataDirectory = undefined` which will:
+        // 1. Remove the `local-data-directory` attribute
+        // 2. Cause `document.localDataDirectory` to return `undefined`
+        // 3. Cause `document.localData` to return `undefined`
+        // 4. Dispatch a `local-data-directory-changed` bubbling event from the document's body
 
-        const propertyKey = "localDirectory";
-        const attributeKeyDirectoryPossible = "data-directory-possible";
-        const attributeKeyDirectoryAvailable = "data-directory-available";
-        const eventKey = "directory-changed";
-        const dataKey = "directory-handle";
+        const appID = document.body.dataset.app ?? document.location.hostname ?? "unnamed";
+
+        const propertyKeyData = "localData";
+        const attributeKeyData = "local-data";
+
+        const propertyKeyPossible = `${propertyKeyData}Possible`;
+        const propertyKeyDirectory = `${propertyKeyData}Directory`;
+        const propertyKeyNeedsSave = `${propertyKeyData}NeedsSave`;
+        const attributeKeyPossible = `${attributeKeyData}-possible`;
+        const attributeKeyDirectory = `${attributeKeyData}-directory`;
+        const attributeKeyNeedsSave = `${attributeKeyData}-needs-save`;
+        const eventKeyDirectoryChanged = `${attributeKeyData}-directory-changed`;
+        const dataKey = `directory-${appID}`;
 
         const idConnect = `directory-connect`;
         const idDisconnect = `directory-disconnect`;
         const idAutoUI = `directory-auto-ui`;
 
-        let directory_;
+        const context = document.body;
 
-        Object.defineProperty(document, propertyKey, {
-            get: () => directory_,
-            set: (handle) => {
-                if (handle === directory_) return;
+        let directory_ = undefined;
+        let data_ = undefined;
+        let dataNeedsSave_ = false;
 
-                set(dataKey, handle); // no-await
+        Object.defineProperty(document, propertyKeyPossible, {
+            get: () => 'showDirectoryPicker' in self
+        });
 
-                directory_ = handle;
+        Object.defineProperty(document, propertyKeyData, {
+            get: () => data_
+        });
 
-                const context = document.body;
+        Object.defineProperty(document, propertyKeyDirectory, {
+            get: () => directory_
+        });
 
-                if (handle === undefined) {
-                    context.removeAttribute(attributeKeyDirectoryAvailable);
-                } else {
-                    context.setAttribute(attributeKeyDirectoryAvailable, handle.name);
+        async function setDirectory(handle) {
+            if (handle === directory_) return;
+
+            directory_ = handle;
+
+            dataNeedsSave_ = false;
+            context.removeAttribute(attributeKeyNeedsSave);
+
+            data_ = (directory_ === undefined) ? undefined : {};
+
+            if (handle === undefined) {
+                context.removeAttribute(attributeKeyDirectory);
+            } else {
+                context.setAttribute(attributeKeyDirectory, handle.name);
+            }
+
+            set(dataKey, handle); // no-await
+
+            // We wait for the data file to load (or not) before dispatching the event
+            if (handle !== undefined) {
+                try {
+                    const fileHandle = await directory_.getFileHandle(`${appID}.json`);
+                    const file = await fileHandle.getFile();
+                    const text = await file.text();
+                    const o = JSON.parse(text);
+                    data_ = o;
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+
+            context.dispatchEvent(new Event(eventKeyDirectoryChanged, { bubbles: true }));
+        }
+
+        let savedVersion = 0;
+        let currentVersion = 0;
+
+        let saving = false;
+
+        async function save() {
+            // Only one save function executing at a time
+            // and keeps looping until there are no further changes to save
+
+            if (saving) {
+                return;
+            } else {
+                saving = true;
+            }
+
+            while (currentVersion !== savedVersion) {
+                console.log("SAVING...");
+
+                const versionToSave = currentVersion;
+
+                const file = await directory_.getFileHandle(`${appID}.json`, { create: true });
+                const stream = await file.createWritable();
+
+                const json = JSON.stringify(data_, null, 2);
+
+                await stream.write(json);
+                await stream.close();
+
+                savedVersion = versionToSave;
+
+                console.log("SAVED");
+            }
+
+            saving = false;
+            dataNeedsSave_ = false;
+            context.removeAttribute(attributeKeyNeedsSave);
+        }
+
+        Object.defineProperty(document, propertyKeyNeedsSave, {
+            get: () => dataNeedsSave_,
+            set: (needsSave) => {
+                currentVersion += 1;
+
+                if (dataNeedsSave_ === needsSave) {
+                    return;
                 }
 
-                context.dispatchEvent(new Event(eventKey, { bubbles: true }));
+                dataNeedsSave_ = needsSave;
+
+                if (dataNeedsSave_) {    
+                    context.setAttribute(attributeKeyNeedsSave, "");
+                    queueMicrotask(save);
+                } else {
+                    context.removeAttribute(attributeKeyNeedsSave);
+                }
             }
         });
+
 
         async function verifyPermission(fileHandle, readWrite) {
             const options = {};
@@ -103,11 +246,11 @@
         }
 
         async function init() {
-            if (!('showDirectoryPicker' in self)) {
+            if (!document[propertyKeyPossible]) {
                 return;
             }
 
-            document.body.setAttribute(attributeKeyDirectoryPossible, "");
+            context.setAttribute(attributeKeyPossible, "");
 
             let handle = await get(dataKey);
 
@@ -116,33 +259,35 @@
             if (autoUI !== undefined) {
                 autoUI.innerHTML = `
                 <style>
-                #${idAutoUI} {
+                .directory-possible {
                     display: none;
                 }
 
-                body[${attributeKeyDirectoryPossible}] #${idAutoUI} {
+                body[${attributeKeyPossible}] .directory-possible {
                     display: block;
                 }
                 
-                .directory-connector {
+                .directory-absent {
                     display: block;
                 }
 
-                body[${attributeKeyDirectoryAvailable}] .directory-connector {
+                body[${attributeKeyDirectory}] .directory-absent {
                     display: none;
                 }
 
-                .directory-disconnector {
+                .directory-present {
                     display: none;
                 }
 
-                body[${attributeKeyDirectoryAvailable}] .directory-disconnector {
+                body[${attributeKeyDirectory}] .directory-present {
                     display: block;
                 }
                 
                 </style>
-                <div class="directory-connector"><button id="${idConnect}">Connect to local folder...</button></div>
-                <div class="directory-disconnector">Connected to local folder <button id="${idDisconnect}">Disconnect</button></div>
+                <div class="directory-possible">
+                <div class="directory-connector directory-absent"><button id="${idConnect}">Connect to local folder...</button></div>
+                <div class="directory-disconnector directory-present">Connected to local folder <button id="${idDisconnect}">Disconnect</button></div>
+                </div>
                 `;
             }
 
@@ -151,16 +296,14 @@
             if (connector !== undefined) {
                 connector.addEventListener("click", async () => {
 
-                    const name = document.body.dataset.appName ?? globalThis.appName ?? document.location.hostname ?? "unnamed";
-
                     handle = await self.showDirectoryPicker({
-                        id: name,
-                        suggestedName: name,
+                        id: appID,
+                        suggestedName: appID,
                         startIn: "documents",
                     });
 
                     if (await isReadable(handle)) {
-                        document[propertyKey] = handle;
+                        await setDirectory(handle);
                     }
                 });
             }
@@ -168,20 +311,20 @@
             const disconnector = document.querySelector(`#${idDisconnect}`) ?? undefined;
 
             if (disconnector !== undefined) {
-                disconnector.addEventListener("click", () => {
-                    document[propertyKey] = undefined;
+                disconnector.addEventListener("click", async () => {
+                    await setDirectory(undefined);
                 });
             }
 
             if (await isReadable(handle)) {
-                document[propertyKey] = handle;
+                await setDirectory(handle);
             }
         }
 
         await init();
 
     </script>
-    <script type="module">
+    <script type="module" blocking="render">
         // import { directory } from "./directory.js";
 
         async function findDirectory(directory, candidates) {
@@ -419,25 +562,6 @@
             background-color: yellow;
         }
 
-        #directory-available {
-            display: none;
-        }
-
-        body[data-directory-available] #directory-available {
-            display: block;
-        }
-
-        #directory-connect {
-            display: none;
-        }
-
-        body[data-directory-possible] #directory-connect {
-            display: block;
-        }
-
-        body[data-directory-available] #directory-connect {
-            display: none;
-        }
     </style>
 </head>
 
