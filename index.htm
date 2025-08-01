@@ -197,7 +197,7 @@
 
                 dataNeedsSave_ = needsSave;
 
-                if (dataNeedsSave_) {    
+                if (dataNeedsSave_) {
                     context.setAttribute(attributeKeyNeedsSave, "");
                     queueMicrotask(save);
                 } else {
@@ -1438,18 +1438,35 @@
                 console.log(trustDirectory?.name);
 
                 const f = document.querySelector(".files") ?? undefined;
-                if (trustDirectory !== undefined && f !== undefined) {
-                    const files = [];
+                if (f !== undefined) {
 
-                    for await (const entry of trustDirectory.values()) {
-                        if (entry.kind === "file" && entry.name[0] !== "-") {
-                            files.push(entry.name);
-                        }
+                    const b = f.querySelector(".create-directory") ?? undefined;
+                    if (b !== undefined) {
+                        b.onclick = async () => {
+                            const name = this.current.shortName;
+                            const parent = document.localDataDirectory;
+                            const folder = await parent.getDirectoryHandle(name, { create: true });
+                            if (folder !== undefined) {
+                                alert(`Created folder '${name}'`);
+                            }
+                        };
                     }
 
-                    const fileList = f.querySelector(".file-list") ?? undefined;
-                    if (fileList !== undefined) {
-                        fileList.innerText = files.join("\n");
+                    if (trustDirectory !== undefined) {
+                        const files = [];
+
+                        for await (const entry of trustDirectory.values()) {
+                            if (entry.kind === "file" && entry.name[0] !== "-") {
+                                files.push(entry.name);
+                            }
+                        }
+
+                        const fileList = f.querySelector(".file-list") ?? undefined;
+                        if (fileList !== undefined) {
+                            fileList.innerText = files.join("\n");
+                        }
+                    } else {
+                        f.setAttribute("no-directory", "");
                     }
                 }
 
@@ -1543,7 +1560,12 @@
             font-size: 1.5rem;
         }
 
-        h1, h2, h3, h4, h5, h6 {
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
             margin-block-end: 0.5rem;
         }
 
@@ -1651,7 +1673,11 @@
             min-height: 4rem;
         }
 
-        .files:has(.file-list:empty) {
+        /* .files:has(.file-list:empty) {
+            display: none;
+        } */
+
+        .files:not([no-directory]) .create-directory {
             display: none;
         }
     </style>
@@ -1716,15 +1742,16 @@
     <div id="name" data-realize>${name}</div>
 
     <div class="directory-present">
-    <div class="bookmark">★</div>
-    <div class="notes">
-        <h4>Notes</h4>
-        <textarea id="notes"></textarea>
-    </div>
-    <div class="files">
-        <h4>Files</h4>
-        <div class="file-list"></div>
-    </div>
+        <div class="bookmark">★</div>
+        <div class="notes">
+            <h4>Notes</h4>
+            <textarea id="notes"></textarea>
+        </div>
+        <div class="files">
+            <h4>Files</h4>
+            <button class="create-directory">CREATE DIRECTORY</button>
+            <div class="file-list"></div>
+        </div>
     </div>
 
     <div id="directory-auto-ui"></div>
