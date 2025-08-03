@@ -400,6 +400,79 @@
         }
 
 
+        /////////////////////////////////////////////////////////
+
+        function splitFileName(name) {
+            const dotIndex = name.lastIndexOf(".");
+            if (dotIndex >= 0) {
+                return {
+                    name: name.substring(0, dotIndex),
+                    extension: name.substring(dotIndex + 1)
+                };
+            }
+            return { name };
+        }
+
+        function showRenameDialog(fileEntry, replacements) {
+            const e = document.querySelector("#rename-dialog") ?? undefined;
+            if (e === undefined) {
+                return undefined;
+            }
+
+            const replace = (t) => {
+                if (replacements === undefined) {
+                    return t;
+                }
+
+                for (const [k, v] of Object.entries(replacements)) {
+                    t = t.replaceAll("${" + k + "}", v);
+                }
+                return t;
+            };
+
+            if (e.dataset.initialised === undefined) {
+                const i = e.querySelector("input") ?? undefined;
+                const p = e.querySelector(".preview .name") ?? undefined;
+
+                Object.defineProperty(e, "newName", {
+                    get: function () {
+                        return replace(i.value);
+                    }
+                });
+
+                Object.defineProperty(e, "newFullName", {
+                    get: function () {
+                        return replace(i.value) + this.fileExtension;
+                    }
+                });
+
+                i.oninput = () => {
+                    p.innerText = e.newName;
+                };
+
+                e.addEventListener("close", () => {
+                    if (e.returnValue === "ok") {
+                        console.log(e.newFullName);
+                        e.fileEntry.move(e.newFullName);
+                    }
+                });
+
+                e.dataset.initialised = true;
+            }
+
+            const o = splitFileName(fileEntry.name);
+
+            e.fileEntry = fileEntry;
+            e.fileExtension = (o.extension !== undefined) ? `.${o.extension}` : "";
+
+            e.querySelector("input").value = o.name;
+            e.querySelector(".preview .name").innerText = replace(o.name);
+            [...e.querySelectorAll(".extension")].map(ext => ext.innerText = e.fileExtension);
+
+            e.showModal();
+        }
+
+        /////////////////////////////////////////////////////////
 
         const noop = (x) => x;
 
@@ -1458,13 +1531,31 @@
 
                         for await (const entry of trustDirectory.values()) {
                             if (entry.kind === "file" && entry.name[0] !== "-") {
-                                files.push(entry.name);
+                                const e = document.createElement("div");
+                                e.fileEntry = entry;
+                                e.innerText = entry.name;
+
+                                files.push(e);
                             }
                         }
 
                         const fileList = f.querySelector(".file-list") ?? undefined;
+                        if (fileList.dataset.initialised === undefined) {
+                            // TODO
+                            fileList.dataset.initialised = true;
+
+                            fileList.addEventListener("dblclick", (e) => {
+                                if (e.srcElement?.fileEntry !== undefined) {
+                                    e.preventDefault();
+
+                                    showRenameDialog(e.srcElement.fileEntry, this.current);
+                                }
+                            });
+
+                        }
+
                         if (fileList !== undefined) {
-                            fileList.innerText = files.join("\n");
+                            fileList.append(...files);
                         }
                     } else {
                         f.setAttribute("no-directory", "");
@@ -1555,6 +1646,11 @@
             max-width: 650px;
             font-size: 115%;
             line-height: 1.4;
+        }
+
+        input {
+            font-family: inherit;
+            font-size: inherit;
         }
 
         h1 {
@@ -1784,6 +1880,85 @@
         <p><button onclick='localStorage.removeItem("licence-accepted"); document.location = document.location;'>I
                 DECLINE</button></p>
     </template>
+
+    <style>
+        dialog {
+            padding: 0;
+        }
+
+        dialog form {
+            padding: 0;
+        }
+
+        dialog header {
+            background-color: aqua;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.1rem;
+        }
+
+        dialog article {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+            padding-top: 0.25rem;
+        }
+
+        dialog footer {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+            padding-bottom: 0.5rem;
+            text-align: end;
+        }
+
+        .dialog-title {
+            font-weight: bold;
+        }
+    </style>
+
+    <dialog id="rename-dialog" closedby="any">
+        <form method="dialog">
+            <header>
+                <div class="dialog-title">Rename?</div>
+            </header>
+            <article>
+                <style>
+                    #rename-dialog {
+                        min-width: 55%;
+                    }
+
+                    #rename-dialog article {
+                        text-align: end;
+                    }
+
+                    #rename-dialog input[type='text'] {
+                        font-size: 1rem;
+                        text-align: end;
+                        flex-grow: 1;
+                    }
+
+                    #rename-dialog .edit {
+                        display: flex;
+                    }
+
+                    #rename-dialog .extension {
+                        flex-grow: 0;
+                    }
+
+                    #rename-dialog .preview {
+                        color: lightgray
+                    }
+                </style>
+                <div class="edit"><input id="name" autocomplete="off" type="text"><span class="extension">.json</span>
+                </div>
+                <div class="preview"><span class="name"> </span><span class="extension"></span></div>
+            </article>
+            <footer>
+                <button class="" type="submit" value="">Cancel</button>
+                <button class="" type="submit" value="ok">OK</button>
+            </footer>
+        </form>
+    </dialog>
 
     <template id="trust-data">
         [
