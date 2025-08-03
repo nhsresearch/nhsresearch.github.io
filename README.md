@@ -202,3 +202,9 @@ If you click the button and allow the web app to access a local folder, the web 
 You will only have to connect to the folder once. The app will remember the connection across sessions.
 
 Safari does not currently support this feature.
+
+One file stores the data for all trusts, but in addition you can store files for each trust in a trust-specific folder.
+
+You can create trust-specific folders from the UI, see files contained in each folder on the trust's page, and rename files by double-clicking the file name.
+
+When renaming files, you can use tokens like `${today}`, `${shortName}`, and `${urlname}` and these will be replaced by specific values related to the date or to the trust.
