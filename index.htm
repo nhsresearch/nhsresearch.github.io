@@ -427,6 +427,11 @@
                 for (const [k, v] of Object.entries(replacements)) {
                     t = t.replaceAll("${" + k + "}", v);
                 }
+
+                const d = new Date();
+                const today = `${d.getFullYear()}-${((d.getMonth() + 1) + "").padStart(2, "0")}-${(d.getDate() + "").padStart(2, "0")}`;
+                t = t.replaceAll("${today}", today);
+
                 return t;
             };
 
@@ -466,6 +471,7 @@
             e.fileExtension = (o.extension !== undefined) ? `.${o.extension}` : "";
 
             e.querySelector("input").value = o.name;
+            e.querySelector(".current .name").innerText = replace(o.name);
             e.querySelector(".preview .name").innerText = replace(o.name);
             [...e.querySelectorAll(".extension")].map(ext => ext.innerText = e.fileExtension);
 
@@ -683,6 +689,14 @@
             if (trust !== undefined && trust.search === undefined) {
                 trust.search = searchLink;
             }
+        }
+
+        function toURLText(text) {
+            return text.toLowerCase().replaceAll(/[^a-zA-Z0-9 -]+/g, "").replaceAll(/\s+/g, "-");
+        }
+
+        for (const trust of trusts) {
+            trust.urlname = toURLText(trust.shortName);
         }
 
         ////////////////////////////////////////////////////////////////
@@ -1945,13 +1959,24 @@
                         flex-grow: 0;
                     }
 
+                    #rename-dialog .current {
+                        font-style: italic;
+                    }
+
                     #rename-dialog .preview {
                         color: lightgray
                     }
+
+                    #rename-dialog h4 {
+                        text-align: start;
+                    }
                 </style>
-                <div class="edit"><input id="name" autocomplete="off" type="text"><span class="extension">.json</span>
-                </div>
+                <h4>From</h4>
+                <div class="current"><span class="name"> </span><span class="extension"></span></div>
+                <h4>To</h4>
+                <div class="edit"><input name="filename" autocomplete="on" type="text"><span class="extension">.json</span></div>
                 <div class="preview"><span class="name"> </span><span class="extension"></span></div>
+                
             </article>
             <footer>
                 <button class="" type="submit" value="">Cancel</button>
