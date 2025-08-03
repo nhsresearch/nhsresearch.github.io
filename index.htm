@@ -286,12 +286,20 @@
                 body[${attributeKeyDirectory}] .directory-present {
                     display: block;
                 }
+
+                .directory-needs-save {
+                    display: none;
+                }
+
+                body[${attributeKeyNeedsSave}] .directory-needs-save {
+                    display: inline;
+                }
                 
                 </style>
                 <div class="directory-possible">
                     <hr>
                 <div class="directory-connector directory-absent"><button id="${idConnect}">Connect to local folder...</button></div>
-                <div class="directory-disconnector directory-present">Connected to local folder <button id="${idDisconnect}">Disconnect</button></div>
+                <div class="directory-disconnector directory-present">Connected to local folder <button id="${idDisconnect}">Disconnect</button> <span class="directory-needs-save">◉</span></div>
                 </div>
                 `;
             }
