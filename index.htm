@@ -676,7 +676,12 @@
             return removeStart((new URL(u)).hostname, "www.");
         }
 
-        const trusts = JSON.parse(document.querySelector("#trust-data").content.textContent).sort((a, b) => a.shortName.localeCompare(b.shortName));
+        if (parameters.focus !== undefined) {
+            document.body.dataset.focus = parameters.focus;
+        }
+
+        const dataTemplate = parameters.focus === "university" ? "#university-data" : "#trust-data";
+        const trusts = JSON.parse(document.querySelector(dataTemplate).content.textContent).sort((a, b) => a.shortName.localeCompare(b.shortName));
 
         function toID(u) {
             try {
@@ -711,7 +716,7 @@
         // trust data has been fully loaded
         ////////////////////////////////////////////////////////////////
 
-        const tagRegions = ["east", "london", "midlands", "northeast", "northwest", "southeast", "southwest", "england", "scotland"];
+        const tagRegions = ["east", "london", "midlands", "northeast", "northwest", "southeast", "southwest", "england", "scotland", "wales", "northern-ireland"];
         const tagTypes = ["ambulance_trust", "community_services_trust", "hospital_trust", "major_ae", "mental_health_trust", "national_body", "nhs_board"];
         const tagOrder = [
             ...tagRegions, "foundation_trust", "nhs_trust", "nhs_board"
@@ -738,36 +743,38 @@
             trust.tags = tags;
         }
 
-        for (const trust of trusts) {
+        if (parameters.focus === undefined) {
+            for (const trust of trusts) {
 
-            const regions = getRegions(trust);
-            if (regions.length === 0) {
-                addTag(trust, "noregion");
-            }
+                const regions = getRegions(trust);
+                if (regions.length === 0) {
+                    addTag(trust, "noregion");
+                }
 
-            const types = getTypes(trust);
-            if (types.length === 0) {
-                addTag(trust, "notype");
-            }
+                const types = getTypes(trust);
+                if (types.length === 0) {
+                    addTag(trust, "notype");
+                }
 
-            if (trust.name.includes("Foundation")) {
-                addTag(trust, "foundation_trust");
-            }
+                if (trust.name.includes("Foundation")) {
+                    addTag(trust, "foundation_trust");
+                }
 
-            if (!hasTag(trust, "nhs_board")) {
-                addTag(trust, "nhs_trust");
-            }
+                if (!hasTag(trust, "nhs_board")) {
+                    addTag(trust, "nhs_trust");
+                }
 
-            if (!hasTag(trust, "scotland")) {
-                addTag(trust, "england");
-            }
+                if (!hasTag(trust, "scotland")) {
+                    addTag(trust, "england");
+                }
 
-            if (trust.name.includes("University") || trust.name.includes("College")) {
-                addTag(trust, "University");
-            }
+                if (trust.name.includes("University") || trust.name.includes("College")) {
+                    addTag(trust, "University");
+                }
 
-            if (trust.name.includes("Teaching")) {
-                addTag(trust, "Teaching");
+                if (trust.name.includes("Teaching")) {
+                    addTag(trust, "Teaching");
+                }
             }
         }
 
@@ -1117,8 +1124,12 @@
                 "southwest": "South West",
                 "england": "England",
                 "scotland": "Scotland",
+                "wales": "Wales",
+                "northern-ireland": "Northern Ireland",
 
-                "foundation_trust": "Foundation"
+                "foundation_trust": "Foundation",
+
+                "Russell-Group": "Russell Group"
             };
             return tags[tag] ?? tag;
         }
@@ -1799,6 +1810,14 @@
         .files:not([no-directory]) .create-directory {
             display: none;
         }
+
+        body[data-focus] #jobs {
+            display: none;
+        }
+
+        body[data-focus] #cqc {
+            display: none;
+        }
     </style>
 </head>
 
@@ -1982,9 +2001,10 @@
                 <h4>From</h4>
                 <div class="current"><span class="name"> </span><span class="extension"></span></div>
                 <h4>To</h4>
-                <div class="edit"><input name="filename" autocomplete="on" type="text"><span class="extension">.json</span></div>
+                <div class="edit"><input name="filename" autocomplete="on" type="text"><span
+                        class="extension">.json</span></div>
                 <div class="preview"><span class="name"> </span><span class="extension"></span></div>
-                
+
             </article>
             <footer>
                 <button class="" type="submit" value="">Cancel</button>
@@ -1993,6 +2013,306 @@
         </form>
     </dialog>
 
+    <template id="university-data">
+        [
+        {
+        "name": "University of Birmingham",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-birmingham",
+        "shortName": "Birmingham",
+        "website": "https://www.birmingham.ac.uk/",
+        "id": "birmingham",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_of_Birmingham",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_of_birmingham",
+        "tags": ["Russell-Group", "england"]
+        },
+        {
+        "name": "University of Bristol",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-bristol",
+        "shortName": "Bristol",
+        "website": "https://www.bristol.ac.uk/",
+        "id": "bristol",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_of_Bristol",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_of_bristol",
+        "tags": ["Russell-Group", "england"]
+        },
+        {
+        "name": "University of Cambridge",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-cambridge",
+        "shortName": "Cambridge",
+        "website": "https://www.cambridge.ac.uk/",
+        "id": "cambridge",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_of_Cambridge",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_of_cambridge",
+        "tags": ["Russell-Group", "england"]
+        },
+        {
+        "name": "Cardiff University",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/cardiff-university",
+        "shortName": "Cardiff",
+        "website": "https://www.cardiff.ac.uk/",
+        "id": "cardiff",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/Cardiff_University",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/cardiff_university",
+        "tags": ["Russell-Group", "wales"]
+        },
+        {
+        "name": "Durham University",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/durham-university",
+        "shortName": "Durham",
+        "website": "https://www.durham.ac.uk/",
+        "id": "durham",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/Durham_University",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/durham_university",
+        "tags": ["Russell-Group", "england"]
+        },
+        {
+        "name": "University of Edinburgh",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-edinburgh",
+        "shortName": "Edinburgh",
+        "website": "https://www.edinburgh.ac.uk/",
+        "id": "edinburgh",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_of_Edinburgh",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_of_edinburgh",
+        "tags": ["Russell-Group", "scotland"]
+        },
+        {
+        "name": "University of Exeter",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-exeter",
+        "shortName": "Exeter",
+        "website": "https://www.exeter.ac.uk/",
+        "id": "exeter",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_of_Exeter",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_of_exeter",
+        "tags": ["Russell-Group", "england"]
+        },
+        {
+        "name": "University of Glasgow",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-glasgow",
+        "shortName": "Glasgow",
+        "website": "https://www.glasgow.ac.uk/",
+        "id": "glasgow",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_of_Glasgow",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_of_glasgow",
+        "tags": ["Russell-Group", "scotland"]
+        },
+        {
+        "name": "Imperial College London",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/imperial-college-london",
+        "shortName": "Imperial",
+        "website": "https://www.imperial.ac.uk/",
+        "id": "imperial",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/Imperial_College_London",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/imperial_college_london",
+        "tags": [
+        "Russell-Group", "england"
+        ]
+        },
+        {
+        "name": "King's College London",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/kings-college-london",
+        "shortName": "KCL",
+        "website": "https://www.kcl.ac.uk/",
+        "id": "kcl",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/Kings_College_London",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/kings_college_london",
+        "tags": [
+        "Russell-Group", "england"
+        ]
+        },
+        {
+        "name": "University of Leeds",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-leeds",
+        "shortName": "Leeds",
+        "website": "https://www.leeds.ac.uk/",
+        "id": "leeds",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_of_Leeds",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_of_leeds",
+        "tags": [
+        "Russell-Group", "england"
+        ]
+        },
+        {
+        "name": "University of Liverpool",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-liverpool",
+        "shortName": "Liverpool",
+        "website": "https://www.liverpool.ac.uk/",
+        "id": "liverpool",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_of_Liverpool",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_of_liverpool",
+        "tags": [
+        "Russell-Group", "england"
+        ]
+        },
+        {
+        "name": "London School of Economics",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/london-school-economics",
+        "shortName": "LSE",
+        "website": "https://www.lse.ac.uk/",
+        "id": "lse",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/London_School_of_Economics",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/lse",
+        "tags": [
+        "Russell-Group", "england"
+        ]
+        },
+        {
+        "name": "University of Manchester",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-manchester",
+        "shortName": "Manchester",
+        "website": "https://www.manchester.ac.uk/",
+        "id": "manchester",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_of_Manchester",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_of_manchester",
+        "tags": [
+        "Russell-Group", "england"
+        ]
+        },
+        {
+        "name": "Newcastle University",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/newcastle-university",
+        "shortName": "Newcastle",
+        "website": "https://www.newcastle.ac.uk/",
+        "id": "newcastle",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/Newcastle_University",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/newcastle_university",
+        "tags": [
+        "Russell-Group", "england"
+        ]
+        },
+        {
+        "name": "University of Nottingham",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-nottingham",
+        "shortName": "Nottingham",
+        "website": "https://www.nottingham.ac.uk/",
+        "id": "nottingham",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_of_Nottingham",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_of_nottingham",
+        "tags": [
+        "Russell-Group", "england"
+        ]
+        },
+        {
+        "name": "University of Oxford",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-oxford",
+        "shortName": "Oxford",
+        "website": "https://www.oxford.ac.uk/",
+        "id": "oxford",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_of_Oxford",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_of_oxford",
+        "tags": [
+        "Russell-Group", "england"
+        ]
+        },
+        {
+        "name": "Queen Mary University of London",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/queen-mary-university-london",
+        "shortName": "Queen Mary",
+        "website": "https://www.qmul.ac.uk/",
+        "id": "queen-mary",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/Queen_Mary_University_of_London",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/queen_mary_university_of_london",
+        "tags": [
+        "Russell-Group", "england"
+        ]
+        },
+        {
+        "name": "Queen's University Belfast",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/queens-university-belfast",
+        "shortName": "Queen's Belfast",
+        "website": "https://www.qub.ac.uk/",
+        "id": "qub",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/Queens_University_Belfast",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/queens_university_belfast",
+        "tags": [
+        "Russell-Group", "northern-ireland"
+        ]
+        },
+        {
+        "name": "University of Sheffield",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-sheffield",
+        "shortName": "Sheffield",
+        "website": "https://www.sheffield.ac.uk/",
+        "id": "sheffield",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_of_Sheffield",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_of_sheffield",
+        "tags": [
+        "Russell-Group", "england"
+        ]
+        },
+        {
+        "name": "University of Southampton",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-southampton",
+        "shortName": "Southampton",
+        "website": "https://www.southampton.ac.uk/",
+        "id": "southampton",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_of_Southampton",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_of_southampton",
+        "tags": [
+        "Russell-Group", "england"
+        ]
+        },
+        {
+        "name": "University College London",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-college-london",
+        "shortName": "UCL",
+        "website": "https://www.ucl.ac.uk/",
+        "id": "ucl",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_College_London",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/ucl",
+        "tags": [
+        "Russell-Group", "england"
+        ]
+        },
+        {
+        "name": "University of Warwick",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-warwick",
+        "shortName": "Warwick",
+        "website": "https://www.warwick.ac.uk/",
+        "id": "warwick",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_of_Warwick",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_of_warwick",
+        "tags": [
+        "Russell-Group", "england"
+        ]
+        },
+        {
+        "name": "University of York",
+        "provider": "https://www.russellgroup.ac.uk/our-universities/university-york",
+        "shortName": "York",
+        "website": "https://www.york.ac.uk/",
+        "id": "york",
+        "legacyIDs": [],
+        "wikipedia": "https://en.wikipedia.org/wiki/University_of_York",
+        "whatdotheyknow": "https://www.whatdotheyknow.com/body/university_of_york",
+        "tags": [
+        "Russell-Group", "england"
+        ]
+        }
+        ]
+    </template>
     <template id="trust-data">
         [
         {
