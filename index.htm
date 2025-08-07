@@ -1587,8 +1587,15 @@
 
                         }
 
+                        files.sort((a, b) => a.innerText.localeCompare(b.innerText));
+
                         if (fileList !== undefined) {
                             fileList.append(...files);
+                        }
+
+                        const fc = f.querySelector(".file-count") ?? undefined;
+                        if (fc !== undefined) {
+                            fc.innerText = `${files.length} files`;
                         }
                     } else {
                         f.setAttribute("no-directory", "");
@@ -1818,6 +1825,14 @@
         body[data-focus] #cqc {
             display: none;
         }
+
+        .files[no-directory] .file-count {
+            display: none;
+        }
+
+        .file-count {
+            color: lightgray;
+        }
     </style>
 </head>
 
@@ -1889,7 +1904,14 @@
             <h4>Files</h4>
             <button class="create-directory">CREATE DIRECTORY</button>
             <div class="file-list"></div>
+            <div class="file-count">0 files</div>
         </div>
+        <!--<div class="lists">
+            <h4>Lists</h4>
+            <div class="list-controls">
+                <button class="create-list">+</button>
+            </div>
+        </div>-->
     </div>
 
     <div id="directory-auto-ui"></div>
